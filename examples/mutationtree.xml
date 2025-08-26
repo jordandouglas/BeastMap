@@ -86,7 +86,7 @@ name="alignment">
         <distribution id="posterior" spec="CompoundDistribution">
             <distribution id="prior" spec="CompoundDistribution">
 
-                <distribution id="BranchLengthPrior" spec="mutationtree.distribution.BranchLengthPrior" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" rate="@birthRate.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" />
+                <distribution id="BranchLengthPrior" spec="mutationtree.distribution.BranchLengthPrior" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" rate="@birthRate.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" midpoint="0.001" /> 
 
 
                 <distribution id="BMT_PropInvariablePrior.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.math.distributions.BMTPrior" count="@hasInvariableSites.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" x="@BMT_ProportionInvariable.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
@@ -184,9 +184,8 @@ name="alignment">
         </logger>
 
 
-        <!-- TODO: metadata should know what the sample number is -->
         <logger id="treelog.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="Logger" fileName="$(filebase)-$(tree).trees" logEvery="10000" mode="tree">
-            <log id="TreeWithMetaDataLogger.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="mutationtree.logger.SampledSubstTreeLogger" lengths="@SubstitutionSum" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+            <log id="TreeWithMetaDataLogger.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="mutationtree.logger.SampledSubstTreeLogger"  tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
                 <sampler id="SubstitutionSum" spec="mutationtree.logger.mut.SubstitutionSum" sampler="@mutationsampler" />
                 <sampler id="SynonymousSubstSum" spec="mutationtree.logger.mut.SynonymousSubstSum" sampler="@mutationsampler" code="universal" readingFrame="1"/>
                 <sampler id="NonSynonymousSubstSum" spec="mutationtree.logger.mut.NonSynonymousSubstSum" sampler="@mutationsampler"  code="universal" readingFrame="1"/>
