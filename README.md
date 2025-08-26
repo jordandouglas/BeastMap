@@ -5,7 +5,7 @@ A BEAST 2 package for counting the number of synonymous, non-synonymous, and ind
 
 ## Install
 
-Package is currently not relased.
+Package is currently not released.
 
 To build:
 
