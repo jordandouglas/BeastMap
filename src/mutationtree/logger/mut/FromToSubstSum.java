@@ -62,7 +62,6 @@ public class FromToSubstSum extends BranchSubstLogger {
 			return false;
 		}
 		
-		// TODO Auto-generated method stub
 		return true;
 	}
 

@@ -139,66 +139,35 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood {
 	 */
 	private List<Mutation> sampleMutationsConditionalEndPoints(int parent, int child, double time, int siteNr,  SubstitutionModel qmatrix, double clockRate, Node node){
 		 
-		 List<Mutation> arr = new ArrayList<>();
+		 List<Mutation> arr = null;
 		 int nstates = qmatrix.getStateCount();
 		 
 		 // What do to if gap? or ambiguous?
 		 if (parent < 0 || child < 0 || parent >= nstates || child >= nstates) {
 			 
 			 // TODO
-			 return arr;
+			 return new ArrayList<>();
 		 }
 		 
-		
 		 
 		 int loopNr = 0;
-		 int finalState = -1;
-		 while (finalState != child) {
+		 while (arr == null) {
 			 
 			 
-			 arr.clear();
-			 
-			 int from = parent;
-			 double t = 0;
-			 while (true) {
-				 
-				 
-				 //When does the next mutation occur?
-				 double dt = Randomizer.nextExponential(clockRate);
-				 
-				// Log.warning("time " + dt + " out of " + time);
-				 
-				 if (t + dt > time) break;
-				 
-				 
-				 // What was the mutation?
-				 double[] outRates = getTransitionProbabilities(qmatrix, from, node);
-				 outRates[from] = 0;
-				 int nextState = Randomizer.randomChoicePDF(outRates);
-				 //Log.warning("mutated from " + from + " to " + nextState + " with rates (" + outRates[0] + "," + outRates[1] + "," + outRates[2] + "," + outRates[3] + ")" );
-				 
-				 // Make mutation
-				 Mutation mut = new Mutation(from, nextState, t+dt, siteNr, parent, child, node);
-				 arr.add(mut);
-				 
-				 
-				 // Increment time, update parental state
-				 from = nextState;
-				 t = t + dt;
-				 
+			 // Simple rejection sampling
+			 if (parent == child) {
+				 arr = rejectionSampleCase1(time, parent, clockRate, qmatrix, node, siteNr);
 			 }
 			 
-			 
-			 // Hopefully the final state is the child or we will need to repeat that loop again
-			 finalState = from;
-			 
-			 if (finalState != child) {
-				//Log.warning("want " + child + " but getting " + finalState);
+			 // Condition the rejection sampling on knowing there was at least one mutation
+			 else {
+				 arr = rejectionSampleCase2(time, parent, child, clockRate, qmatrix, node, siteNr);
 			 }
 			 
 			 loopNr++;
 			 if (loopNr > MAX_N_LOOPS) {
-				 Log.warning("Taking too long to get mutations on branch. Setting to parsimonious estimate. If this error happens to often, the rejection sampler is not working properly.");
+				 arr = new ArrayList<>();
+				 Log.warning("Taking too long to get mutations on branch. Setting to parsimonious estimate. If this warning happens to often, it is because the rejection sampler is too slow.");
 				 if (parent != child) {
 					 Mutation mut = new Mutation(parent, child, -1, siteNr, parent, child, node);
 					 arr.add(mut);
@@ -217,14 +186,147 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood {
 	
 	
 	/**
+	 * Rejection sampler where the start and end state are the same (nothing special just a regular rejection sampler)
+	 * Algorithm 2 Case 1 from https://pmc.ncbi.nlm.nih.gov/articles/PMC2818752/
+	 * @return
+	 */
+	private List<Mutation> rejectionSampleCase1(double time, int state, double clockRate, SubstitutionModel qmatrix, Node node, int siteNr){
+		
+		
+		List<Mutation> arr = new ArrayList<>();
+		
+		int from = state;
+		double t = 0;
+		while (true) {
+			 
+			 
+			//When does the next mutation occur?
+			double dt = Randomizer.nextExponential(clockRate);
+		 
+			if (t + dt > time) break;
+		 
+		 
+			// What was the mutation?
+			double[] outRates = getTransitionRates(qmatrix, from, node);
+			outRates[from] = 0;
+			int nextState = Randomizer.randomChoicePDF(outRates);
+			//Log.warning("mutated from " + from + " to " + nextState + " with rates (" + outRates[0] + "," + outRates[1] + "," + outRates[2] + "," + outRates[3] + ")" );
+		 
+			// Make mutation
+			Mutation mut = new Mutation(from, nextState, t+dt, siteNr, state, state, node);
+			arr.add(mut);
+		 
+		 
+			// Increment time, update parental state
+			from = nextState;
+			t = t + dt;
+			 
+		}
+		
+		
+		// Success
+		if (from == state) {
+			return arr;
+		}
+		
+		// Failure
+		else {
+			return null;
+		}
+		 
+		
+		 
+	}
+	
+	/**
+	 * Rejection sampler where the start and end state are different
+	 * Algorithm 2 Case 2 from https://pmc.ncbi.nlm.nih.gov/articles/PMC2818752/
+	 * @return
+	 */
+	private List<Mutation> rejectionSampleCase2(double time, int parent, int child, double clockRate, SubstitutionModel qmatrix, Node node, int siteNr){
+		
+		
+		List<Mutation> arr = new ArrayList<>();
+		
+		int from = parent;
+		double t = 0;
+		boolean first = true;
+		while (true) {
+			
+			
+			double[] outRates = getTransitionRates(qmatrix, from, node);
+			
+			//When does the next mutation occur?
+			double dt;
+			if (first) {
+				
+				// Sample time conditional on there being at least one change
+				double lambda = 0;
+				for (int i = 0; i < outRates.length; i ++) lambda += outRates[i];
+				dt = sampleTimeConditionalOnAtLeastOneChange(lambda, time);
+				first = false;
+				
+			}else {
+				dt = Randomizer.nextExponential(clockRate);
+			}
+			 
+			
+		 
+			if (t + dt > time) break;
+		 
+		 
+			// What was the mutation?
+			outRates[from] = 0;
+			int nextState = Randomizer.randomChoicePDF(outRates);
+			//Log.warning("mutated from " + from + " to " + nextState + " with rates (" + outRates[0] + "," + outRates[1] + "," + outRates[2] + "," + outRates[3] + ")" );
+		 
+			// Make mutation
+			Mutation mut = new Mutation(from, nextState, t+dt, siteNr, parent, child, node);
+			arr.add(mut);
+		 
+			// Increment time, update parental state
+			from = nextState;
+			t = t + dt;
+			 
+		}
+		
+		
+		// Success
+		if (from == child) {
+			return arr;
+		}
+		
+		// Failure
+		else {
+			return null;
+		}
+		
+	}
+	
+	
+	/**
+	 * Sample the waiting time to the first transition in time T, conditional on there being at least one transition during that period
+	 * Equation 2.1 from https://pmc.ncbi.nlm.nih.gov/articles/PMC2818752/
+	 * @param lambda - the total outgoing rate of initial state a (positive number)
+	 * @param t - the total length of time
+	 * @return
+	 */
+	public static double sampleTimeConditionalOnAtLeastOneChange(double lambda, double t) {
+		double u = Randomizer.nextFloat();
+		return -Math.log(1 - u*(1-Math.exp(-t*lambda))) / lambda;
+	}
+	
+	
+	
+	/**
 	 * Many substitution model implementations do not return the Q matrix, and some of these are node/time dependent
-	 * The most general approach that works around the setup of beast2 is to callculate P(Qt) for a very small t, which will be a close approximation of Q
+	 * The most general approach that works around the setup of beast2 is to calculate P(Qt)/t for a very small t, whose off-diagonal elements will be a close approximation of Q
 	 * @param substModel
 	 * @param fromState
 	 * @param node
 	 * @return
 	 */
-	private double[] getTransitionProbabilities(SubstitutionModel substModel, int fromState, Node node) {
+	private double[] getTransitionRates(SubstitutionModel substModel, int fromState, Node node) {
 		
 		
 		
@@ -236,15 +338,15 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood {
 		
 		
 		double outSum = 0;
-		double[] outProbs = new double[nstates];
+		double[] outRates = new double[nstates];
 		for (int toState = 0; toState < nstates; toState ++) {
 			if (toState == fromState) {
-				outProbs[toState] = 0;
+				outRates[toState] = 0;
 			}else {
 				int index2d = fromState*nstates + toState;
-				outProbs[toState] = matrix[index2d];
+				outRates[toState] = matrix[index2d] / EPSILON;
 			}
-			outSum += outProbs[toState];
+			outSum += outRates[toState];
 		}
 		
 		
@@ -252,10 +354,10 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood {
 			Log.warning("Zero sum. Epsilon is too small.");
 		}
 		for (int toState = 0; toState < nstates; toState ++) {
-			outProbs[toState] = outProbs[toState] / outSum;
+			outRates[toState] = outRates[toState] / outSum;
 		}
 		
-		return outProbs;
+		return outRates;
 		
 		
 	}
