@@ -1,0 +1,33 @@
+<package name='mutationtree' version='0.0.1'>
+	<depends on='BEAST.base' atleast='2.7.8'/>
+    <!-- <depends on='codonsubstmodels' atleast='2.0.0'/> -->
+
+
+          <service type="beast.base.core.BEASTInterface">
+
+
+          <provider classname="mutationtree.distribution.BranchLengthPrior"/>
+          <provider classname="mutationtree.operator.UnconstrainedTipRandomWalker"/>
+          <provider classname="mutationtree.evolution.AncestralSequenceTreeLikelihood"/>
+          <provider classname="mutationtree.evolution.PatternlessAlignment"/>
+          <provider classname="mutationtree.evolution.BranchMutationSampler"/>
+
+          <provider classname="mutationtree.logger.AncestralSequenceLogger"/>
+          <provider classname="mutationtree.logger.SampledSubstTreeLogger"/>
+
+
+          <provider classname="mutationtree.logger.mut.SubstitutionSum"/>
+          <provider classname="mutationtree.logger.mut.SynonymousSubstSum"/>
+          <provider classname="mutationtree.logger.mut.NonSynonymousSubstSum"/>
+          <provider classname="mutationtree.logger.mut.FromToSubstSum"/>
+          <provider classname="mutationtree.logger.mut.NucleotideTransversionCounter"/>
+          <provider classname="mutationtree.logger.mut.NucleotideTransitionCounter"/>
+
+
+
+
+     </service>
+
+
+
+</package>

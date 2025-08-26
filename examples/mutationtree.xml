@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.8:bModelTest v1.3.3" version="2.7">
+
+
+
+
+<log id="mutationsampler" spec="mutationtree.evolution.BranchMutationSampler" tag="seq" useAmbiguities="true" >
+     <tree idref="Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" />
+     <siteModel idref="BEASTModelTest.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" />
+     <branchRateModel idref="StrictClock.c:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" />
+     <data spec="mutationtree.evolution.PatternlessAlignment" data="@RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" />
+</log>
+
+
+    <data
+id="RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"
+spec="Alignment"
+name="alignment">
+        <sequence id="seq_I18658_63_Grevillea_costata_seq1" spec="Sequence" taxon="I18658_63_Grevillea_costata_seq1" totalcount="4" value="aggaaatggagtcagatagcgaccaaactccccckkttaatcttggtgkcyctgtcgagaacttgtctactgcsggagaatctgtgttggtttcttcaggawctvacgaaaatgaacaacgrctgacgcacatcagcaaracagggaaagcccagatggtggatatttcttccraagytgtcngcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtctbagcgaatcargtggccaaggggratgtcbttggtgtggcaaagattgchggaattagtggggctaagcagactagcaaccttatcccactcwgtcacaacataaatctcayacatgtycgtgtggacctgatcatgaatgagaaggattttagcgttgagattgaaggagaagccgcttcaactgbgaagactggtgtggagatggaagcactaacanctgtgaccattgctggtttaavtgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcacgggtgtaagnctcctgcacaaaagtggtggcaaaagtgggagchggtccaggaagcagtga"/>
+        <sequence id="seq_I18660_87_Grevillea_epicroca_seq1" spec="Sequence" taxon="I18660_87_Grevillea_epicroca_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaatctcccccggttaatcttggtggctctgtcgagaacttgtctactrccggagaatctgtgttggtttcttcagaaactgacgaaaatgaacaacgactgacgcacatcagcaaaacagggaaagcccagatggtggatgtttcttccaaagttgttagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattagtggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgttgagattgaaggagaagccgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggagatagagatcacgggtgtaaaacttctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18661_204_Grevillea_floribunda.ssp.floribunda_seq1" spec="Sequence" taxon="I18661_204_Grevillea_floribunda.ssp.floribunda_seq1" totalcount="4" value="aggaaatggagtcagtattcggscaaactcccccggttaatctcggtggctctgtcgagaacttctctactgccggagaatctgtggtggtttcttcaggaactgacgaaaatgaacaacgactgacacacatcagcaaaacaggaaaagcccagatggtggatgtttcttccaaagttgtcagcaagagagtcgccaccgcygggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaaaattgcaggaattagtggggctaagcagactagcaaycttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgttgagattgaaggagaagccgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtttaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagattacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18662_14_Grevillea_annulifera_seq1" spec="Sequence" taxon="I18662_14_Grevillea_annulifera_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaaactcctccggttaatctcggtggctctgtcgagaacttctctactgccggagaatctgtgttagtttcttcaggaattgacgaaaatgaacgacgactgacccacatcagcagaacaggggaagcccagatggtggatgtgtcttccaaagttgtcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgayttggtctcagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattagtggggcgaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgttgagatagaaggagaagccgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaagacatagagatcacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18663_32_Grevillea_beardiana_seq1" spec="Sequence" taxon="I18663_32_Grevillea_beardiana_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaacctcccccggttaatctcggtggctctgtcgagaacttgtctactgccggaraatctgtgttggtttcttcaggaactgacgaaaatgaacaacgactgacccacatcagcagaacaggggaagcacagatggtagatgtttcttccaaagttgtcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattaatggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgttgagatagaaggagaagccgcttcaagtgggaagactggtgtggagatggaagcactaacagcggtdaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18666_202_Grevillea_dilatata_seq1" spec="Sequence" taxon="I18666_202_Grevillea_dilatata_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaacctcccccggttaatctcggtggctctgtcaagaacttgtctactgccgragaatctgtgttggtttcttcaggaacygacgaaaatgaacaacgactgacccacatcagcagaacaggggaagcacagatggtagatgtttcttccaaagttgtcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattaatggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagngttgagatagaaggagaagcvgcttcaagtgggaagactggtgtggagatggaagcactaacagcggtgaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18667_89_Grevillea_eremophila_seq1" spec="Sequence" taxon="I18667_89_Grevillea_eremophila_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaagctcctccggttaatctcggtggctctgtcgagaacttctctgctgccggagaatctgtgttggtttcttcaggaactgacgaaaatgaacaacgactgacccacgtaagcagaacaggggaagcccagatggtggatgtttcttccaaaggaatcagcaagagagtcgccatcgctgggtgcaaggttcttctgggctctaagaaggtgttcgatttggttttagcgaatcaggttgtcaagggggatgttcttggtgtggcaaagattgcaggaattactggggctaagcagactagcaaccttatcccactctgtcacaatataaatctcacgcatgtccgtgtggacctgaccatgaatgagaaggattttagcgttgagatagaaggagaagctgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtctaactgtgtatgatatgtgcaaggctgcctcaaaggacatagagatcacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtg-"/>
+        <sequence id="seq_I18668_375_Grevillea_floribunda.ssp.tenella_seq1" spec="Sequence" taxon="I18668_375_Grevillea_floribunda.ssp.tenella_seq1" totalcount="4" value="aggaaatggagtcagtattcgggcaaactcccccggttaatctcggtggctctgtcgagaacttctctactgccggagaatctgtggtggtttcttcaggaactgacgaaaatgaacaacgactgacacacatcagcaaaacaggaaaagcccagatggtggatgtttcttccaaagttgtcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaaaattgcaggaattagtggggctaagcagactagcaatcttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgttgagattgaaggagaagccgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtttaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagattacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18669_349_Grevillea_acacioides_seq1" spec="Sequence" taxon="I18669_349_Grevillea_acacioides_seq1" totalcount="4" value="aggaaatggagtcagtgttcggccaaactcctccggttagcctcggtgggtctgttgggaacttgtctactgccggagaatctgtgggggtttctccaggaactgacgaaaatgatcaacgactgacccacattagcagaacaggggaagcacagatggtggatgtttcttctaaaggaatcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaagaaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtycttggtgtggcaaagattgcaggaattagtggggctaagcagactvgcaaccttatcccactctghcacaacataaatctcacacatgtccgtgtggacctgaccatgaatgagaaggattttagcgttgagatagaaggagaagccgcttcaactgggaacactggtgtggagatggaagcactaacrgctgtgaccgttgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcacgggtgtaagacttctgcacaaaagtggtggcaaaagtgggagctggtccaggaagc-----"/>
+        <sequence id="seq_I18671_357_Grevillea_benthamiana_seq1" spec="Sequence" taxon="I18671_357_Grevillea_benthamiana_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaaactcctccggttaatctcggtggctctgtcgagaacttctgtactaccggagaatctgtgttggtttcttcaggaattgacgaaaatgaacgacgactgacccacattagcagaacaggggaagcccagatggtggatgtgtcttccaaagtcgtcagcaagagagtcgccaccgctgggtgcaaggttcttctgggttctaaggaggtgttcgatttggtctcagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattagtggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgaggaggattttagcgttgagatagaaggagaagccgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18672_51_Grevillea_ceratocarpa_seq1" spec="Sequence" taxon="I18672_51_Grevillea_ceratocarpa_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaagctcctccggttaatctcggtggctctgtcgagaacttctctgctgccggagaatctgtgttggtttcttcaggaactgacgaaaatgaacaacgactgacacacgtaagcagaacaggggaagcccagatggtggatgtttcttccaaaggaatcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaagaaggtgttcgatttggttttagcgaatcaggttgtcaagggggatgttcttggtgtggcaaagattgcaggaattactggggctaagcagactagcaaccttatcccactctgtcacaatataaatctcacgcatgtccgtgtggacctgaccatgaatgagaaggattttagcgttgagatagaaggagaagctgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgcnggtctaactgtgtatgahatgtgcaaggctgchtcaaaggacatagagatcacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtnn"/>
+        <sequence id="seq_I18673_65_Grevillea_crithmifolia_seq1" spec="Sequence" taxon="I18673_65_Grevillea_crithmifolia_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaaactcctccggttaatctcggtggctctgtcgacaacttctctactgccggagaatctgtgttggtttcttcaggaaatgacgaaaatgaacaacgactgacccacatcagcagaacaggggaagcccagatggtggatgtgtcttccaaagttatcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattagtggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgcgtggacctgaacatgaatgagaaggattttagcgttgagatagaaggagaagccgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcacaggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18674_75_Grevillea_diminuta_seq1" spec="Sequence" taxon="I18674_75_Grevillea_diminuta_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaatctcccccggttaatcttggtggctctgtcgagaacttgtctactgccggagaatctgtgttggtttcttcagdaactgacgaaaatgaacaacgactgacvcacatcagcaraacagggraagcccagatggtggatgtttcttccaaagttgtbagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattavtggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgahcatgaatgagaaggattttagcgttgagatwgaaggagaagccgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggabatagagatcacgggtgtaadactyctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18676_105_Grevillea_florida_seq1" spec="Sequence" taxon="I18676_105_Grevillea_florida_seq1" totalcount="4" value="aggaaatggagtcagtattyggccaaactcccccggttaatctcggtggctctgtcgagaacttctctrctgccggagaatctgtggtggtttcttcaggaactgacgaaaatgaactacgactgacgcacataagcaaaacaggaaaagcccagatggtggatgtttcttccaaagttgtcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtrttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattagtggggctaagcagactagcaaccttataccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgttgagattgaaggagaagchgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtttaactgtgtatgacatgtgcaargctgcctcaaaggacatagagattacgggtgtaagactcctgcamaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18677_196_Grevillea_acanthifolia.ssp.acanthifolia_seq1" spec="Sequence" taxon="I18677_196_Grevillea_acanthifolia.ssp.acanthifolia_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaacctccccccgttaatctcggtggctctgtcaagaacttgtctactgccggagaatctgtgttggtttcttcaggaactgacgaaaatgaacaacgactgacccacatcagcagaacaggggaagcacagatggtggatgtttcttccaaagttgttagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattaatggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgttgagatagaaggagaagccgcttcaagtgggaagactggtgtggagatggaagcactaacagcggtkaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcacgggtgttagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18678_442_Grevillea_arenaria.ssp.canescens_seq1" spec="Sequence" taxon="I18678_442_Grevillea_arenaria.ssp.canescens_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaaactcccccggttaatctcggtggctctgtcgagaacttctctactgccggagaatctgtggtggtttcttcaggaaytgacgaaaatgaacracgactgacvcacrtcagcaaaacaggraaagcccagatggtggatgtttcttccaaagttgtcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaavattgcaggaattagtggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgttgagattgaaggagaagccgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtttaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagattacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18679_34_Grevillea_biformis.ssp.biformis_seq1" spec="Sequence" taxon="I18679_34_Grevillea_biformis.ssp.biformis_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaacctcctccggttaatctcggtggctctgtcgagaacttctctactgccggagaatctgtgttggtttcttcaggaactgacgaaaatgaacaacgactgacccacgtaagcagaacaggggaagcccagatggtggatgtttcttccaaaggaatcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctcyaagaakgtgttcgatttggttttagcgaatcaggttgtcaagggdgatgttcttggtgtggcaaagattgcaggaattactggggctaagcagactagcaaccttatcccactctgtcacaatataaatctcacgcatgtccgtgtggacctgaccatgaatgagaaggattttagcgttgagatagaaggagaagctgcttcaactgggaagactggtgtggagatggaagcactaacagctgttaccattgctggtctaactgtgtatgacatgtgcaaggctgcttcaaaggacatagagatcacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18680_52_Grevillea_cheilocarpa_seq1" spec="Sequence" taxon="I18680_52_Grevillea_cheilocarpa_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaacttcctccggttaatctcggtggctctgacgagaacttatctgctgccggagaatctgtgttggtttcttcaggaactgacgaaaatgaacaacgactgacccacatcagcagaacaggggaagcccagatggtggatgtttcttccaaaggaatcagcaagcgagtcgccatcgctgggtgcaaggttcttctgggctctaagaaggtgttcgatttggttttagcgaatcaggttgtcaagggggatgttcttggtgtggcaaagattgcaggaattactggggctaagcagactagcaaccttatcccactctgtcacaatataaatctcacgcatgtccgtgtggacctgaccatgaatgagaaggattttagcgttgagatagaaggagaagctgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtctaactgtgtatgacatgtgcaaggctgcttcaaaggacatagagatcacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18681_67_Grevillea_curviloba.ssp.curviloba_seq1" spec="Sequence" taxon="I18681_67_Grevillea_curviloba.ssp.curviloba_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaaactcctccggctaatctcggtggctctgtcgagaacctctctacwgccggagaatctgtgatggtttcttcaggaattgacgaaaatgaacaacgactgacccacatcagcagaacaggggaagcccagatggtggatgtgtcttccaaagttgtcagcaagagactcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattagtggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgtcgagatagaaggagaagctgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccatcgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcactggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18682_76_Grevillea_dimorpha_seq1" spec="Sequence" taxon="I18682_76_Grevillea_dimorpha_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaatctcccccggttaatcttggtggctctgtcgagaacttgtctactgccggagaatctgtgttggtttcttcagaaactgacgaaaatgaacaacgactgacgcacatcagcaaaacagggaaagcccagatggtggatgtttcttccaaagttgttagcaagagagttgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattagtggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgttgagattgaaggagaagccgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcacgggtgtaaaacttctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+        <sequence id="seq_I18683_93_Grevillea_eryngioides_seq1" spec="Sequence" taxon="I18683_93_Grevillea_eryngioides_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaaactcccccggttaatctcggtggctctgtcgagarcttctctactgccggagaatctgtgttggtttcttcacgarttgacgaaaatgaacaacgactgacccacatcagcagaacaggggaagcccagatggtggatgtgtcttccaaagttgtcagcaagagagtcgccatcgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattagtggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtgtggacctgatcatgaatgagaaggattttagcgttgagatagaaggagaagccgcttcaactgggaagactggtgtggagatggaagcactaacagctgtgaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcacgrgtgtaagactcctgcacaaaagtggbggcaaaagtgggagctggtccaggaagcagtsa"/>
+        <sequence id="seq_I18685_445_Grevillea_acanthifolia.ssp.stenomera_seq1" spec="Sequence" taxon="I18685_445_Grevillea_acanthifolia.ssp.stenomera_seq1" totalcount="4" value="aggaaatggagtcagtattcggccaacctcccccggttaatcccggtggctctgtcgagaacttgtctactgccggagaatctgtgttggtctcttcaggaactgacgaaaatgaacaacgactgacccacatcagcagaacaggggaagcacagatggtagatgtttcttccaaagttgtcagcaagagagtcgccaccgctgggtgcaaggttcttctgggctctaaggaggtgttcgatttggtcttagcgaatcaggtggccaagggggatgtccttggtgtggcaaagattgcaggaattaatggggctaagcagactagcaaccttatcccactctgtcacaacataaatctcacacatgtccgtatggacctgatcataaatgagaaggattttagcgttgagatagaaggagaagccgcttcaagtgggaagactggtgtggagatggaagcactaacagcggtgaccattgctggtctaactgtgtatgacatgtgcaaggctgcctcaaaggacatagagatcacgggtgtaagactcctgcacaaaagtggtggcaaaagtgggagctggtccaggaagcagtga"/>
+
+      
+    </data>
+
+    <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+
+    <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+
+    <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+
+    <map name="Normal" >beast.base.inference.distribution.Normal</map>
+
+    <map name="Beta" >beast.base.inference.distribution.Beta</map>
+
+    <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+
+    <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+
+    <map name="prior" >beast.base.inference.distribution.Prior</map>
+
+    <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+
+    <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
+
+    <run id="mcmc" spec="MCMC" chainLength="10000000">
+        <state id="state" spec="State" storeEvery="50000">
+            <tree id="Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="beast.base.evolution.tree.Tree" name="stateNode">
+                <taxonset id="TaxonSet.RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="TaxonSet">
+                    <alignment idref="RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+                </taxonset>
+            </tree>
+            <parameter id="birthRate.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.RealParameter" lower="0.0" name="stateNode">1.0</parameter>
+            <stateNode id="BMT_ModelIndicator.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.IntegerParameter" lower="0" upper="5">5</stateNode>
+            <parameter id="BMT_Rates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.RealParameter" dimension="6" lower="0.01" name="stateNode" upper="100.0">1.0</parameter>
+            <parameter id="BMT_gammaShape.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
+            <parameter id="BMT_ProportionInvariable.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="1.0">0.1</parameter>
+            <stateNode id="hasInvariableSites.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.IntegerParameter">1</stateNode>
+            <stateNode id="hasGammaRates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.IntegerParameter">1</stateNode>
+            <stateNode id="hasEqualFreqs.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.BooleanParameter">false</stateNode>
+            <parameter id="BMT_frequencies.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.RealParameter" dimension="4" name="stateNode">0.25 0.25 0.25 0.25</parameter>
+        </state>
+        <init id="RandomTree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="RandomTree" estimate="false" initial="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" taxa="@RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+            <populationModel id="ConstantPopulation0.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="ConstantPopulation">
+                <parameter id="randomPopSize.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.RealParameter" name="popSize">1.0</parameter>
+            </populationModel>
+        </init>
+        <distribution id="posterior" spec="CompoundDistribution">
+            <distribution id="prior" spec="CompoundDistribution">
+
+                <distribution id="BranchLengthPrior" spec="mutationtree.distribution.BranchLengthPrior" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" rate="@birthRate.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" />
+
+
+                <distribution id="BMT_PropInvariablePrior.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.math.distributions.BMTPrior" count="@hasInvariableSites.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" x="@BMT_ProportionInvariable.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+                    <Beta id="Beta.0" name="distr">
+                        <alpha id="Function$Constant.2" spec="Function$Constant" value="1.0"/>
+                        <beta id="Function$Constant.3" spec="Function$Constant" value="4.0"/>
+                    </Beta>
+                </distribution>
+                <distribution id="BMT_RatesPrior.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.math.distributions.NucleotideRevJumpSubstModelRatePrior" modelIndicator="@BMT_ModelIndicator.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" x="@BMT_Rates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+                    <substModel id="RevJump.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" modelIndicator="@BMT_ModelIndicator.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" rates="@BMT_Rates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+                        <frequencies id="BMTfreqs.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.substitutionmodel.ModelFrequencies" empirical="false" frequencies="@BMT_frequencies.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" hasEqualFreqs="@hasEqualFreqs.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+                    </substModel>
+                    <Exponential id="BMT_RatesPrior.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2x" name="distr"/>
+                </distribution>
+                <prior id="BMT_freqsPrior.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" name="distribution" x="@BMT_frequencies.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+                    <distr id="Dirichlet.1" spec="distribution.Dirichlet">
+                        <alpha id="Function$Constant.4" spec="Function$Constant" value="1.0 1.0 1.0 1.0"/>
+                    </distr>
+                </prior>
+                <distribution id="BMT_GammaShapePrior.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.math.distributions.BMTPrior" count="@hasGammaRates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" x="@BMT_gammaShape.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+                    <Exponential id="Exponential.1" name="distr">
+                        <parameter id="RealParameter.8" spec="parameter.RealParameter" estimate="false" lower="0.0" name="mean" upper="0.0">1.0</parameter>
+                    </Exponential>
+                </distribution>
+                <prior id="YuleBirthRatePrior.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" name="distribution" x="@birthRate.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+                    <LogNormal meanInRealSpace="true" name="distr" M="1" S="3"/>
+                </prior>
+            </distribution>
+            <distribution id="likelihood" spec="CompoundDistribution" useThreads="true">
+                <distribution id="treeLikelihood.RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="ThreadedTreeLikelihood" data="@RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+                    <siteModel id="BEASTModelTest.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.sitemodel.BEASTModelTestSiteModel" gammaCategoryCount="4" hasGammaRates="@hasGammaRates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" hasInvariantSites="@hasInvariableSites.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" proportionInvariant="@BMT_ProportionInvariable.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" shape="@BMT_gammaShape.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" substModel="@RevJump.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+                        <parameter id="BMT_mutationRate.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.RealParameter" estimate="false" name="mutationRate">1.0</parameter>
+                    </siteModel>
+                    <branchRateModel id="StrictClock.c:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="beast.base.evolution.branchratemodel.StrictClockModel">
+                        <parameter id="clockRate.c:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="parameter.RealParameter" estimate="false" lower="0.0" name="clock.rate">1.0</parameter>
+                    </branchRateModel>
+                </distribution>
+            </distribution>
+        </distribution>
+
+
+        <operator id="TipDatesRandomWalker" spec="mutationtree.operator.UnconstrainedTipRandomWalker" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" useGaussian="true" windowSize="0.1" weight="3.0"/>
+
+        <operator id="YuleBirthRateScaler.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="kernel.BactrianScaleOperator" parameter="@birthRate.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" upper="10.0" weight="3.0"/>
+        <operator id="YuleModelTreeRootScaler.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="kernel.BactrianScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" upper="10.0" weight="3.0"/>
+        <operator id="YuleModelUniformOperator.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="kernel.BactrianNodeOperator" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="30.0"/>
+        <operator id="YuleModelSubtreeSlide.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="kernel.BactrianSubtreeSlide" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="15.0"/>
+        <operator id="YuleModelNarrow.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="Exchange" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="15.0"/>
+        <operator id="YuleModelWide.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="Exchange" isNarrow="false" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="3.0"/>
+        <operator id="YuleModelWilsonBalding.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="WilsonBalding" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="3.0"/>
+        <operator id="YuleModelBICEPSEpochTop.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="EpochFlexOperator" scaleFactor="0.1" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="2.0"/>
+        <operator id="YuleModelBICEPSEpochAll.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="EpochFlexOperator" fromOldestTipOnly="false" scaleFactor="0.1" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="2.0"/>
+        <operator id="YuleModelBICEPSTreeFlex.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="TreeStretchOperator" scaleFactor="0.01" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="2.0"/>
+        <operator id="BMT_ModelTestOperator.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.operators.BMTMergeSplitOperator" modelIndicator="@BMT_ModelIndicator.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" rates="@BMT_Rates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" substModel="@RevJump.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="1.0"/>
+        <operator id="BMT_Ratescaler.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.operators.BMTExchangeOperator" delta="0.15" modelIndicator="@BMT_ModelIndicator.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" rates="@BMT_Rates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" substModel="@RevJump.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="1.0"/>
+        <operator id="BMT_gammaShapeScaler.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.operators.BMTScaleOperator" count="@hasGammaRates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" parameter="@BMT_gammaShape.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" scaleFactor="0.5" weight="0.5"/>
+        <operator id="BMT_ProportionInvariableScaler.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.operators.BMTScaleOperator" count="@hasInvariableSites.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" parameter="@BMT_ProportionInvariable.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" scaleFactor="0.5" weight="0.5"/>
+        <operator id="BMT_hasGammaRatesFlipper.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.operators.BMTBirthDeathOperator" count="@hasGammaRates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" rates="@BMT_gammaShape.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="0.1"/>
+        <operator id="BMT_hasInvariableSitesFlipper.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.operators.BMTBirthDeathOperator" count="@hasInvariableSites.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" rates="@BMT_ProportionInvariable.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="0.1"/>
+        <operator id="BMT_FreqsFlipOperator.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="operator.BitFlipOperator" parameter="@hasEqualFreqs.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" weight="0.1"/>
+        <operator id="BMT_FrequenciesExchanger.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="operator.kernel.BactrianDeltaExchangeOperator" delta="0.01" weight="0.2">
+            <parameter idref="BMT_frequencies.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+        </operator>
+        <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log idref="treeLikelihood.RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log id="TreeHeight.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="beast.base.evolution.tree.TreeStatLogger" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log idref="birthRate.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log idref="RevJump.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log idref="BMT_ModelIndicator.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log idref="BMT_gammaShape.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log idref="BMT_ProportionInvariable.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log idref="hasGammaRates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log idref="hasInvariableSites.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log id="ActivePropInvariable.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.substitutionmodel.ActiveLogger" mask="@hasInvariableSites.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" parameter="@BMT_ProportionInvariable.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log id="ActiveGammaShape.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="bmodeltest.evolution.substitutionmodel.ActiveLogger" mask="@hasGammaRates.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" parameter="@BMT_gammaShape.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log idref="hasEqualFreqs.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log idref="BMT_frequencies.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2"/>
+            <log idref="SubstitutionSum"  />
+            <log idref="SynonymousSubstSum"  />
+            <log idref="NonSynonymousSubstSum"  />
+            <log idref="FromToSubstSum"  />
+            <log idref="NucleotideTransitionCounter"  />
+            <log idref="NucleotideTransversionCounter"  />
+
+            
+
+        </logger>
+        <logger id="screenlog" spec="Logger" logEvery="10000">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+        </logger>
+
+
+        <!-- TODO: metadata should know what the sample number is -->
+        <logger id="treelog.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="Logger" fileName="$(filebase)-$(tree).trees" logEvery="10000" mode="tree">
+            <log id="TreeWithMetaDataLogger.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" spec="mutationtree.logger.SampledSubstTreeLogger" lengths="@SubstitutionSum" tree="@Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2">
+                <sampler id="SubstitutionSum" spec="mutationtree.logger.mut.SubstitutionSum" sampler="@mutationsampler" />
+                <sampler id="SynonymousSubstSum" spec="mutationtree.logger.mut.SynonymousSubstSum" sampler="@mutationsampler" code="universal" readingFrame="1"/>
+                <sampler id="NonSynonymousSubstSum" spec="mutationtree.logger.mut.NonSynonymousSubstSum" sampler="@mutationsampler"  code="universal" readingFrame="1"/>
+                <sampler id="FromToSubstSum" spec="mutationtree.logger.mut.FromToSubstSum" sampler="@mutationsampler" from="A" to="A" />
+                <sampler id="NucleotideTransitionCounter" spec="mutationtree.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />
+                <sampler id="NucleotideTransversionCounter" spec="mutationtree.logger.mut.NucleotideTransversionCounter" sampler="@mutationsampler" />
+            </log>
+        </logger>
+
+        
+
+        <logger id="treelog.ancestral" spec="Logger" fileName="ancestral.trees" logEvery="10000" mode="tree">
+            <log id="ancestral.logger" spec="mutationtree.logger.AncestralSequenceLogger" tag="seq" >
+                 <tree idref="Tree.t:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" />
+                 <siteModel idref="BEASTModelTest.s:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" />
+                 <branchRateModel idref="StrictClock.c:RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" />
+                 <data spec="mutationtree.evolution.PatternlessAlignment" data="@RESOLVED_dropped_taxa3_L1_GAS3_light_trimmed_rmshortseq_TAPER2" />
+            </log>
+        </logger>
+
+
+      
+
+        <operatorschedule id="OperatorSchedule" spec="OperatorSchedule"/>
+    </run>
+
+</beast>
+
