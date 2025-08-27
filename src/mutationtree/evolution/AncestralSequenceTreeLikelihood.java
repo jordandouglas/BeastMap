@@ -20,6 +20,13 @@ import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeInterface;
 import beast.base.util.Randomizer;
 
+
+
+/**
+ * Adapted from AncestralStateTreeLikelihood in beast classic
+ */
+
+
 @Description("Ancestral State Tree Likelihood")
 public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     public static final String STATES_KEY = "states";

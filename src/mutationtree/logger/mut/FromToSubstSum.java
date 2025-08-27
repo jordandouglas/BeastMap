@@ -26,7 +26,7 @@ public class FromToSubstSum extends BranchSubstLogger {
 		// Check that we can handle this data type
 		super.initAndValidate();
 		
-		DataType dt = samplerInput.get().dataInput.get().getDataType();
+		DataType dt = getDataType();
 		this.from = dt.stringToEncoding(fromInput.get());
 		this.to = dt.stringToEncoding(toInput.get());
 		

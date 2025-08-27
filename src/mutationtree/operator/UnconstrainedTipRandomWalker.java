@@ -1,12 +1,12 @@
 package mutationtree.operator;
 
 import beast.base.core.Description;
-import beast.base.evolution.operator.TipDatesRandomWalker;
+import beast.base.evolution.operator.kernel.BactrianTipDatesRandomWalker;
 import beast.base.evolution.tree.Node;
 
 
 @Description("Moves a random tip, and then adjusts the height of each node so that all heights are non-negative")
-public class UnconstrainedTipRandomWalker extends TipDatesRandomWalker {
+public class UnconstrainedTipRandomWalker extends BactrianTipDatesRandomWalker {
 
 	
 	@Override

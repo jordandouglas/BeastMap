@@ -11,6 +11,7 @@ import beast.base.core.Input;
 import beast.base.core.Log;
 import beast.base.core.Loggable;
 import beast.base.core.Input.Validate;
+import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
@@ -18,6 +19,7 @@ import beast.base.inference.CalculationNode;
 import mutationtree.codons.Codon;
 import mutationtree.codons.GeneticCode;
 import mutationtree.evolution.BranchMutationSampler;
+import mutationtree.evolution.SimulatedAlignmentWithMutations;
 import mutationtree.util.Mutation;
 
 
@@ -25,15 +27,16 @@ import mutationtree.util.Mutation;
 public abstract class BranchSubstLogger extends CalculationNode implements Loggable, Function {
 
 	
-	final public Input<BranchMutationSampler> samplerInput = new Input<>("sampler", "mutation sampler to log", Validate.REQUIRED);
+	final public Input<BranchMutationSampler> samplerInput = new Input<>("sampler", "mutation sampler to log");
+	final public Input<SimulatedAlignmentWithMutations> truthInput = new Input<>("truth", "mutation sampler to log", Validate.XOR, samplerInput);
 	
-
+	
 
     
     @Override
     public void initAndValidate() {
     	
-    	DataType dt = samplerInput.get().dataInput.get().getDataType();
+    	DataType dt = this.getDataType();
     	if (!this.canHandleDataType(dt)) {
     		throw new IllegalArgumentException(this.getID() + " cannot support datatype " + dt.getClass());
     	}
@@ -72,6 +75,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
      */
     public void sampleMutations(long sampleNr) {
     	BranchMutationSampler sampler = samplerInput.get();
+    	if (sampler == null) return;
     	sampler.sampleMutations(sampleNr);
     }
 
@@ -79,9 +83,19 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     @Override
     public double getArrayValue(int dim) {
     	
-    	// Make sure to call sampleMutations before calling this method so that it depends on the current stochastic sample
-    	BranchMutationSampler sampler = samplerInput.get();
-    	List<Mutation> mutations = sampler.getMutationsOnBranch(dim);
+    	List<Mutation> mutations;
+    	if (samplerInput.get() != null) {
+    		
+    		// Make sure to call sampleMutations before calling this method so that it depends on the current stochastic sample
+    		mutations = samplerInput.get().getMutationsOnBranch(dim);
+    		
+    	}else {
+    		
+    		mutations = truthInput.get().getMutationsOnBranch(dim);
+    		
+    	}
+    	
+    	
     	return getMutationSummary(mutations);
     }
 
@@ -91,10 +105,10 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 
 	@Override
 	public void init(PrintStream out) {
-		Tree tree = (Tree) samplerInput.get().treeInput.get();
+		Tree tree = getTree();
 		for (int i = 0; i < getDimension(); i ++) {
 			String id = tree.getNode(i).getID();
-			if (id == null) id = "" + i;
+			if (id == null) id = "node" + i;
 			out.print(this.getID() + "." + id + "\t");
 		}
 		
@@ -107,13 +121,20 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 		
 		this.sampleMutations(sampleNr);
 		
-		Tree tree = (Tree) samplerInput.get().treeInput.get();
 		for (int nodeNr = 0; nodeNr < getDimension(); nodeNr ++) {
 			double nmut = getArrayValue(nodeNr);
 			out.print(nmut + "\t");
 		}
 		
 		
+	}
+	
+	protected Tree getTree() {
+		if (samplerInput.get() == null) {
+			return (Tree) truthInput.get().m_treeInput.get();
+		}else {
+			return (Tree) samplerInput.get().treeInput.get();
+		}
 	}
 
 
@@ -126,11 +147,38 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	
     @Override
     public int getDimension() {
-    	Tree tree = (Tree) samplerInput.get().treeInput.get();
+    	Tree tree = getTree();
         return tree.getNodeCount()-1;
     }
 
 
+    
+    protected int[] getSequenceForNode(Node node) {
+    	
+    	if (samplerInput.get() == null) {
+			return truthInput.get().getSequenceForNode(node);
+		}else {
+			return samplerInput.get().getStatesForNode(getTree(), node);
+		}
+    	
+    	
+    }
+    
+    
+    protected DataType getDataType(){
+    	return samplerInput.get() != null ? samplerInput.get().dataInput.get().getDataType() : truthInput.get().getDataType();
+    }
+    
+    
+    
+    /**
+     * We are assuming that the number of patterns is the number of sites, which will be true if a PatternlessAlignment is used
+     * @return
+     */
+    protected int getSiteAndPatternCount(){
+    	Alignment data = samplerInput.get() != null ? samplerInput.get().dataInput.get() : truthInput.get();
+    	return data.getSiteCount();
+    }
     
 
     /**
@@ -148,16 +196,15 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 		if (mutations.isEmpty()) return new int[] {0, 0};
 		
 		// Get child and parent sequences
-		BranchMutationSampler sampler = samplerInput.get();
 		Node child = mutations.get(0).getNode();
 		Node parent = child.getParent();
-		int[] childSequence = sampler.getStatesForNode(sampler.treeInput.get(), child);
-		int[] parentSequence = sampler.getStatesForNode(sampler.treeInput.get(), parent);
+		int[] childSequence = getSequenceForNode(child);
+		int[] parentSequence = getSequenceForNode(parent);
 		
 		
 		int nNonSyn = 0;
 		int nSyn = 0;
-		int nsites = sampler.dataInput.get().getPatternCount(); // Pattern count should equal site count if using PatternlessAlignment
+		int nsites = this.getSiteAndPatternCount(); // Pattern count should equal site count if using PatternlessAlignment
 		for (int codonNr = 0; codonNr < nsites/3; codonNr ++) {
 			int codon1 = codonNr*3 + openReadingFrame-1;
 			int codon2 = codon1+1;

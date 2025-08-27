@@ -6,11 +6,18 @@
           <service type="beast.base.core.BEASTInterface">
 
 
-          <provider classname="mutationtree.distribution.BranchLengthPrior"/>
+          <provider classname="mutationtree.distribution.UnconstrainedTreePrior"/>
+          
           <provider classname="mutationtree.operator.UnconstrainedTipRandomWalker"/>
+          <provider classname="mutationtree.operator.BranchLengthScaler"/>
+
+
           <provider classname="mutationtree.evolution.AncestralSequenceTreeLikelihood"/>
           <provider classname="mutationtree.evolution.PatternlessAlignment"/>
           <provider classname="mutationtree.evolution.BranchMutationSampler"/>
+          <provider classname="mutationtree.evolution.SimulatedAlignmentWithMutations"/>
+
+
 
           <provider classname="mutationtree.logger.AncestralSequenceLogger"/>
           <provider classname="mutationtree.logger.SampledSubstTreeLogger"/>

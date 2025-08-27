@@ -12,6 +12,7 @@ import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
 import beast.base.util.Randomizer;
 import mutationtree.util.Mutation;
+import mutationtree.util.MutationUtils;
 
 @Description("Stochastically samples a mutation trajectory along each branch for a given state")
 public class BranchMutationSampler extends AncestralSequenceTreeLikelihood {
@@ -24,7 +25,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood {
 	SubstitutionModel substitutionModel; 
 	
 	
-	final double EPSILON = 1e-10; // The small amount of time considered as 1 dt for computing the instantaneous transition rates from a P matrix
+
 	final int MAX_N_LOOPS = 100000000;
 	
 	@Override
@@ -200,14 +201,17 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood {
 		while (true) {
 			 
 			 
+			double lambda = 0;
+			double[] outRates = MutationUtils.getTransitionRates(qmatrix, from, node);
+			for (int i = 0; i < outRates.length; i ++) lambda += outRates[i]*clockRate;
+			
 			//When does the next mutation occur?
-			double dt = Randomizer.nextExponential(clockRate);
+			double dt = Randomizer.nextExponential(lambda);
 		 
 			if (t + dt > time) break;
 		 
 		 
 			// What was the mutation?
-			double[] outRates = getTransitionRates(qmatrix, from, node);
 			outRates[from] = 0;
 			int nextState = Randomizer.randomChoicePDF(outRates);
 			//Log.warning("mutated from " + from + " to " + nextState + " with rates (" + outRates[0] + "," + outRates[1] + "," + outRates[2] + "," + outRates[3] + ")" );
@@ -254,20 +258,20 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood {
 		while (true) {
 			
 			
-			double[] outRates = getTransitionRates(qmatrix, from, node);
+			double lambda = 0;
+			double[] outRates = MutationUtils.getTransitionRates(qmatrix, from, node);
+			for (int i = 0; i < outRates.length; i ++) lambda += outRates[i]*clockRate;
 			
 			//When does the next mutation occur?
 			double dt;
 			if (first) {
 				
 				// Sample time conditional on there being at least one change
-				double lambda = 0;
-				for (int i = 0; i < outRates.length; i ++) lambda += outRates[i];
 				dt = sampleTimeConditionalOnAtLeastOneChange(lambda, time);
 				first = false;
 				
 			}else {
-				dt = Randomizer.nextExponential(clockRate);
+				dt = Randomizer.nextExponential(lambda);
 			}
 			 
 			
@@ -318,50 +322,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood {
 	
 	
 	
-	/**
-	 * Many substitution model implementations do not return the Q matrix, and some of these are node/time dependent
-	 * The most general approach that works around the setup of beast2 is to calculate P(Qt)/t for a very small t, whose off-diagonal elements will be a close approximation of Q
-	 * @param substModel
-	 * @param fromState
-	 * @param node
-	 * @return
-	 */
-	private double[] getTransitionRates(SubstitutionModel substModel, int fromState, Node node) {
-		
-		
-		
-		int nstates = substModel.getStateCount();
-		double[] matrix = new double[nstates*nstates];
-		
-		// From time 0 to time epsilon, assuming a clock rate of 1 change per unit of time. If epsilon is too small, the probabilities may underflow
-		substModel.getTransitionProbabilities(node, 0, EPSILON, 1, matrix);
-		
-		
-		double outSum = 0;
-		double[] outRates = new double[nstates];
-		for (int toState = 0; toState < nstates; toState ++) {
-			if (toState == fromState) {
-				outRates[toState] = 0;
-			}else {
-				int index2d = fromState*nstates + toState;
-				outRates[toState] = matrix[index2d] / EPSILON;
-			}
-			outSum += outRates[toState];
-		}
-		
-		
-		if (outSum < 1e-100) {
-			Log.warning("Zero sum. Epsilon is too small.");
-		}
-		for (int toState = 0; toState < nstates; toState ++) {
-			outRates[toState] = outRates[toState] / outSum;
-		}
-		
-		return outRates;
-		
-		
-	}
-	 
+	
 	
 	
 	

@@ -35,7 +35,7 @@ public class SynonymousSubstSum extends BranchSubstLogger {
 		this.codon = new Codon(code);
 		this.frame = readingFrameInput.get();
 		
-		if (! (samplerInput.get().dataInput.get().getDataType() instanceof Nucleotide)) {
+		if (! (getDataType() instanceof Nucleotide)) {
 			throw new IllegalArgumentException("Cannot find non-synonymous substitutions unless the data type is nucleotide");
 		}
 		
