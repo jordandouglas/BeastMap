@@ -21,6 +21,7 @@ import mutationtree.codons.GeneticCode;
 import mutationtree.evolution.BranchMutationSampler;
 import mutationtree.evolution.SimulatedAlignmentWithMutations;
 import mutationtree.util.Mutation;
+import mutationtree.util.MutationUtils;
 
 
 @Description("Counts the number and type of substitutions on each branch")
@@ -30,8 +31,18 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	final public Input<BranchMutationSampler> samplerInput = new Input<>("sampler", "mutation sampler to log");
 	final public Input<SimulatedAlignmentWithMutations> truthInput = new Input<>("truth", "mutation sampler to log", Validate.XOR, samplerInput);
 	
+	final public Input<String> filterInput = new Input<>("filter", "specifies which of the sites in the input alignment we will restrict to" +
+	            "First site is 1." +
+	            "Filter specs are comma separated, either a singleton, a range [from]-[to] or iteration [from]:[to]:[step]; " +
+	            "1-100 defines a range, " +
+	            "1-100\3 or 1:100:3 defines every third in range 1-100, " +
+	            "1::3,2::3 removes every third site. " +
+	            "Default for range [1]-[last site], default for iterator [1]:[last site]:[1]", Validate.OPTIONAL);
 	
 
+	 protected List<Integer> filter;
+	 
+	 
     
     @Override
     public void initAndValidate() {
@@ -41,8 +52,35 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     		throw new IllegalArgumentException(this.getID() + " cannot support datatype " + dt.getClass());
     	}
     	
+    	this.filter = null;
+    	if (filterInput.get() != null && !filterInput.get().isEmpty()) {
+    		this.filter = MutationUtils.parseFilterSpec(getSiteAndPatternCount(), filterInput.get());
+    	}
+    	
     }
     
+    
+
+    public double getMutationSummary(List<Mutation> mutations){
+    	
+    	if (this.filter == null) {
+    		return getFilteredMutationSummary(mutations);
+    	}else {
+    		
+    		// Filter the mutations and then give the remainder to the child class
+    		List<Mutation> filteredMutations = new ArrayList<Mutation>();
+        	for (Mutation mutation : mutations) {
+        		if (this.filter.contains(mutation.getSiteNr())){
+        			filteredMutations.add(mutation);
+        		}
+        	}
+        	return getFilteredMutationSummary(filteredMutations);
+    	}
+    	
+    	
+    	
+    	
+    }
     
     
     /**
@@ -50,7 +88,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
      * @param nodeNr
      * @return
      */
-    public abstract double getMutationSummary(List<Mutation> mutations);
+    public abstract double getFilteredMutationSummary(List<Mutation> mutations);
     
     
     
@@ -293,6 +331,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	
 	
 	
+
 	protected int getCodonNr(int[] threeNucleotides, Codon codon) {
 		try {
 			return codon.getCodonState(threeNucleotides[0], threeNucleotides[1], threeNucleotides[2]);
@@ -302,7 +341,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	}
 
 	
-
+	
 
 
 

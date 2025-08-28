@@ -7,20 +7,24 @@
 
 
           <provider classname="mutationtree.distribution.UnconstrainedTreePrior"/>
-          
+
           <provider classname="mutationtree.operator.UnconstrainedTipRandomWalker"/>
           <provider classname="mutationtree.operator.BranchLengthScaler"/>
+          <provider classname="mutationtree.operator.AVMNTimelessTree"/>
 
 
           <provider classname="mutationtree.evolution.AncestralSequenceTreeLikelihood"/>
           <provider classname="mutationtree.evolution.PatternlessAlignment"/>
           <provider classname="mutationtree.evolution.BranchMutationSampler"/>
           <provider classname="mutationtree.evolution.SimulatedAlignmentWithMutations"/>
+          <provider classname="mutationtree.evolution.TimelessTree"/>
 
 
 
           <provider classname="mutationtree.logger.AncestralSequenceLogger"/>
           <provider classname="mutationtree.logger.SampledSubstTreeLogger"/>
+          <provider classname="mutationtree.logger.SubstitutionSummer"/>
+
 
 
           <provider classname="mutationtree.logger.mut.SubstitutionSum"/>

@@ -1,6 +1,10 @@
 package mutationtree.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import beast.base.core.Log;
+import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Node;
 
@@ -59,6 +63,98 @@ public class MutationUtils {
 		
 		
 	}
+	
+	
+
+	/**
+	 * Return a list of sites that correspond to a string filter
+	 * Adapted from FilteredAlignment
+	 */
+    public static List<Integer> parseFilterSpec(int siteCount, String filterString) {
+    	
+    	
+    	List<Integer> filter = new ArrayList<>();
+    	
+        // parse filter specification
+        String[] filters = filterString.split(",");
+        int[] from = new int[filters.length];
+        int[] to = new int[filters.length];
+        int[] step = new int[filters.length];
+        for (int i = 0; i < filters.length; i++) {
+            filterString = " " + filters[i] + " ";
+            if (filterString.matches(".*-.*")) {
+                // range, e.g. 1-100/3
+                if (filterString.indexOf('\\') >= 0) {
+                	String str2 = filterString.substring(filterString.indexOf('\\') + 1); 
+                	step[i] = parseInt(str2, 1);
+                	filterString = filterString.substring(0, filterString.indexOf('\\'));
+                } else {
+                	step[i] = 1;
+                }
+                String[] strs = filterString.split("-");
+                from[i] = parseInt(strs[0], 1) - 1;
+                to[i] = parseInt(strs[1], siteCount) - 1;
+            } else if (filterString.matches(".*:.*:.+")) {
+                // iterator, e.g. 1:100:3
+                String[] strs = filterString.split(":");
+                from[i] = parseInt(strs[0], 1) - 1;
+                to[i] = parseInt(strs[1], siteCount) - 1;
+                step[i] = parseInt(strs[2], 1);
+            } else if (filterString.trim().matches("[0-9]*")) {
+                from[i] = parseInt(filterString.trim(), 1) - 1;
+                to[i] = from[i];
+            	step[i] = 1;
+            } else {
+                throw new IllegalArgumentException("Don't know how to parse filter " + filterString);
+            }
+        }
+        
+        
+        // Calculate filter
+        boolean[] isUsed = new boolean[siteCount];
+        for (int i = 0; i < to.length; i++) {
+            for (int k = from[i]; k <= to[i]; k += step[i]) {
+                isUsed[k] = true;
+            }
+        }
+        // count
+        int k = 0;
+        for (int i = 0; i < isUsed.length; i++) {
+            if (isUsed[i]) {
+                k++;
+            }
+        }
+        
+        
+        // set up index set
+        k = 0;
+        for (int i = 0; i < isUsed.length; i++) {
+            if (isUsed[i]) {
+            	filter.add(i);
+            }
+        }
+        
+        
+        return filter;
+        
+    }
+
+    
+    /**
+	 * Adapted from FilteredAlignment
+	 */
+    public static int parseInt(String str, int defaultValue) {
+        str = str.replaceAll("\\s+", "");
+        try {
+            return Integer.parseInt(str);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    
+
+
 	 
 
 }

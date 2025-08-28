@@ -18,7 +18,7 @@ public class SubstitutionSum extends BranchSubstLogger {
 	}
 	
 	@Override
-	public double getMutationSummary(List<Mutation> mutations) {
+	public double getFilteredMutationSummary(List<Mutation> mutations) {
 		return mutations.size();
 	}
 

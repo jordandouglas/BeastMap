@@ -28,6 +28,7 @@ public class SynonymousSubstSum extends BranchSubstLogger {
 		
 		super.initAndValidate();
 		
+		// Parse inputs
 		this.code = GeneticCode.findByName(geneticCodeInput.get());
 		if (this.code == null) {
 			throw new IllegalArgumentException("Cannot find code " + geneticCodeInput.get());
@@ -35,15 +36,11 @@ public class SynonymousSubstSum extends BranchSubstLogger {
 		this.codon = new Codon(code);
 		this.frame = readingFrameInput.get();
 		
-		if (! (getDataType() instanceof Nucleotide)) {
-			throw new IllegalArgumentException("Cannot find non-synonymous substitutions unless the data type is nucleotide");
-		}
-		
     }
 	
 	
 	@Override
-	public double getMutationSummary(List<Mutation> mutations) {
+	public double getFilteredMutationSummary(List<Mutation> mutations) {
 		int[] counts = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
 		return counts[0];
 	}

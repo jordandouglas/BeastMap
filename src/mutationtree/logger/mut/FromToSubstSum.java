@@ -34,7 +34,7 @@ public class FromToSubstSum extends BranchSubstLogger {
 	}
 	
 	@Override
-	public double getMutationSummary(List<Mutation> mutations) {
+	public double getFilteredMutationSummary(List<Mutation> mutations) {
 		
 		int count = 0;
 		for (Mutation mut : mutations) {

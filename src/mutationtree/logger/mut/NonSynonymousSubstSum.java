@@ -29,23 +29,35 @@ public class NonSynonymousSubstSum extends BranchSubstLogger {
 		
 		super.initAndValidate();
 		
+		
+		// Parse inputs
 		this.code = GeneticCode.findByName(geneticCodeInput.get());
 		if (this.code == null) {
 			throw new IllegalArgumentException("Cannot find code " + geneticCodeInput.get());
 		}
 		this.codon = new Codon(code);
-    	
 		this.frame = readingFrameInput.get();
-		if (! (getDataType() instanceof Nucleotide)) {
-			throw new IllegalArgumentException("Cannot find non-synonymous substitutions unless the data type is nucleotide");
-		}
+		
+		
+		// If there is a filter, make sure none of the codons have been split into bits
+//		if (this.filter != null) {
+//			
+//			for (int i = 0; i < filter.length; i ++){
+//				
+//				
+//				
+//			}
+//			
+//		}
+		
+		
 		
     }
 	
 	
 	
 	@Override
-	public double getMutationSummary(List<Mutation> mutations) {
+	public double getFilteredMutationSummary(List<Mutation> mutations) {
 		int[] counts = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
 		return counts[1];
 	}

@@ -22,6 +22,7 @@ import beast.base.inference.State;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.inference.util.InputUtil;
 import beast.base.util.Randomizer;
+import mutationtree.evolution.TimelessTree;
 
 
 @Description("A tree prior for a non-time tree")
@@ -30,6 +31,16 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 	final public Input<RealParameter> rateInput = new Input<>("rate", "exponential distribution prior rate of branch lengths", Input.Validate.REQUIRED);
 	final public Input<RealParameter> midpointInput = new Input<>("midpoint", "the difference between the root's two furtherest tips is an exponential with this mean", Input.Validate.OPTIONAL);
 	
+	
+	
+	public void initAndValidate() {
+		
+		if (! (treeInput.get() instanceof TimelessTree)) {
+			throw new IllegalArgumentException("The tree must be a TimelessTree");
+		}
+		
+		super.initAndValidate();
+	}
 	
 	@Override
 	public double calculateTreeLogLikelihood(TreeInterface tree) {
@@ -76,15 +87,8 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 			Node left = root.getLeft();
 			Node right = root.getRight();
 			
-			double leftHeight = Double.POSITIVE_INFINITY;
-			double rightHeight = Double.POSITIVE_INFINITY;
-			
-			for (Node node : left.getAllLeafNodes()) {
-				leftHeight = Math.min(leftHeight, node.getHeight());
-			}
-			for (Node node : right.getAllLeafNodes()) {
-				rightHeight = Math.min(rightHeight, node.getHeight());
-			}
+			double leftHeight = getYoungestLeafHeight(left);
+			double rightHeight = getYoungestLeafHeight(right);
 			
 			
 			// Difference between heights
@@ -92,12 +96,28 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 			double rootToRight = root.getHeight() - rightHeight;
 			double diff = Math.abs(rootToLeft - rootToRight);
 			double midpointRate = 1 / midpointInput.get().getArrayValue();
+			
+			//Log.warning("diff" + diff + " midpointRate " + midpointRate + " rootToLeft " + rootToLeft + " rootToRight " + rootToRight);
+			
 			logPTree += Math.log(midpointRate) - midpointRate*diff; // Exponential distribution density in log space
 			
 			
 		}
 		
 		return logPTree;
+	}
+	
+	
+	private double getYoungestLeafHeight(Node node) {
+		
+		if (node.isLeaf()) return node.getHeight();
+		
+		double youngest = Double.POSITIVE_INFINITY;
+		for (Node leaf : node.getAllLeafNodes()) {
+			youngest = Math.min(youngest, leaf.getHeight());
+		}
+
+		return youngest;
 	}
 	
     @Override
@@ -208,143 +228,23 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 		
 		// Reset tree height so that the youngest leaf has height 0
 		setNodeHeights(tree);
-//		
-		
-		//Log.warning("before " + tree.getRoot().toNewick());
-		
-//		
-//		// Midpoint rooting: find the two leaves that are the furtherest apart
-//		int ntaxa = tree.getLeafNodeCount();
-//		double[][] dists = new double[ntaxa][ntaxa];
-//		for (int i = 0; i < ntaxa; i ++) {
-//			
-//			Node leaf1 = tree.getNode(i);
-//			for (int j = i+1; j < ntaxa; j ++) {
-//				
-//				// The root is at height 0 and all leaves are negative
-//				Node leaf2 = tree.getNode(j);
-//				double distance = -(leaf1.getHeight() + leaf2.getHeight());
-//				dists[i][j] = distance;
-//				
-//			}
-//		}
-//		
-//		// Max distance pair
-//		double maxD = 0;
-//		int younger = 0;
-//		for (int i = 0; i < ntaxa; i ++) {
-//			for (int j = i+1; j < ntaxa; j ++) {
-//				if (dists[i][j] > maxD) {
-//					maxD = dists[i][j];
-//					
-//					Node leaf1 = tree.getNode(i);
-//					Node leaf2 = tree.getNode(j);
-//					if (leaf1.getHeight() < leaf2.getHeight()) {
-//						younger = i;
-//					}else {
-//						younger = j;
-//					}
-//				}
-//			}
-//		}
-//		
-//		
-//		// Put the root in the middle of these two leaves, plus a Laplace distributed amount
-//		double w = Randomizer.nextExponential(1/midpointMean);
-//		if (Randomizer.nextBoolean()) w = -w;
-//		double distAboveYounger = maxD/2 + w;
-//		
-//		
-//		
 		
 		
+		if (midpointInput.get() != null) {
 		
-		// NOT WORKING
+			 // Convert to an unrooted tree
+			 RootnessNode unrootedNode = convert(tree.getRoot());
+			 MidpointResult result = findMidpoint(unrootedNode);
+			 Tree tree2 = convert(result.nodeA, result.nodeB);
+			 
+			 //Log.warning("before rooting " + tree.getRoot().toNewick());
+			 //Log.warning(" after rooting" + tree2.getRoot().toNewick());
+			 
+			 //tree.assignFromWithoutID(new Tree(tree2.getRoot()));
+			 tree.assignFromWithoutID(tree2);
 		
-		 // Convert to an unrooted tree
-		// RootnessNode unrootedNode = convert(tree.getRoot());
-		//// MidpointResult result = findMidpoint(unrootedNode);
-		// Tree tree2 = convert(result.nodeA, result.nodeB, maxD/2);
-		 
-//		 Log.warning("before " + tree.getRoot().toNewick());
-//		 Log.warning("after " + tree2.getRoot().toNewick());
-//		 
-		 
-		// tree.assignFromWithoutID(new Tree(tree2.getRoot()));
-		
-		
-		// Find the node whose parent will become the root
-		//double t = 0;
-		//Node node = tree.getNode(younger);
-		
-		// Go up the tree from younger towards the root until we are half way to the other node.
-		// Because 'younger' is the younger of the two nodes, we will stop before we reach the tentative root
-		// TODO ACCOUNT FOR RANDOMNESS, IN SOME CASE WE WANT THE OLDER ONE
-//		while (true) {
-//			
-//			double length = node.getLength();
-//			if (t + length >= distAboveYounger) {
-//				
-//				// We will put the root above this node
-//				
-//				
-//				// Free the current root node and keep track of which of its children will become the parent and child later 
-//				Node root = tree.getRoot();
-//				Node oldRootElder, oldRootYounger;
-//				boolean goingUpLeft = root.getLeft().getAllChildNodesAndSelf().contains(node);
-//				if (goingUpLeft) {
-//					oldRootElder = root.getLeft();
-//					oldRootYounger = root.getRight();
-//				}else {
-//					oldRootYounger = root.getLeft();
-//					oldRootElder = root.getRight();
-//				}
-//				root.removeChild(oldRootYounger);
-//				root.removeChild(oldRootElder);
-//				
-//				
-//				// Move the root above our current node
-//				Node parent = node.getParent();
-//				Node grandParent = parent.getParent(); // Will be null if parent is the root
-//				if (grandParent != null) {
-//					grandParent.removeChild(parent); // Redundant if grandparent is the root
-//				}
-//				Node sister = parent.getLeft() == node ? parent.getRight() : parent.getLeft();
-//				
-//				root.setHeight(distAboveYounger);
-//				root.addChild(node);
-//				root.addChild(parent);
-//				
-//				// Adjust the whole clade under parent by a fixed distance
-//				double dParentClade =  2 * (t + length - distAboveYounger);
-//				for (Node n : parent.getAllChildNodesAndSelf()) {
-//					n.setHeight(n.getHeight() - dParentClade);
-//				}
-//				
-//				
-//				// Now we need to reconnect the nodes around the old root
-//				if (grandParent != null) {
-//					
-//					
-//					
-//					
-//				}else {
-//					
-//					
-//					
-//				}
-//				
-//				
-//				break;
-//			}
-//			
-//			t = t + length;
-//			
-//			
-//		}
-//		
-		
-		
+			 
+		}
 		
 	
          
@@ -357,13 +257,25 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
     
     
     // Reset tree height so that the youngest leaf has height 0
-    private void setNodeHeights(Tree tree) {
+    private static void setNodeHeights(Tree tree) {
+    	setNodeHeights(tree.getRoot());
+    }
+    
+    
+    // Reset tree height so that the youngest leaf has height 0
+    private static void setNodeHeights(Node root) {
+    	if (root.isLeaf()) {
+    		root.setHeight(0);
+    		return;
+    	}
+    	
     	double minHeight = Double.POSITIVE_INFINITY;
-		for (Node node : tree.getNodesAsArray()) {
+		for (Node node : root.getAllChildNodesAndSelf()) {
 			minHeight = Math.min(minHeight, node.getHeight());
 		}
-		for (Node node : tree.getNodesAsArray()) {
+		for (Node node : root.getAllChildNodesAndSelf()) {
 			node.setHeight(node.getHeight() - minHeight);
+			//Log.warning("Setting node height to " + node.getHeight());
 		}
     }
     
@@ -410,19 +322,60 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
     }
     
     
-    public static Tree convert(RootnessNode nodeA, RootnessNode nodeB, double rootHeight) {
-        // Create new root
+    public static Tree convert(RootnessNode nodeA, RootnessNode nodeB) {
+       
+    
+        
+        double connectingLength = nodeA.getBranchLengthTo(nodeB);
+        double heightOfA = nodeA.lengthToFurthestLeaf(nodeB);
+        double heightOfB = nodeB.lengthToFurthestLeaf(nodeA);
+        double spanDistance = heightOfA + heightOfB + connectingLength;
+        double rootHeightFromALeaf = spanDistance / 2;
+        
+        // TODO Random walk
+        double midpointMean=0.01;
+        double dt = 0;//Randomizer.nextExponential(1/midpointMean);
+        double dir = Randomizer.nextBoolean() ? -1 : 1;
+        rootHeightFromALeaf = rootHeightFromALeaf + dt*dir;
+        
+        
+        double lenToA = rootHeightFromALeaf - heightOfA;
+        double lenToB = connectingLength - lenToA;
+        
+        
+    	// Create new root
         Node root = new Node();
-        root.setHeight(rootHeight);
+        root.setHeight(rootHeightFromALeaf);
+        
+        //Log.warning("rootHeightFromALeaf " + rootHeightFromALeaf +  ", connectingLength " + connectingLength + ", heightOfA " + heightOfA + ", heightOfB " + heightOfB + " , lenToA" + lenToA + " , lenToB" + lenToB);
 
         // Create two subtrees, one descending from nodeA and one from nodeB
-        Node left = buildSubtree(nodeA, rootHeight, nodeB, new HashMap<>(), new HashSet<>());
-        Node right = buildSubtree(nodeB, rootHeight, nodeA, new HashMap<>(), new HashSet<>());
-
+        Node left  = buildSubtree(nodeA, rootHeightFromALeaf, lenToA, nodeB, new HashMap<>(), new HashSet<>());
+        Node right = buildSubtree(nodeB, rootHeightFromALeaf, lenToB, nodeA,  new HashMap<>(), new HashSet<>());
+        
         root.addChild(left);
         root.addChild(right);
 
-        return new Tree(root);
+        
+        
+        
+        // Renumber nodes
+        int nr = 0;
+        for (Node leaf : root.getAllChildNodesAndSelf()) {
+        	if (!leaf.isLeaf()) continue;
+        	leaf.setNr(nr);
+        	nr++;
+        }
+        for (Node internal : root.getAllChildNodesAndSelf()) {
+        	if (internal.isRoot() || internal.isLeaf()) continue;
+        	internal.setNr(nr);
+        	nr++;
+        }
+        root.setNr(nr);
+        
+        Tree tree = new Tree(root);
+        
+        return tree;
     }
 
     /**
@@ -434,7 +387,7 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
      * @param mapping Cache from LengthedNode -> Node
      * @param visited Set of visited LengthedNodes
      */
-    private static Node buildSubtree(RootnessNode current, double parentHeight, RootnessNode cameFrom, Map<RootnessNode, Node> mapping, Set<RootnessNode> visited) {
+    private static Node buildSubtree(RootnessNode current, double parentHeight, double branchLen, RootnessNode cameFrom, Map<RootnessNode, Node> mapping, Set<RootnessNode> visited) {
         if (mapping.containsKey(current)) {
             return mapping.get(current);
         }
@@ -446,15 +399,14 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
         }
 
         // Height = parentHeight - branchLength
-        double length = current.getBranchLengthTo(cameFrom);
-        double height = parentHeight - length;
+        double height = parentHeight - branchLen;
         thisNode.setHeight(height);
         mapping.put(current, thisNode);
 
         // Recurse into neighbours (except the one we came from)
         for (RootnessNode neigh : current.getNeighbours()) {
             if (neigh == cameFrom) continue;
-            Node child = buildSubtree(neigh, height, current, mapping, visited);
+            Node child = buildSubtree(neigh, height, current.getBranchLengthTo(neigh), current, mapping, visited);
             thisNode.addChild(child);
         }
 
@@ -474,7 +426,33 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
             this.label = label;
         }
 
-        public String getLabel() {
+        
+        // Length to furthest leaf on this side of the other node
+        public double lengthToFurthestLeaf(RootnessNode otherNode) {
+        	Set<RootnessNode> visited = new HashSet<>();
+			return lengthToFurthestLeaf(otherNode, visited);
+		}
+        
+        private double lengthToFurthestLeaf(RootnessNode cameFrom, Set<RootnessNode> visited) {
+        	
+        	visited.add(this);
+        	
+        	double maxDistFromLeaves = 0;
+        	for (RootnessNode neigh : this.getNeighbours()) {
+                if (neigh == cameFrom) continue;
+                double d1 = neigh.lengthToFurthestLeaf(this, visited);
+                double d2 = neigh.getBranchLengthTo(this);
+                double d = d1 + d2;
+                //Log.warning("dist = " + d1 + " + " + d2 + "=" + d);
+                if (d > maxDistFromLeaves) {
+                	maxDistFromLeaves = d;
+                }
+            }
+        	
+			return maxDistFromLeaves;
+		}
+
+		public String getLabel() {
             return label;
         }
 
@@ -536,6 +514,7 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
     
     
     public static MidpointResult findMidpoint(RootnessNode anyNode) {
+    	
         // Step 1: find one farthest leaf
     	RootnessNode leaf1 = farthestLeaf(anyNode).node;
 
