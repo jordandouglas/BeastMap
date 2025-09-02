@@ -1,6 +1,6 @@
 <package name='mutationtree' version='0.0.1'>
 	<depends on='BEAST.base' atleast='2.7.8'/>
-    <!-- <depends on='codonsubstmodels' atleast='2.0.0'/> -->
+  <depends on='CodonSubstModels' atleast='2.0.1'/>
 
 
           <service type="beast.base.core.BEASTInterface">
@@ -17,6 +17,7 @@
           <provider classname="mutationtree.evolution.PatternlessAlignment"/>
           <provider classname="mutationtree.evolution.BranchMutationSampler"/>
           <provider classname="mutationtree.evolution.SimulatedAlignmentWithMutations"/>
+          <provider classname="mutationtree.evolution.SimulatedCodonAlignmentWithMutations"/>
           <provider classname="mutationtree.evolution.TimelessTree"/>
 
 

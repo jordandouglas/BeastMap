@@ -6,8 +6,8 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.Nucleotide;
-import mutationtree.codons.Codon;
-import mutationtree.codons.GeneticCode;
+import codonmodels.evolution.datatype.Codon;
+import codonmodels.evolution.datatype.GeneticCode;
 import mutationtree.logger.BranchSubstLogger;
 import mutationtree.util.Mutation;
 
@@ -29,7 +29,6 @@ public class NonSynonymousSubstSum extends BranchSubstLogger {
 		
 		super.initAndValidate();
 		
-		
 		// Parse inputs
 		this.code = GeneticCode.findByName(geneticCodeInput.get());
 		if (this.code == null) {
@@ -37,19 +36,6 @@ public class NonSynonymousSubstSum extends BranchSubstLogger {
 		}
 		this.codon = new Codon(code);
 		this.frame = readingFrameInput.get();
-		
-		
-		// If there is a filter, make sure none of the codons have been split into bits
-//		if (this.filter != null) {
-//			
-//			for (int i = 0; i < filter.length; i ++){
-//				
-//				
-//				
-//			}
-//			
-//		}
-		
 		
 		
     }
@@ -72,7 +58,7 @@ public class NonSynonymousSubstSum extends BranchSubstLogger {
 
 	@Override
 	protected boolean canHandleDataType(DataType dataType) {
-		return dataType instanceof Nucleotide;
+		return dataType instanceof Nucleotide || dataType instanceof Codon;
 	}
 
 }

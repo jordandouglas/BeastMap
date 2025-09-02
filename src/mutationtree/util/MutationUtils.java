@@ -7,6 +7,7 @@ import beast.base.core.Log;
 import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Node;
+import beast.base.util.Randomizer;
 
 public class MutationUtils {
 	
@@ -150,6 +151,56 @@ public class MutationUtils {
         } catch (Exception e) {
             return defaultValue;
         }
+    }
+
+
+
+	    /**
+     * Simulate directly using Gillespie's algorithm and return the child state
+     * @param node
+     * @param clockRate
+     * @param substModel
+     * @param mutations
+     * @return
+     */
+    public static int simulateMutationsDownBranch(int parentState, Node node, double clockRate, SubstitutionModel qmatrix, List<Mutation> arr, int siteNr) {
+    	
+
+    		
+		int from = parentState;
+		double t = 0;
+		double time = node.getLength();
+		while (true) {
+			 
+
+			// Outgoing rate
+			double lambda = 0;
+			double[] outRates = MutationUtils.getTransitionRates(qmatrix, from, node);
+			for (int r = 0; r < outRates.length; r++) lambda += outRates[r]*clockRate;
+			
+			//When does the next mutation occur?
+			double dt = Randomizer.nextExponential(lambda);
+		 
+			if (t + dt > time) break;
+		 
+		 
+			// What was the mutation?
+			int nextState = Randomizer.randomChoicePDF(outRates);
+			//Log.warning("mutated from " + from + " to " + nextState + " with rates (" + outRates[0] + "," + outRates[1] + "," + outRates[2] + "," + outRates[3] + ")" );
+		 
+			// Make mutation
+			Mutation mut = new Mutation(from, nextState, t+dt, siteNr, parentState, -1, node);
+			arr.add(mut);
+		 
+		 
+			// Increment time, update parental state
+			from = nextState;
+			t = t + dt;
+			 
+		}
+    		
+    		 
+    	return from;
     }
 
     

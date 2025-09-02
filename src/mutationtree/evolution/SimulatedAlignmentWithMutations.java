@@ -30,7 +30,7 @@ import mutationtree.util.MutationUtils;
 
 @Description("An alignment containing sequences randomly generated using a"
         + "given site model down a given tree.")
-public class SimulatedAlignmentWithMutations extends Alignment {
+public class SimulatedAlignmentWithMutations extends Alignment implements RecordedMutationSimulator {
     final public Input<Alignment> m_data = new Input<>("data", "alignment data which specifies datatype and taxa of the beast.tree", Validate.REQUIRED);
     final public Input<Tree> m_treeInput = new Input<>("tree", "phylogenetic beast.tree with sequence data in the leafs", Validate.REQUIRED);
     final public Input<SiteModel.Base> m_pSiteModelInput = new Input<>("siteModel", "site model for leafs in the beast.tree", Validate.REQUIRED);
@@ -92,9 +92,6 @@ public class SimulatedAlignmentWithMutations extends Alignment {
         sequenceInput.setRule(Validate.OPTIONAL);
     }
     
-    public List<Mutation> getMutationsOnBranch(int nodeNr){
-		return this.mutationsTree.get(nodeNr);
-	}
 
     @Override
     public void initAndValidate() {
@@ -239,7 +236,7 @@ public class SimulatedAlignmentWithMutations extends Alignment {
             for (int i = 0; i < m_sequenceLength; i++) {
                 double clockRate = (m_branchRateModel == null ? 1.0 : m_branchRateModel.getRateForBranch(child));
                 double siteRate = m_siteModel.getRateForCategory(category[i], child);
-                seq[i] = simulateMutationsDownBranch(parentSequence[i], child, clockRate*siteRate, m_siteModel.getSubstitutionModel(), mutationsBranch, i);
+                seq[i] = MutationUtils.simulateMutationsDownBranch(parentSequence[i], child, clockRate*siteRate, m_siteModel.getSubstitutionModel(), mutationsBranch, i);
             }
             
             this.mutationsTree.set(child.getNr(), mutationsBranch);
@@ -303,8 +300,28 @@ public class SimulatedAlignmentWithMutations extends Alignment {
     	return from;
     }
 
+	@Override
+	public DataType getDataTypeOfSimulator() {
+		return super.getDataType();
+	}
+    
+    public List<Mutation> getMutationsOnBranch(int nodeNr){
+		return this.mutationsTree.get(nodeNr);
+	}
+
+    
 	public int[] getSequenceForNode(Node node) {
 		return sequencesAll[node.getNr()];
+	}
+
+	@Override
+	public Tree getTree() {
+		return m_tree;
+	}
+
+	@Override
+	public Alignment getData() {
+		return this;
 	}
     
 

@@ -11,6 +11,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.commons.math.MathException;
+import org.apache.commons.math.distribution.BetaDistributionImpl;
+import org.apache.commons.math.distribution.GammaDistributionImpl;
+
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Log;
@@ -28,10 +32,15 @@ import mutationtree.evolution.TimelessTree;
 @Description("A tree prior for a non-time tree")
 public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 
-	final public Input<RealParameter> rateInput = new Input<>("rate", "exponential distribution prior rate of branch lengths", Input.Validate.REQUIRED);
-	final public Input<RealParameter> midpointInput = new Input<>("midpoint", "the difference between the root's two furtherest tips is an exponential with this mean", Input.Validate.OPTIONAL);
+	final public Input<RealParameter> meanInput = new Input<>("mean", "mean branch length under a gamma distribution prior", Input.Validate.REQUIRED);
+	final public Input<RealParameter> shapeInput = new Input<>("shape", "gamma distribution prior shape of branch lengths. Set to 1 for exponential distribution.", Input.Validate.REQUIRED);
 	
 	
+	final public Input<RealParameter> midpointInput = new Input<>("midpoint", "the relative position of the root between the two furtherest tips is a beta(alpha, alpha), where alpha is large (e.g. 100)", Input.Validate.OPTIONAL);
+	
+	
+	org.apache.commons.math.distribution.GammaDistribution gammaDist = new GammaDistributionImpl(1, 1);
+	org.apache.commons.math.distribution.BetaDistribution betaDist = new BetaDistributionImpl(1, 1);
 	
 	public void initAndValidate() {
 		
@@ -45,34 +54,36 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 	@Override
 	public double calculateTreeLogLikelihood(TreeInterface tree) {
 		
-		double rate = rateInput.get().getArrayValue();
+		double mean = meanInput.get().getArrayValue();
+		double shape = shapeInput.get().getArrayValue();
+		double scale = mean/shape;
+		this.gammaDist = new GammaDistributionImpl(shape, scale);
 		
 		double logPTree = 0;
 		for (Node node : treeInput.get().getNodesAsArray()) {
 			if (node.isRoot()) continue;
 			double length = node.getLength();
 			
-//			// So that this process is generative, the two branches coming out of the root will count as a single branch
-			// Edit: since we are using an exponential prior, this step is redundant and gives the same answer
-//			if (midpointInput.get() != null && node.getParent().isRoot()) {
-//				
-//				
-//				// Skip one branch
-//				if (node == node.getParent().getRight()){
-//					continue;
-//				}else {
-//					Node left = node;
-//					Node right = node.getParent().getRight();
-//					length = left.getHeight() + right.getHeight();
-//				}
-//				
-//			}
+			// The two branches coming out of the root will count as a single branch
+			if (midpointInput.get() != null && node.getParent().isRoot()) {
+				
+				
+				// Skip one branch
+				if (node == node.getParent().getRight()){
+					continue;
+				}else {
+					Node left = node;
+					Node right = node.getParent().getRight();
+					length = left.getLength() + right.getLength();
+				}
+				
+			}
 			
 			if (length <= 0) {
 				return Double.NEGATIVE_INFINITY;
 			}
 			
-			logPTree += Math.log(rate) - rate*length; // Exponential distribution density in log space
+			logPTree += this.gammaDist.logDensity(length);
 			
 			if (node.getHeight() < 0) {
 				Log.warning("height=" + node.getHeight());
@@ -81,6 +92,8 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 		}
 		
 		if (midpointInput.get() != null) {
+			
+			
 			Node root = treeInput.get().getRoot();
 			
 			// Find the furtherest tip on either side
@@ -94,12 +107,13 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 			// Difference between heights
 			double rootToLeft = root.getHeight() - leftHeight;
 			double rootToRight = root.getHeight() - rightHeight;
-			double diff = Math.abs(rootToLeft - rootToRight);
-			double midpointRate = 1 / midpointInput.get().getArrayValue();
+			double alpha = midpointInput.get().getArrayValue(); 
+			this.betaDist = new BetaDistributionImpl(alpha, alpha);
+			double proportion = rootToLeft / (rootToLeft + rootToRight); 
 			
 			//Log.warning("diff" + diff + " midpointRate " + midpointRate + " rootToLeft " + rootToLeft + " rootToRight " + rootToRight);
 			
-			logPTree += Math.log(midpointRate) - midpointRate*diff; // Exponential distribution density in log space
+			logPTree += this.betaDist.logDensity(proportion);
 			
 			
 		}
@@ -123,7 +137,8 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
     @Override
     public List<String> getConditions() {
         List<String> conditions = new ArrayList<>();
-        conditions.add(rateInput.get().getID());
+        conditions.add(meanInput.get().getID());
+        conditions.add(shapeInput.get().getID());
         if (midpointInput.get() != null) conditions.add(midpointInput.get().getID());
         return conditions;
     }
@@ -137,8 +152,10 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
     
     @Override
     protected boolean requiresRecalculation() {
-    	if (InputUtil.isDirty(rateInput)) return true;
+    	if (InputUtil.isDirty(meanInput)) return true;
     	if (InputUtil.isDirty(midpointInput)) return true;
+    	if (InputUtil.isDirty(shapeInput)) return true;
+    	
         return treeInput.get().somethingIsDirty();
     }
     
@@ -155,8 +172,10 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
          
          
          
-         double lambda = rateInput.get().getValue();
-         double midpointMean = midpointInput.get().getValue();
+         double mean = meanInput.get().getArrayValue();
+         double shape = shapeInput.get().getArrayValue();
+         double scale = mean/shape;
+         this.gammaDist = new GammaDistributionImpl(shape, scale);
          Tree tree = (Tree) treeInput.get();
          
          
@@ -173,12 +192,24 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
          int nextNr = activeLineages.size();
 
          while (activeLineages.size() > 1) {
-             int k = activeLineages.size();
-
-             // Sample 2 branch lengths
-             double branchLength1 = Randomizer.nextExponential(lambda);
-             double branchLength2 = Randomizer.nextExponential(lambda);
-
+			int k = activeLineages.size();
+			
+			// Sample 2 branch lengths
+			double branchLength1=0, branchLength2=0;
+			try {
+				branchLength1 = this.gammaDist.inverseCumulativeProbability(Randomizer.nextFloat());
+				branchLength2 = this.gammaDist.inverseCumulativeProbability(Randomizer.nextFloat());
+			} catch (MathException e) {
+				e.printStackTrace();
+			}
+			
+			
+			// To make the root, we will sample just a single branch length and then split it in half
+			if (activeLineages.size() == 2) {
+				double sum = branchLength1;
+				branchLength1 = sum/2;
+				branchLength2 = sum/2;
+			}
              
              // Sample 2 nodes
              Node node1 = activeLineages.get(random.nextInt(k));
@@ -231,17 +262,28 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 		
 		
 		if (midpointInput.get() != null) {
-		
-			 // Convert to an unrooted tree
-			 RootnessNode unrootedNode = convert(tree.getRoot());
-			 MidpointResult result = findMidpoint(unrootedNode);
-			 Tree tree2 = convert(result.nodeA, result.nodeB);
+			
+			double alpha = midpointInput.get().getValue();
+			this.betaDist = new BetaDistributionImpl(alpha, alpha);
+			double rootProportion;
+			try {
+				rootProportion = betaDist.inverseCumulativeProbability(Randomizer.nextDouble());
+				//Log.warning("alpha = " + alpha + " prop = " + rootProportion);
+			} catch (MathException e) {
+				e.printStackTrace();
+				rootProportion = 0.5;
+			}
+			
+			// Convert to an unrooted tree
+			RootnessNode unrootedNode = convert(tree.getRoot());
+			MidpointResult result = findMidpoint(unrootedNode, rootProportion);
+			Tree tree2 = convert(result.nodeA, result.nodeB, result.distFromAToRoot);
 			 
-			 //Log.warning("before rooting " + tree.getRoot().toNewick());
-			 //Log.warning(" after rooting" + tree2.getRoot().toNewick());
+			//Log.warning("before rooting " + tree.getRoot().toNewick());
+			//Log.warning(" after rooting" + tree2.getRoot().toNewick());
 			 
-			 //tree.assignFromWithoutID(new Tree(tree2.getRoot()));
-			 tree.assignFromWithoutID(tree2);
+			//tree.assignFromWithoutID(new Tree(tree2.getRoot()));
+			tree.assignFromWithoutID(tree2);
 		
 			 
 		}
@@ -322,7 +364,7 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
     }
     
     
-    public static Tree convert(RootnessNode nodeA, RootnessNode nodeB) {
+    public static Tree convert(RootnessNode nodeA, RootnessNode nodeB, double rootHeightFromALeaf) {
        
     
         
@@ -330,14 +372,7 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
         double heightOfA = nodeA.lengthToFurthestLeaf(nodeB);
         double heightOfB = nodeB.lengthToFurthestLeaf(nodeA);
         double spanDistance = heightOfA + heightOfB + connectingLength;
-        double rootHeightFromALeaf = spanDistance / 2;
-        
-        // TODO Random walk
-        double midpointMean=0.01;
-        double dt = 0;//Randomizer.nextExponential(1/midpointMean);
-        double dir = Randomizer.nextBoolean() ? -1 : 1;
-        rootHeightFromALeaf = rootHeightFromALeaf + dt*dir;
-        
+
         
         double lenToA = rootHeightFromALeaf - heightOfA;
         double lenToB = connectingLength - lenToA;
@@ -513,7 +548,7 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
     }
     
     
-    public static MidpointResult findMidpoint(RootnessNode anyNode) {
+    public static MidpointResult findMidpoint(RootnessNode anyNode, double midpointProportion) {
     	
         // Step 1: find one farthest leaf
     	RootnessNode leaf1 = farthestLeaf(anyNode).node;
@@ -526,9 +561,11 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
         // Step 3: get path leaf1 -> leaf2
         List<RootnessNode> path = getPath(leaf1, leaf2);
 
-        // Step 4: walk halfway along the path
-        double halfway = diameter / 2.0;
+        // Step 4: walk along the path
+        double halfway = diameter * midpointProportion;
         double distSoFar = 0.0;
+        
+       // Log.warning("midpointProportion " + midpointProportion);
 
         for (int i = 0; i < path.size() - 1; i++) {
         	RootnessNode a = path.get(i);
@@ -537,7 +574,7 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 
             if (distSoFar + len >= halfway) {
                 double distFromA = halfway - distSoFar;
-                return new MidpointResult(a, b, distFromA);
+                return new MidpointResult(a, b, distFromA, halfway);
             }
             distSoFar += len;
         }
@@ -604,11 +641,13 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
     public static class MidpointResult {
         public final RootnessNode nodeA, nodeB;
         public final double distFromA; // distance from nodeA along branch
+        public final double distFromAToRoot;
 
-        public MidpointResult(RootnessNode a, RootnessNode b, double distFromA) {
+        public MidpointResult(RootnessNode a, RootnessNode b, double distFromA, double distFromAToRoot) {
             this.nodeA = a;
             this.nodeB = b;
             this.distFromA = distFromA;
+            this.distFromAToRoot = distFromAToRoot;
         }
     }
 

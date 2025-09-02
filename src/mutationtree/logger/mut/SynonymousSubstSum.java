@@ -6,8 +6,8 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.Nucleotide;
-import mutationtree.codons.Codon;
-import mutationtree.codons.GeneticCode;
+import codonmodels.evolution.datatype.Codon;
+import codonmodels.evolution.datatype.GeneticCode;
 import mutationtree.logger.BranchSubstLogger;
 import mutationtree.util.Mutation;
 
@@ -52,7 +52,7 @@ public class SynonymousSubstSum extends BranchSubstLogger {
 	
 	@Override
 	protected boolean canHandleDataType(DataType dataType) {
-		return dataType instanceof Nucleotide;
+		return dataType instanceof Nucleotide || dataType instanceof Codon;
 	}
 
 }

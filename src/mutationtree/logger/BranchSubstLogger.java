@@ -12,13 +12,16 @@ import beast.base.core.Log;
 import beast.base.core.Loggable;
 import beast.base.core.Input.Validate;
 import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.datatype.Aminoacid;
 import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.datatype.Nucleotide;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.CalculationNode;
-import mutationtree.codons.Codon;
-import mutationtree.codons.GeneticCode;
+import codonmodels.evolution.datatype.Codon;
+import codonmodels.evolution.datatype.GeneticCode;
 import mutationtree.evolution.BranchMutationSampler;
+import mutationtree.evolution.RecordedMutationSimulator;
 import mutationtree.evolution.SimulatedAlignmentWithMutations;
 import mutationtree.util.Mutation;
 import mutationtree.util.MutationUtils;
@@ -29,7 +32,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 
 	
 	final public Input<BranchMutationSampler> samplerInput = new Input<>("sampler", "mutation sampler to log");
-	final public Input<SimulatedAlignmentWithMutations> truthInput = new Input<>("truth", "mutation sampler to log", Validate.XOR, samplerInput);
+	final public Input<RecordedMutationSimulator> truthInput = new Input<>("truth", "mutation sampler to log", Validate.XOR, samplerInput);
 	
 	final public Input<String> filterInput = new Input<>("filter", "specifies which of the sites in the input alignment we will restrict to" +
 	            "First site is 1." +
@@ -169,7 +172,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	
 	protected Tree getTree() {
 		if (samplerInput.get() == null) {
-			return (Tree) truthInput.get().m_treeInput.get();
+			return (Tree) truthInput.get().getTree();
 		}else {
 			return (Tree) samplerInput.get().treeInput.get();
 		}
@@ -204,7 +207,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     
     
     protected DataType getDataType(){
-    	return samplerInput.get() != null ? samplerInput.get().dataInput.get().getDataType() : truthInput.get().getDataType();
+    	return samplerInput.get() != null ? samplerInput.get().dataInput.get().getDataType() : truthInput.get().getDataTypeOfSimulator();
     }
     
     
@@ -214,7 +217,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
      * @return
      */
     protected int getSiteAndPatternCount(){
-    	Alignment data = samplerInput.get() != null ? samplerInput.get().dataInput.get() : truthInput.get();
+    	Alignment data = samplerInput.get() != null ? samplerInput.get().dataInput.get() : truthInput.get().getData();
     	return data.getSiteCount();
     }
     
@@ -230,7 +233,121 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
      */
 	protected int[] getSynonymousAndNonSynonymousSubstitutionCount(List<Mutation> mutations, GeneticCode code, Codon codon, int openReadingFrame) {
 		
+		if (this.getDataType() instanceof Nucleotide) {
+			return getSNCountForNucleotides(mutations, code, codon, openReadingFrame);
+		}
 		
+		if (this.getDataType() instanceof Codon) {
+			return getSNCountForCodons(mutations, code, codon);
+		}
+		
+		return null;
+		
+	}
+	
+	
+	// Number of synonymous and non-synonymous, when using codon data
+	private int[] getSNCountForCodons(List<Mutation> mutations, GeneticCode code, Codon codon) {
+		
+		
+		if (mutations.isEmpty()) return new int[] {0, 0};
+		
+		
+		
+		// Get child and parent sequences
+		Node child = mutations.get(0).getNode();
+		Node parent = child.getParent();
+		int[] childSequence = getSequenceForNode(child);
+		int[] parentSequence = getSequenceForNode(parent);
+		
+		int nNonSyn = 0;
+		int nSyn = 0;
+		int ncodons = this.getSiteAndPatternCount(); // Pattern count should equal site count if using PatternlessAlignment
+		for (int codonNr = 0; codonNr < ncodons; codonNr ++) {
+			
+			//Log.warning("Position " + codonNr + " of " + ncodons);
+			
+			// Find all mutations in this position
+			List<Mutation> codonMutations = new ArrayList<>();
+			for (Mutation mut : mutations) {
+				if (mut.getSiteNr() == codonNr) {
+					codonMutations.add(mut);
+				}
+			}
+			
+			// Sort by time along branch (forward in time)
+			Collections.sort(codonMutations);
+			if (codonMutations.isEmpty()) continue;
+			
+			
+			
+			// Parent and child states
+			int parentCodonNr = parentSequence[codonNr];
+			int childCodonNr = childSequence[codonNr];
+			
+			
+			//Log.warning("parentCodonNr " + parentCodonNr + ", childCodonNr " + childCodonNr);
+			
+			// I don't know what to do about gaps/ambig/stop codons just yet...
+			if (parentCodonNr == -1 || childCodonNr == -1) continue;
+			
+		
+			int parentAA = code.getAminoAcidState(parentCodonNr);
+			
+			
+			
+			for (Mutation mut : codonMutations) {
+				int from = mut.getFrom();
+				int to = mut.getTo();
+				if (parentCodonNr != from) {
+					Log.warning("Unexpected dev error 24244: " + parentCodonNr + "!=" + from);
+				}
+				parentCodonNr = to;
+				
+				
+				
+				// Translate codon. Stop codons, gaps, and ambigs will get -1
+				int nextAA = to < 0 ? -1 : code.getAminoAcidState(to);
+				
+				//Log.warning(from +  " to " + to + " aa " + nextAA);
+				
+				
+				// For debugging
+//				DataType aminoacid = new Aminoacid();
+//				String fromChar = this.getDataType().getCharacter(from);
+//				String toChar = this.getDataType().getCharacter(to);
+//				String fromAAChar = aminoacid.getCharacter(parentAA);
+//				String toAAChar = aminoacid.getCharacter(nextAA);
+				
+				
+				// Synonymous mutation
+				if (nextAA == parentAA) {
+					//Log.warning("s: " + fromAAChar + "("+fromChar+")" + "->" + toAAChar + "("+toChar+")" + (" (from " + from + " to " + to + ")"));
+					nSyn ++;
+				}
+				
+				// Non-synonymous mutation
+				else{
+					nNonSyn++;
+					//Log.warning("ns: " + fromAAChar + "("+fromChar+")" + "->" + toAAChar + "("+toChar+")" + (" (from " + from + " to " + to + ")"));
+				}
+				
+				parentAA = nextAA;
+				
+			}
+						
+						
+			
+		}
+		
+		return new int[] { nSyn, nNonSyn };
+		
+	}
+		
+	
+	// Number of synonymous and non-synonymous, when using nucleotide data
+	private int[] getSNCountForNucleotides(List<Mutation> mutations, GeneticCode code, Codon codon, int openReadingFrame) {
+			
 		if (mutations.isEmpty()) return new int[] {0, 0};
 		
 		// Get child and parent sequences
