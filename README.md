@@ -12,11 +12,11 @@ To build:
 Download the repository and use ant:
 
 ```
-mkdir ~/.beast/2.7/mutationtree/
-cd MutationTree/
+mkdir ~/.beast/2.7/beastmap/
+cd BeastMap/
 ant package
-cp build/dist/mutationtree.package.v*.zip ~/.beast/2.7/mutationtree/tmp.zip
-cd ~/.beast/2.7/mutationtree/
+cp build/dist/beastmap.package.v*.zip ~/.beast/2.7/beastmap/tmp.zip
+cd ~/.beast/2.7/beastmap/
 unzip -o tmp.zip
 ```
 
@@ -28,32 +28,32 @@ Each counter requires a ```BranchMutationSampler```, which will stochastically s
 ### SubstitutionSum
 Counts the total number of substitutions per branch.
 
-```<sampler spec="mutationtree.logger.mut.SubstitutionSum" sampler="@mutationsampler" />```
+```<sampler spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" />```
 
 ### SynonymousSubstSum
 Counts the total number of synonymous substitutions per branch. Requirements: **nucleotide** data. Options: code (default: universal); readingFrame (default: 1).
 
-```<sampler spec="mutationtree.logger.mut.SynonymousSubstSum" sampler="@mutationsampler" code="universal" readingFrame="1"/>```
+```<sampler spec="beastmap.logger.mut.SynonymousSubstSum" sampler="@mutationsampler" code="universal" readingFrame="1"/>```
 
 ### NonSynonymousSubstSum
 Counts the total number of non-synonymous substitutions per branch. Requirements: **nucleotide** data. Options: code (default: universal); readingFrame (default: 1).
 
-```<sampler spec="mutationtree.logger.mut.NonSynonymousSubstSum" sampler="@mutationsampler"  code="universal" readingFrame="1"/>```
+```<sampler spec="beastmap.logger.mut.NonSynonymousSubstSum" sampler="@mutationsampler"  code="universal" readingFrame="1"/>```
 
 ### FromToSubstSum
 Counts the total number of substitutions per branch from one of the characters in state X to one of the characters in state Y (user defined). Options: from (e.g. 'A' or 'AG'); from (e.g. 'C' or 'ACG').
 
-``` <sampler spec="mutationtree.logger.mut.FromToSubstSum" sampler="@mutationsampler" from="A" to="CG" />```
+``` <sampler spec="beastmap.logger.mut.FromToSubstSum" sampler="@mutationsampler" from="A" to="CG" />```
 
 ### NucleotideTransitionCounter
 Counts the total number of transitions per branch (purine to purine or pyrimidine to pyrimidine). Requirements: **nucleotide** data.
 
-``` <sampler spec="mutationtree.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />```
+``` <sampler spec="beastmap.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />```
 
 ### NucleotideTransversionCounter
 Counts the total number of substitutions per branch (purine to pyrimidine or vice versa). Requirements: **nucleotide** data.
 
-``` <sampler spec="mutationtree.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />```
+``` <sampler spec="beastmap.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />```
 
 
 
@@ -66,19 +66,19 @@ At every log, the ancestral sequence of each internal node will be stochatsicall
 Append the following loggers to the bottom of the XML file to count the number of substitutions along each branch in the tree logger. In this example, the trees will be logged with length `SubstitutionSum` but you can leave in default units by removing the `lengths` input.
 ```
   <logger id="treelog" spec="Logger" fileName="substitution.trees" logEvery="10000" mode="tree">
-      <log id="SampledSubstTreeLogger" spec="mutationtree.logger.SampledSubstTreeLogger" lengths="@SubstitutionSum" tree="@tree">
-          <sampler id="SubstitutionSum" spec="mutationtree.logger.mut.SubstitutionSum" sampler="@mutationsampler" />
-          <sampler id="SynonymousSubstSum" spec="mutationtree.logger.mut.SynonymousSubstSum" sampler="@mutationsampler" code="universal" readingFrame="1"/>
-          <sampler id="NonSynonymousSubstSum" spec="mutationtree.logger.mut.NonSynonymousSubstSum" sampler="@mutationsampler"  code="universal" readingFrame="1"/>
-          <sampler id="FromToSubstSum" spec="mutationtree.logger.mut.FromToSubstSum" sampler="@mutationsampler" from="A" to="A" />
-          <sampler id="NucleotideTransitionCounter" spec="mutationtree.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />
+      <log id="SampledSubstTreeLogger" spec="beastmap.logger.SampledSubstTreeLogger" lengths="@SubstitutionSum" tree="@tree">
+          <sampler id="SubstitutionSum" spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" />
+          <sampler id="SynonymousSubstSum" spec="beastmap.logger.mut.SynonymousSubstSum" sampler="@mutationsampler" code="universal" readingFrame="1"/>
+          <sampler id="NonSynonymousSubstSum" spec="beastmap.logger.mut.NonSynonymousSubstSum" sampler="@mutationsampler"  code="universal" readingFrame="1"/>
+          <sampler id="FromToSubstSum" spec="beastmap.logger.mut.FromToSubstSum" sampler="@mutationsampler" from="A" to="A" />
+          <sampler id="NucleotideTransitionCounter" spec="beastmap.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />
 
-          <sampler id="NucleotideTransversionCounter" spec="mutationtree.logger.mut.NucleotideTransversionCounter">
-            <sampler id="mutationsampler" spec="mutationtree.evolution.BranchMutationSampler" tag="seq" useAmbiguities="true" >
+          <sampler id="NucleotideTransversionCounter" spec="beastmap.logger.mut.NucleotideTransversionCounter">
+            <sampler id="mutationsampler" spec="beastmap.evolution.BranchMutationSampler" tag="seq" useAmbiguities="true" >
                <tree idref="tree" />
                <siteModel idref="siteModelID" />
                <branchRateModel idref="clockModelID" />
-               <data spec="mutationtree.evolution.PatternlessAlignment" data="@data" />
+               <data spec="beastmap.evolution.PatternlessAlignment" data="@data" />
             </sampler>
           </sampler>
       </log>
@@ -97,4 +97,4 @@ You can also place these loggers in the trace file as well as the tree file to e
 
 ## Examples
 
-See the mutationtree.xml file in examples.
+See the beastmap.xml file in examples.
