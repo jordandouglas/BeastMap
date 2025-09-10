@@ -1,19 +1,19 @@
-<!-- Build mutationtree. It is also used by Hudson mutationtree project. JUnit test is available for this build. -->
-<project basedir="." default="build_jar_all_mutationtree" name="BUILD_mutationtree">
+<!-- Build beastmap. It is also used by Hudson beastmap project. JUnit test is available for this build. -->
+<project basedir="." default="build_jar_all_beastmap" name="BUILD_beastmap">
 	<description>
-	    Build mutationtree.
+	    Build beastmap.
 	    JUnit test is available for this build.
-	    $Id: build_mutationtree.xml $
+	    $Id: build_beastmap.xml $
 	</description>
 
 	<!-- set global properties for this build -->
-	<property name="mutationtreedir" value="../MutationTree/" />
-	<property name="srcmutationtree" location="src" />
-	<property name="docmutationtree" location="doc" />
-	<property name="buildmutationtree" location="build" />
-	<property name="libmutationtree" location="lib" />
+	<property name="beastmapdir" value="../BeastMap/" />
+	<property name="srcbeastmap" location="src" />
+	<property name="docbeastmap" location="doc" />
+	<property name="buildbeastmap" location="build" />
+	<property name="libbeastmap" location="lib" />
 	<property name="release_dir" value="release" />
-	<property name="distmutationtree" location="${buildmutationtree}/dist" />
+	<property name="distbeastmap" location="${buildbeastmap}/dist" />
 	<property name="beast2path" location="../beast2"/>
 	<property name="libBeast2" location="${beast2path}/lib" />
 	<property name="srcBeast2" location="${beast2path}/src" />
@@ -22,11 +22,11 @@
 
     <import file="${beast2path}/build.xml" />
 
-	<property name="main_class_CladeAge" value="beast.app.ca.mutationtreePanel" />
-	<property name="report" value="${buildmutationtree}/junitreport"/>
+	<property name="main_class_CladeAge" value="beast.app.ca.beastmapPanel" />
+	<property name="report" value="${buildbeastmap}/junitreport"/>
 
 	<path id="classpath">
-        <pathelement path="${buildmutationtree}"/>
+        <pathelement path="${buildbeastmap}"/>
 		<fileset dir="${libBeast2}" includes="junit/junit-platform-console-standalone-1.8.2.jar"/>
 		<fileset dir="${libBeast2}" includes="jam.jar"/>
 		<fileset dir="${libBeast2}" includes="commons-math3-3.6.1.jar"/>
@@ -42,41 +42,41 @@
 
 
 	<!-- start -->
-	<target name="initmutationtree">
+	<target name="initbeastmap">
 		<echo message="${ant.project.name}: ${ant.file}" />
 
-	    <available file="${mutationtreedir}/version.xml" property="versionAvailable"/>
+	    <available file="${beastmapdir}/version.xml" property="versionAvailable"/>
     	<fail unless="versionAvailable">
 	      ** Required file version.xml does not exist. **
 	    </fail>
 
-	    <xmlproperty file="${mutationtreedir}/version.xml" prefix="fromVersionFile" />
+	    <xmlproperty file="${beastmapdir}/version.xml" prefix="fromVersionFile" />
         <property name="projName" value="${fromVersionFile.package(name)}" />
-    	<property name="mutationtreeversion" value="${fromVersionFile.package(version)}" />
+    	<property name="beastmapversion" value="${fromVersionFile.package(version)}" />
 	</target>
 
-	<target name="cleanmutationtree">
-    	<delete dir="${buildmutationtree}" />
+	<target name="cleanbeastmap">
+    	<delete dir="${buildbeastmap}" />
 	</target>
 
 	<!-- clean previous build, and then compile Java source code, and Juint test -->
-	<target name="build_all_mutationtree" depends="cleanmutationtree,compile-allmutationtree,junitmutationtree"
+	<target name="build_all_beastmap" depends="cleanbeastmap,compile-allbeastmap,junitbeastmap"
         description="Clean and Build all run-time stuff">
 	</target>
 
 	<!-- clean previous build, compile Java source code, and Junit test, and make the beast.jar and beauti.jar -->
-	<target name="build_jar_all_mutationtree" depends="cleanmutationtree,compile-allmutationtree,junitmutationtree,dist_all_mutationtree"
+	<target name="build_jar_all_beastmap" depends="cleanbeastmap,compile-allbeastmap,junitbeastmap,dist_all_beastmap"
         description="Clean and Build all run-time stuff">
 	</target>
 
 
-	<!-- No JUnit Test, clean previous build, compile Java source code, and make the mutationtree.jar and beauti.jar -->
-	<target name="build_jar_all_mutationtree_NoJUnitTest" depends="cleanmutationtree,compile-allmutationtree,dist_all_mutationtree"
+	<!-- No JUnit Test, clean previous build, compile Java source code, and make the beastmap.jar and beauti.jar -->
+	<target name="build_jar_all_beastmap_NoJUnitTest" depends="cleanbeastmap,compile-allbeastmap,dist_all_beastmap"
         description="Clean and Build all run-time stuff">
 	</target>
 
 	<!-- compile Java source code -->
-	<target name="compile-allmutationtree" depends="initmutationtree,compile-all">
+	<target name="compile-allbeastmap" depends="initbeastmap,compile-all">
 
 
 	    <!-- Capture the path as a delimited property using the refid attribute -->
@@ -84,10 +84,10 @@
 	    <!-- Emit the property to the ant console -->
 	    <echo message="Classpath = ${myclasspath}"/>
 
-		<mkdir dir="${buildmutationtree}" />
+		<mkdir dir="${buildbeastmap}" />
 
-		<!-- Compile the java code from ${srcmutationtree} into ${buildmutationtree} /bin -->
-		<javac srcdir="${srcmutationtree}" destdir="${buildmutationtree}" classpathref="classpath"
+		<!-- Compile the java code from ${srcbeastmap} into ${buildbeastmap} /bin -->
+		<javac srcdir="${srcbeastmap}" destdir="${buildbeastmap}" classpathref="classpath"
 		       fork="true"
 		       memoryinitialsize="256m"
 		       memorymaximumsize="256m"
@@ -97,24 +97,24 @@
 			<!-- compile JUnit test classes -->
 			<include name="test/beast/**" />
 		</javac>
-		<copy todir="${buildmutationtree}">
-			<fileset dir="${srcmutationtree}" includes="**/*.png" />
+		<copy todir="${buildbeastmap}">
+			<fileset dir="${srcbeastmap}" includes="**/*.png" />
 		</copy>
 		<echo message="Successfully compiled." />
 	</target>
 
 	<!-- make the beast.jar and beauti.jar -->
-	<target name="dist_all_mutationtree" depends="compile-allmutationtree" description="create mutationtree jar">
+	<target name="dist_all_beastmap" depends="compile-allbeastmap" description="create beastmap jar">
 		<!-- Create the distribution directory -->
-		<mkdir dir="${distmutationtree}" />
+		<mkdir dir="${distbeastmap}" />
 
-		<!-- Put everything in ${buildmutationtree} into the beast.jar file -->
-		<jar jarfile="${distmutationtree}/mutationtree.jar">
+		<!-- Put everything in ${buildbeastmap} into the beast.jar file -->
+		<jar jarfile="${distbeastmap}/beastmap.jar">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="Main-Class" value="${main_class_CladeAge}" />
 			</manifest>
-			<fileset dir="${buildmutationtree}">
+			<fileset dir="${buildbeastmap}">
 				<include name="**/*.class" />
 				<include name="**/*.png" />
 			</fileset>
@@ -129,18 +129,18 @@
 			<zipgroupfileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar" />
 			<zipgroupfileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar" /> -->
 		</jar>
-		<jar jarfile="${distmutationtree}/mutationtree.src.jar">
-			<fileset dir="${srcmutationtree}">
+		<jar jarfile="${distbeastmap}/beastmap.src.jar">
+			<fileset dir="${srcbeastmap}">
 				<include name="**/*.java" />
 				<include name="**/*.png" />
 				<include name="**/*.xsl" />
 			</fileset>
         </jar>
-		<jar jarfile="${distmutationtree}/mutationtree.package.jar">
+		<jar jarfile="${distbeastmap}/beastmap.package.jar">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
 			</manifest>
-			<fileset dir="${buildmutationtree}">
+			<fileset dir="${buildbeastmap}">
 				<include name="**/*.png" />
 				<include name="**/*.class" />
 				<include name="**/*.class" />
@@ -150,24 +150,24 @@
 	</target>
 
 	<!-- run beast.jar -->
-	<target name="run_mutationtree">
-		<java jar="${distmutationtree}/mutationtree.jar" fork="true" />
+	<target name="run_beastmap">
+		<java jar="${distbeastmap}/beastmap.jar" fork="true" />
 	</target>
 
 
 	<!-- JUnit test -->
-	<target name="junitmutationtree">
+	<target name="junitbeastmap">
 		<mkdir dir="${report}" />
 		<junit printsummary="yes"> <!--showoutput='yes'-->
 			<classpath>
 				<path refid="classpath" />
-				<path location="${buildmutationtree}" />
+				<path location="${buildbeastmap}" />
 			</classpath>
 
 			<formatter type="xml" />
 
 			<batchtest fork="yes" todir="${report}">
-				<fileset dir="${srcmutationtree}">
+				<fileset dir="${srcbeastmap}">
                     <include name="test/**/*Test.java"/>
 				</fileset>
 				<fileset dir="${srcBeast2}">
@@ -189,8 +189,8 @@
 
 
 	<target name="package"
-	        depends="build_jar_all_mutationtree_NoJUnitTest"
-	        description="release BEAST 2 add-on version of mutationtree">
+	        depends="build_jar_all_beastmap_NoJUnitTest"
+	        description="release BEAST 2 add-on version of beastmap">
 
 		<delete dir="${Add_on_dir}" />
 		<!-- Create the release directory -->
@@ -211,24 +211,24 @@
 		</copy>
 		<!--
 		<copy todir="${Add_on_dir}/doc">
-			<fileset dir="doc" includes="mutationtree.pdf"/>
+			<fileset dir="doc" includes="beastmap.pdf"/>
 		</copy>
 		-->
 		<copy todir="${Add_on_dir}/lib">
-			<fileset dir="${distmutationtree}" includes="mutationtree.package.jar" />
+			<fileset dir="${distbeastmap}" includes="beastmap.package.jar" />
 		</copy>
 		<copy todir="${Add_on_dir}">
-			<fileset dir="${distmutationtree}" includes="mutationtree.src.jar" />
+			<fileset dir="${distbeastmap}" includes="beastmap.src.jar" />
 		</copy>
 
 
 
-		<jar jarfile="${distmutationtree}/mutationtree.package.v${mutationtreeversion}.zip">
+		<jar jarfile="${distbeastmap}/beastmap.package.v${beastmapversion}.zip">
 			<fileset dir="${Add_on_dir}">
 				<include name="**/*" />
 			</fileset>
         </jar>
-		<echo message="Add-on version v${mutationtreeversion} release is finished." />
+		<echo message="Add-on version v${beastmapversion} release is finished." />
 	</target>
 
 
@@ -237,77 +237,77 @@
 
 	<!-- Release -->
 	<property name="version" value="1.1.0" />
-	<property name="version_number" value="${mutationtreeversion}" />
-	<property name="release_dirmutationtree" value="release" />
+	<property name="version_number" value="${beastmapversion}" />
+	<property name="release_dirbeastmap" value="release" />
 	<property name="copyright" value="CladeAge development team 2013" />
 
 	<property name="CladeAge_name" value="CladeAge" />
 
-	<property name="common_dirmutationtree" value="${release_dirmutationtree}/common" />
-	<property name="Mac_dirmutationtree" value="${release_dirmutationtree}/Mac" />
-	<property name="Linux_dirmutationtree" value="${release_dirmutationtree}/Linux" />
-	<property name="Windows_dirmutationtree" value="${release_dirmutationtree}/Windows" />
+	<property name="common_dirbeastmap" value="${release_dirbeastmap}/common" />
+	<property name="Mac_dirbeastmap" value="${release_dirbeastmap}/Mac" />
+	<property name="Linux_dirbeastmap" value="${release_dirbeastmap}/Linux" />
+	<property name="Windows_dirbeastmap" value="${release_dirbeastmap}/Windows" />
 
-	<property name="Mac_package_dirmutationtree" value="${Mac_dirmutationtree}/${CladeAge_name}" />
-	<property name="Linux_package_dirmutationtree" value="${Linux_dirmutationtree}/${CladeAge_name}" />
-	<property name="Windows_package_dirmutationtree" value="${Windows_dirmutationtree}/${CladeAge_name}" />
+	<property name="Mac_package_dirbeastmap" value="${Mac_dirbeastmap}/${CladeAge_name}" />
+	<property name="Linux_package_dirbeastmap" value="${Linux_dirbeastmap}/${CladeAge_name}" />
+	<property name="Windows_package_dirbeastmap" value="${Windows_dirbeastmap}/${CladeAge_name}" />
 
 	<!-- Need to either install Launch4j under {CladeAge workspace}/${release}
                  or install it in the default directory and change the location of launch4j.dir -->
 	<target name="windows"
-	        depends="build_jar_all_mutationtree_NoJUnitTest"
+	        depends="build_jar_all_beastmap_NoJUnitTest"
 	        description="release Windows version of CladeAge">
 
-		<delete dir="${Windows_package_dirmutationtree}" />
+		<delete dir="${Windows_package_dirbeastmap}" />
 		<!-- Create the release directory -->
-		<mkdir dir="${Windows_package_dirmutationtree}" />
+		<mkdir dir="${Windows_package_dirbeastmap}" />
 
 		<property name="launch4j.dir" location="../../launch4j" />
 		<taskdef name="launch4j"
 		         classname="net.sf.launch4j.ant.Launch4jTask"
 		         classpath="${launch4j.dir}/launch4j.jar :${launch4j.dir}/lib/xstream.jar" />
 
-		<copy file="${distmutationtree}/mutationtree.src.jar" todir="${Windows_package_dirmutationtree}/lib" />
-		<copy file="${common_dirmutationtree}/VERSION HISTORY.txt" todir="${Windows_package_dirmutationtree}" />
-		<copy file="${common_dirmutationtree}/README.txt" todir="${Windows_package_dirmutationtree}" />
-		<copy file="${common_dirmutationtree}/LICENSE.txt" todir="${Windows_package_dirmutationtree}" />
+		<copy file="${distbeastmap}/beastmap.src.jar" todir="${Windows_package_dirbeastmap}/lib" />
+		<copy file="${common_dirbeastmap}/VERSION HISTORY.txt" todir="${Windows_package_dirbeastmap}" />
+		<copy file="${common_dirbeastmap}/README.txt" todir="${Windows_package_dirbeastmap}" />
+		<copy file="${common_dirbeastmap}/LICENSE.txt" todir="${Windows_package_dirbeastmap}" />
 
 		<!-- CladeAge v?.?.?.exe -->
-		<launch4j configFile="${Windows_dirmutationtree}/CladeAge_launch4j.xml"
-		          jar="${distmutationtree}/mutationtree.jar"
-		          outfile="${Windows_package_dirmutationtree}/${CladeAge_name}.exe"
+		<launch4j configFile="${Windows_dirbeastmap}/CladeAge_launch4j.xml"
+		          jar="${distbeastmap}/beastmap.jar"
+		          outfile="${Windows_package_dirbeastmap}/${CladeAge_name}.exe"
 		          fileVersion="${version_number}.0"
-		          txtFileVersion="${mutationtreeversion}"
+		          txtFileVersion="${beastmapversion}"
 		          productVersion="${version_number}.0"
-		          txtProductVersion="${mutationtreeversion}" />
+		          txtProductVersion="${beastmapversion}" />
 
 
-		<zip destfile="${Windows_dirmutationtree}/${CladeAge_name} v${mutationtreeversion}.zip">
-			<zipfileset dir="${Windows_package_dirmutationtree}" prefix="${CladeAge_name}" />
+		<zip destfile="${Windows_dirbeastmap}/${CladeAge_name} v${beastmapversion}.zip">
+			<zipfileset dir="${Windows_package_dirbeastmap}" prefix="${CladeAge_name}" />
 		</zip>
 
 		<echo message="Windows version release is finished." />
 	</target>
 
 	<target name="linux"
-	        depends="build_jar_all_mutationtree_NoJUnitTest"
+	        depends="build_jar_all_beastmap_NoJUnitTest"
 	        description="release Linux/Unix version of CladeAge">
-		<delete dir="${Linux_package_dirmutationtree}" />
+		<delete dir="${Linux_package_dirbeastmap}" />
 		<!-- Create the release directory -->
-		<mkdir dir="${Linux_package_dirmutationtree}" />
+		<mkdir dir="${Linux_package_dirbeastmap}" />
 
-		<copy todir="${Linux_package_dirmutationtree}/bin">
-			<fileset dir="${Linux_dirmutationtree}/bin" />
+		<copy todir="${Linux_package_dirbeastmap}/bin">
+			<fileset dir="${Linux_dirbeastmap}/bin" />
 		</copy>
-		<chmod dir="${Linux_package_dirmutationtree}/bin" perm="755" includes="**/**" />
+		<chmod dir="${Linux_package_dirbeastmap}/bin" perm="755" includes="**/**" />
 
-		<copy file="${distmutationtree}/mutationtree.jar" todir="${Linux_package_dirmutationtree}/lib" />
-		<copy file="${distmutationtree}/mutationtree.src.jar" todir="${Linux_package_dirmutationtree}/lib" />
-		<copy file="${common_dirmutationtree}/icons/mutationtree.png" todir="${Linux_package_dirmutationtree}/images" />
+		<copy file="${distbeastmap}/beastmap.jar" todir="${Linux_package_dirbeastmap}/lib" />
+		<copy file="${distbeastmap}/beastmap.src.jar" todir="${Linux_package_dirbeastmap}/lib" />
+		<copy file="${common_dirbeastmap}/icons/beastmap.png" todir="${Linux_package_dirbeastmap}/images" />
 
-		<copy file="${common_dirmutationtree}/VERSION HISTORY.txt" todir="${Linux_package_dirmutationtree}" />
-		<copy file="${common_dirmutationtree}/README.txt" todir="${Linux_package_dirmutationtree}" />
-		<copy file="${common_dirmutationtree}/LICENSE.txt" todir="${Linux_package_dirmutationtree}" />
+		<copy file="${common_dirbeastmap}/VERSION HISTORY.txt" todir="${Linux_package_dirbeastmap}" />
+		<copy file="${common_dirbeastmap}/README.txt" todir="${Linux_package_dirbeastmap}" />
+		<copy file="${common_dirbeastmap}/LICENSE.txt" todir="${Linux_package_dirbeastmap}" />
 
 		<echo message="Have to tar manaully, because [ANT Bug 550] the tar task change the mode of the executables files." />
 		<echo message="Linux/Unix version release is finished." />
@@ -315,43 +315,43 @@
 
 	<property name="jarbundler_dir" value="/Applications/eclipse/plugins/org.apache.ant_1.8.3.v201301120609/lib" />
 	<target name="mac"
-	        depends="build_jar_all_mutationtree_NoJUnitTest"
+	        depends="build_jar_all_beastmap_NoJUnitTest"
 	        description="release Mac version of CladeAge">
-		<delete dir="${Mac_package_dirmutationtree}" />
-		<delete file="${Mac_dirmutationtree}/pack.temp.dmg"/>
-		<delete file="${Mac_dirmutationtree}/CladeAge v${mutationtreeversion}.dmg"/>
+		<delete dir="${Mac_package_dirbeastmap}" />
+		<delete file="${Mac_dirbeastmap}/pack.temp.dmg"/>
+		<delete file="${Mac_dirbeastmap}/CladeAge v${beastmapversion}.dmg"/>
 		<!-- Create the release directory -->
-		<mkdir dir="${Mac_package_dirmutationtree}" />
+		<mkdir dir="${Mac_package_dirbeastmap}" />
 
-		<copy todir="${Mac_package_dirmutationtree}/bin">
-			<fileset dir="${Linux_dirmutationtree}/bin" />
+		<copy todir="${Mac_package_dirbeastmap}/bin">
+			<fileset dir="${Linux_dirbeastmap}/bin" />
 		</copy>
-		<chmod dir="${Mac_package_dirmutationtree}/bin" perm="755" includes="**/**" />
+		<chmod dir="${Mac_package_dirbeastmap}/bin" perm="755" includes="**/**" />
 
-		<copy file="${distmutationtree}/mutationtree.jar" todir="${Mac_package_dirmutationtree}/lib" />
-		<copy file="${distmutationtree}/mutationtree.src.jar" todir="${Mac_package_dirmutationtree}/lib" />
+		<copy file="${distbeastmap}/beastmap.jar" todir="${Mac_package_dirbeastmap}/lib" />
+		<copy file="${distbeastmap}/beastmap.src.jar" todir="${Mac_package_dirbeastmap}/lib" />
 
-		<copy file="${common_dirmutationtree}/VERSION HISTORY.txt" todir="${Mac_package_dirmutationtree}" />
-		<copy file="${common_dirmutationtree}/README.txt" todir="${Mac_package_dirmutationtree}" />
-		<copy file="${common_dirmutationtree}/LICENSE.txt" todir="${Mac_package_dirmutationtree}" />
+		<copy file="${common_dirbeastmap}/VERSION HISTORY.txt" todir="${Mac_package_dirbeastmap}" />
+		<copy file="${common_dirbeastmap}/README.txt" todir="${Mac_package_dirbeastmap}" />
+		<copy file="${common_dirbeastmap}/LICENSE.txt" todir="${Mac_package_dirbeastmap}" />
 
 		<taskdef name="jarbundler"
 		         classname="net.sourceforge.jarbundler.JarBundler"
 		         classpath="${jarbundler_dir}/jarbundler-2.2.0.jar" />
 
 		<!-- create a jar bundle for the mac -->
-		<jarbundler dir="${Mac_package_dirmutationtree}"
+		<jarbundler dir="${Mac_package_dirbeastmap}"
 		            name="${CladeAge_name}"
 		            mainclass="${main_class_CladeAge}"
-		            icon="${common_dirmutationtree}/icons/mutationtree.icns"
+		            icon="${common_dirbeastmap}/icons/beastmap.icns"
 		            jvmversion="1.8+"
 		            vmoptions="-Xmx1024M"
 		            arguments="-window -working -options"
-		            version="${mutationtreeversion}"
+		            version="${beastmapversion}"
 		            infostring="${CladeAge_name}, ${copyright}"
 		            bundleid="${main_class_CladeAge}">
-			<jarfileset dir="${Mac_package_dirmutationtree}/lib">
-				<include name="**/mutationtree.jar" />
+			<jarfileset dir="${Mac_package_dirbeastmap}/lib">
+				<include name="**/beastmap.jar" />
 			</jarfileset>
 			<javaproperty name="apple.laf.useScreenMenuBar" value="true" />
 			<javaproperty name="java.library.path" value="$JAVAROOT:/usr/local/lib" />
@@ -373,17 +373,17 @@
 
 	<target name="installLinux" depends="package" if="isLinux">
 	        <mkdir dir="${user.home}/.beast/2.7/${projName}"/>
-			<unzip src="${distmutationtree}/mutationtree.package.v${mutationtreeversion}.zip" dest="${user.home}/.beast/2.7/${projName}"/>
+			<unzip src="${distbeastmap}/beastmap.package.v${beastmapversion}.zip" dest="${user.home}/.beast/2.7/${projName}"/>
 	</target>
 
 	<target name="installMac" depends="package" if="isMac">
 	        <mkdir dir="${user.home}/.beast/2.7/${projName}"/>
-			<unzip src="${distmutationtree}/mutationtree.package.v${mutationtreeversion}.zip" dest="${user.home}/Library/Application Support/BEAST/2.7/${projName}"/>
+			<unzip src="${distbeastmap}/beastmap.package.v${beastmapversion}.zip" dest="${user.home}/Library/Application Support/BEAST/2.7/${projName}"/>
 	</target>
 
 	<target name="installWindows" depends="package" if="isWindows">
 	        <mkdir dir="${user.home}/BEAST/2.7/${projName}"/>
-			<unzip src="${distmutationtree}/mutationtree.package.v${mutationtreeversion}.zip" dest="${user.home}/BEAST/2.7/${projName}"/>
+			<unzip src="${distbeastmap}/beastmap.package.v${beastmapversion}.zip" dest="${user.home}/BEAST/2.7/${projName}"/>
 	</target>
 
 	<target name="install" depends="installWindows,installMac,installLinux">

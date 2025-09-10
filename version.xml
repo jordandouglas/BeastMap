@@ -1,4 +1,4 @@
-<package name='mutationtree' version='0.0.1'>
+<package name='beastmap' version='0.0.1'>
 	<depends on='BEAST.base' atleast='2.7.8'/>
   <depends on='CodonSubstModels' atleast='2.0.1'/>
 
@@ -6,36 +6,40 @@
           <service type="beast.base.core.BEASTInterface">
 
 
-          <provider classname="mutationtree.distribution.UnconstrainedTreePrior"/>
+          <provider classname="beastmap.distribution.UnconstrainedTreePrior"/>
 
-          <provider classname="mutationtree.operator.UnconstrainedTipRandomWalker"/>
-          <provider classname="mutationtree.operator.BranchLengthScaler"/>
-          <provider classname="mutationtree.operator.AVMNTimelessTree"/>
-
-
-          <provider classname="mutationtree.evolution.AncestralSequenceTreeLikelihood"/>
-          <provider classname="mutationtree.evolution.PatternlessAlignment"/>
-          <provider classname="mutationtree.evolution.BranchMutationSampler"/>
-          <provider classname="mutationtree.evolution.SimulatedAlignmentWithMutations"/>
-          <provider classname="mutationtree.evolution.SimulatedCodonAlignmentWithMutations"/>
-          <provider classname="mutationtree.evolution.TimelessTree"/>
+          <provider classname="beastmap.operator.UnconstrainedTipRandomWalker"/>
+          <provider classname="beastmap.operator.BranchLengthScaler"/>
+          <provider classname="beastmap.operator.AVMNTimelessTree"/>
 
 
-
-          <provider classname="mutationtree.logger.AncestralSequenceLogger"/>
-          <provider classname="mutationtree.logger.SampledSubstTreeLogger"/>
-          <provider classname="mutationtree.logger.SubstitutionSummer"/>
+          <provider classname="beastmap.evolution.AncestralSequenceTreeLikelihood"/>
+          <provider classname="beastmap.evolution.PatternlessAlignment"/>
+          <provider classname="beastmap.evolution.BranchMutationSampler"/>
+          <provider classname="beastmap.evolution.StochasticMapJoiner"/>
+          <provider classname="beastmap.evolution.SimulatedAlignmentWithMutations"/>
+          <provider classname="beastmap.evolution.SimulatedCodonAlignmentWithMutations"/>
+          <provider classname="beastmap.evolution.TimelessTree"/>
 
 
 
-          <provider classname="mutationtree.logger.mut.SubstitutionSum"/>
-          <provider classname="mutationtree.logger.mut.SynonymousSubstSum"/>
-          <provider classname="mutationtree.logger.mut.NonSynonymousSubstSum"/>
-          <provider classname="mutationtree.logger.mut.FromToSubstSum"/>
-          <provider classname="mutationtree.logger.mut.NucleotideTransversionCounter"/>
-          <provider classname="mutationtree.logger.mut.NucleotideTransitionCounter"/>
+          <provider classname="beastmap.logger.AncestralSequenceLogger"/>
+          <provider classname="beastmap.logger.SampledSubstTreeLogger"/>
+          <provider classname="beastmap.logger.SubstitutionSummer"/>
 
 
+
+          <provider classname="beastmap.logger.mut.SubstitutionSum"/>
+          <provider classname="beastmap.logger.mut.SynonymousSubstSum"/>
+          <provider classname="beastmap.logger.mut.NonSynonymousSubstSum"/>
+          <provider classname="beastmap.logger.mut.FromToSubstSum"/>
+          <provider classname="beastmap.logger.mut.NucleotideTransversionCounter"/>
+          <provider classname="beastmap.logger.mut.NucleotideTransitionCounter"/>
+          <provider classname="beastmap.logger.mut.AminoAcidClassRemains"/>
+          <provider classname="beastmap.logger.mut.AminoAcidClassChanges"/>
+
+
+          <provider classname="beastmap.indel.SimpleIndelCodingAlignment"/>
 
 
      </service>
