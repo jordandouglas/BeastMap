@@ -74,6 +74,7 @@ Counts the total number of amino acid substitutions per branch such that the ami
 ### SubstitutionSummer
 
 Takes one of the other per-branch counters and adds all the numbers together across the whole tree
+
 ``` <log spec="beastmap.logger.SubstitutionSummer" counter="@ID_OF_COUNTER"  />```
 
 
