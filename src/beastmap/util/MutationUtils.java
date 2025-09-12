@@ -5,6 +5,7 @@ import java.util.List;
 
 import beast.base.core.Log;
 import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.substitutionmodel.GeneralSubstitutionModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Node;
 import beast.base.util.Randomizer;
@@ -66,8 +67,16 @@ public class MutationUtils {
 	}
 	
 	
-	public static double[][] getTransitionRates(SubstitutionModel substModel, Node node) {
+	public static double[][] getTransitionRates(SubstitutionModel substModel, Node node, boolean nodeDependent) {
 		
+		
+		
+		if (substModel instanceof GeneralSubstitutionModel && !nodeDependent) {
+			GeneralSubstitutionModel gensub = (GeneralSubstitutionModel)substModel;
+			gensub.setupRelativeRates();
+			gensub.setupRateMatrix();
+			return gensub.getRateMatrix();
+		}
 		
 		
 		int nstates = substModel.getStateCount();

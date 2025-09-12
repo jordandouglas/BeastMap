@@ -6,6 +6,7 @@ import beast.base.core.Description;
 import beast.base.core.Log;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.Nucleotide;
+import beast.base.evolution.tree.Node;
 import beastmap.logger.BranchSubstLogger;
 import beastmap.util.Mutation;
 
@@ -25,7 +26,7 @@ public class NucleotideTransversionCounter extends BranchSubstLogger {
 	}
 	
 	@Override
-	public double getFilteredMutationSummary(List<Mutation> mutations) {
+	public double getFilteredMutationSummary(List<Mutation> mutations, Node node) {
 		
 		
 		int count = 0;

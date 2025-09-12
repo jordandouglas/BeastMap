@@ -25,6 +25,7 @@ public class PatternlessAlignment extends FilteredAlignment {
     int[] step;
     
     
+    
     public PatternlessAlignment() {
     	filterInput.setRule(Validate.OPTIONAL);
     	sequenceInput.setRule(Validate.OPTIONAL);
@@ -36,10 +37,10 @@ public class PatternlessAlignment extends FilteredAlignment {
 		
 		
 		String filterStr = "1-" + alignmentInput.get().getSiteCount();
-		if (alignmentInput.get() instanceof FilteredAlignment) {
-			FilteredAlignment aln = (FilteredAlignment) alignmentInput.get();
-			filterStr = aln.filterInput.get();
-		}
+//		if (alignmentInput.get() instanceof FilteredAlignment) {
+//			FilteredAlignment aln = (FilteredAlignment) alignmentInput.get();
+//			filterStr = aln.filterInput.get();
+//		}
 		
 		
 		for (String input : alignmentInput.get().getInputs().keySet()) {
@@ -110,7 +111,10 @@ public class PatternlessAlignment extends FilteredAlignment {
 	
 	
 	private void calcFilter() {
+		
         boolean[] isUsed = new boolean[alignmentInput.get().getSiteCount()];
+        
+       // Log.warning("isUsed " + isUsed.length);
         for (int i = 0; i < to.length; i++) {
             for (int k = from[i]; k <= to[i]; k += step[i]) {
                 isUsed[k] = true;
@@ -190,6 +194,8 @@ public class PatternlessAlignment extends FilteredAlignment {
         
         
 	}
+
+
 	 
 	 
 	 

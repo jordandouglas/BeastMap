@@ -18,7 +18,7 @@ import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.TwoStateCovarion;
 
 
-@Description("Represents an alignment using its gaps https://www.jstor.org/stable/pdf/2585224.pdf. Assumes that all ambiguous characters are gaps.")
+@Description("Represents an alignment using its gaps https://www.jstor.org/stable/pdf/2585224.pdf")
 public class SimpleIndelCodingAlignment extends Alignment {
 	
     final public Input<Alignment> dataInput = new Input<>("data", "the original alignment", Validate.REQUIRED);
@@ -26,7 +26,7 @@ public class SimpleIndelCodingAlignment extends Alignment {
 
     
     SimpleIndelCoding indels;
-    
+    int gapChar;
 	
 	@Override
     public void initAndValidate() {
@@ -45,8 +45,9 @@ public class SimpleIndelCodingAlignment extends Alignment {
 		
 		stateCountInput.setValue(2, this);
 		
+		gapChar = dataInput.get().getDataType().stringToEncoding(""+DataType.GAP_CHAR).get(0);
 		List<Sequence> sequencesOrig = dataInput.get().sequenceInput.get();
-		indels = new SimpleIndelCoding(sequencesOrig, dataInput.get().getDataType());
+		indels = new SimpleIndelCoding(sequencesOrig, dataInput.get().getDataType(), this.gapChar);
 		
 		//int[][] indelCodingMatrix = prepareIndelMatrix(sequences);
 		int[][] indelCodingMatrix = indels.getSICMatrix();
@@ -69,6 +70,8 @@ public class SimpleIndelCodingAlignment extends Alignment {
     	if (types.size() == 0) {
     		findDataTypes();    		
     	}
+    	
+    	
     	
     	
     	// Test the back-conversion
@@ -120,11 +123,12 @@ public class SimpleIndelCodingAlignment extends Alignment {
 	    private final int alnLength;
 
 	    /** Constructor: compute superset-aware SIC from sequences */
-	    public SimpleIndelCoding(List<Sequence> sequences, DataType dtOriginal) {
+	    public SimpleIndelCoding(List<Sequence> sequences, DataType dtOriginal, int gapChar) {
 	        if (sequences == null || sequences.isEmpty())
 	            throw new IllegalArgumentException("Sequences cannot be empty");
 
 	        this.alnLength = sequences.get(0).getSequence(dtOriginal).size();
+	        
 
 	        // 1. collect gap runs for each sequence
 	        List<List<Interval>> gapsPerSeq = new ArrayList<>();
@@ -134,7 +138,8 @@ public class SimpleIndelCodingAlignment extends Alignment {
 	            boolean inGap = false;
 	            int start = -1;
 	            for (int i = 0; i < alnLength; i++) {
-	                boolean isGap = dtOriginal.isAmbiguousCode(s.get(i));
+	                //boolean isGap = dtOriginal.isAmbiguousCode(s.get(i));
+	                boolean isGap = s.get(i) == gapChar; // Gaps only not ambigs
 	                if (isGap && !inGap) {
 	                    inGap = true;
 	                    start = i;
@@ -204,6 +209,10 @@ public class SimpleIndelCodingAlignment extends Alignment {
 	        }
 	        return full;
 	    }
+	}
+
+	public int getGapChar() {
+		return gapChar;
 	}
 	
 }

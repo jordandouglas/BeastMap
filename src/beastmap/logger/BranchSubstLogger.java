@@ -65,10 +65,10 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     
     
 
-    public double getMutationSummary(List<Mutation> mutations){
+    public double getMutationSummary(List<Mutation> mutations, Node node){
     	
     	if (this.filter == null) {
-    		return getFilteredMutationSummary(mutations);
+    		return getFilteredMutationSummary(mutations, node);
     	}else {
     		
     		// Filter the mutations and then give the remainder to the child class
@@ -78,7 +78,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
         			filteredMutations.add(mutation);
         		}
         	}
-        	return getFilteredMutationSummary(filteredMutations);
+        	return getFilteredMutationSummary(filteredMutations, node);
     	}
     	
     	
@@ -98,7 +98,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
      * @param nodeNr
      * @return
      */
-    public abstract double getFilteredMutationSummary(List<Mutation> mutations);
+    public abstract double getFilteredMutationSummary(List<Mutation> mutations, Node node);
     
     
     
@@ -132,20 +132,18 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     @Override
     public double getArrayValue(int dim) {
     	
+    	
     	List<Mutation> mutations;
     	if (samplerInput.get() != null) {
     		
     		// Make sure to call sampleMutations before calling this method so that it depends on the current stochastic sample
     		mutations = samplerInput.get().getMutationsOnBranch(dim);
-    		
     	}else {
-    		
     		mutations = truthInput.get().getMutationsOnBranch(dim);
-    		
     	}
     	
-    	
-    	return getMutationSummary(mutations);
+    	Node node = this.getTree().getNode(dim);
+    	return getMutationSummary(mutations, node);
     }
 
 

@@ -11,6 +11,7 @@ import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
+import beastmap.indel.SimpleIndelCodingAlignment;
 import beastmap.util.Mutation;
 
 @Description("Glues together two or more branch samplers into a single object. Useful for joining partitions")
@@ -23,6 +24,8 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 	
 	final public Input<List<StochasticMapper>> samplerInput = new Input<>("sampler", "mutation sampler to join", new ArrayList<>());
 	final public Input<String> joinInput = new Input<>("join", "how to join the alignments together", JOIN_OPTIONS[0], JOIN_OPTIONS);
+	public Input<BranchMutationSampler> indelInput = new Input<BranchMutationSampler>("indel", "another mapper can be used to remove all sites that are predicted to have gaps");
+	
 	
 	String join;
 	int nsites;
@@ -30,7 +33,8 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 	List<List<Mutation>> mutationsAlongEachBranch = new ArrayList<>();
 	int[][] sampledSequences;
 	
-	
+	int gapChar;
+	SimpleIndelCodingAlignment indelData;
 	
 	@Override
 	public void initAndValidate() {
@@ -73,6 +77,20 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 		}
 		
 		
+		if (indelInput.get() != null) {
+			
+			PatternlessAlignment data = (PatternlessAlignment)indelInput.get().getData();
+			if (! (data.alignmentInput.get() instanceof SimpleIndelCodingAlignment)) {
+				throw new IllegalArgumentException("Please ensure that the indel data is of type " + SimpleIndelCodingAlignment.class.getName() + ". Currently it is " + data.alignmentInput.get());
+			}
+			indelData = (SimpleIndelCodingAlignment)data.alignmentInput.get();
+		}
+		
+		
+		
+    	gapChar = getDataType().stringToEncoding(""+DataType.GAP_CHAR).get(0);
+		
+		
 		
 		lastSample=-1;
 		
@@ -82,6 +100,10 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 	@Override
 	public void sampleMutations(long sample) {
 		
+		BranchMutationSampler indels = indelInput.get();
+		if (indels != null) indelInput.get().sampleMutations(sample);
+		
+	
 		// Only do this once per logged state
     	if (sample == this.lastSample) return;
 		
@@ -170,6 +192,8 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
     			
     			
     		}
+    		
+    		maskWithGaps(indels, this.sampledSequences[nodeNr], node, nsites);
 
     		
     		//Log.warning("BranchMutationSampler :" +  nodeNr + " there are " + mutationsBranch.size());
@@ -183,6 +207,32 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 		this.lastSample = sample;
 		
 	}
+	
+	
+	private void maskWithGaps(BranchMutationSampler indels, int[] siteStates, Node node, int nsites) {
+		
+		
+		// Mask any sites that correspond to deletions
+    	if (indels != null) {
+    		
+    		int[] gapsChildCompact = indels.getStatesForNode(getTree(), node);
+    		boolean[] gapsChild = indelData.expandIndelCoding(gapsChildCompact);
+    		
+    		if (gapsChild.length != siteStates.length) {
+    			throw new IllegalArgumentException("Please ensure that the original dataset in 'indel' is the same as this one. The lengths are not matching: " + gapsChild.length  + "!=" + siteStates.length);
+    		}
+    		
+    		for (int siteNr = 0; siteNr < nsites; siteNr ++) {
+    			if (!gapsChild[siteNr]) {
+    				siteStates[siteNr] = gapChar;
+    			}
+    		}
+    		
+    	}
+		
+		
+	}
+	
 	
 	@Override
 	public int[] getStatesForNode(Tree tree, Node node) {

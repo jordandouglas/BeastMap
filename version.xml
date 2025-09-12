@@ -37,6 +37,8 @@
           <provider classname="beastmap.logger.mut.NucleotideTransitionCounter"/>
           <provider classname="beastmap.logger.mut.AminoAcidClassRemains"/>
           <provider classname="beastmap.logger.mut.AminoAcidClassChanges"/>
+          <provider classname="beastmap.logger.mut.NetSize"/>
+          <provider classname="beastmap.logger.mut.TotalSize"/>
 
 
           <provider classname="beastmap.indel.SimpleIndelCodingAlignment"/>

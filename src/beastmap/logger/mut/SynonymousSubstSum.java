@@ -6,6 +6,7 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.Nucleotide;
+import beast.base.evolution.tree.Node;
 import beastmap.logger.BranchSubstLogger;
 import beastmap.util.Mutation;
 import codonmodels.evolution.datatype.Codon;
@@ -40,7 +41,7 @@ public class SynonymousSubstSum extends BranchSubstLogger {
 	
 	
 	@Override
-	public double getFilteredMutationSummary(List<Mutation> mutations) {
+	public double getFilteredMutationSummary(List<Mutation> mutations, Node node) {
 		int[] counts = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
 		return counts[0];
 	}

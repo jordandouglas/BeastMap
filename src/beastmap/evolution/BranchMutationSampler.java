@@ -24,8 +24,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 	
 	public Input<Boolean> nodeDependentInput = new Input<Boolean>("substModelIsNodeDependent", "set to false if the substituion model does not vary among branches (and gain some extra efficiency). but this will return the wrong answer for epoch subst models", true);
 	public Input<BranchMutationSampler> indelInput = new Input<BranchMutationSampler>("indel", "another mapper can be used to remove all sites that are predicted to have gaps");
-	
-	
+	public Input<Integer> burninInput = new Input<Integer>("burnin", "do not print any numbers until we have reached this state number (in case the tree branches are too long at the initial state)", 0);
 	
 	
 	long lastSample;
@@ -35,7 +34,8 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 	
 	double[][] qmatrixBase;
 
-	final int MAX_N_LOOPS = 100000000;
+	final int MAX_N_LOOPS = 1000000;
+	final int MAX_MUT_BRANCH = 10000; // Any more than this and we risk running out of memory
 	int gapChar;
 	
 	SimpleIndelCodingAlignment indelData;
@@ -44,7 +44,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 	public void initAndValidate() {
 		super.initAndValidate();
 		this.lastSample = -1;
-		this.mutationsAlongEachBranch = new ArrayList<>();
+		
 		this.siteModel = (SiteModel.Base) siteModelInput.get();
 		this.substitutionModel = siteModel.getSubstitutionModel();
 		
@@ -63,25 +63,42 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 				throw new IllegalArgumentException("Please ensure that the indel data is of type " + SimpleIndelCodingAlignment.class.getName() + ". Currently it is " + data.alignmentInput.get());
 			}
 			indelData = (SimpleIndelCodingAlignment)data.alignmentInput.get();
+			gapChar = indelData.getGapChar();
 		}
 		
 		
+		// Initialise empty arrays
+		this.mutationsAlongEachBranch = new ArrayList<>();
+		this.mutationsAlongEachBranch.clear();
+		Tree tree = (Tree) treeInput.get();
+		int nbranches = tree.getNodeCount()-1;
+		for (int nodeNr = 0; nodeNr < nbranches; nodeNr ++) {
+			this.mutationsAlongEachBranch.add(new ArrayList<>());
+		}
 		
-    	gapChar = dataInput.get().getDataType().stringToEncoding(""+DataType.GAP_CHAR).get(0);
+    	
     	
 		
 	}
 
 	
+
+
+
 	@Override
 	 public void sampleMutations(long sample) {
 		
+		// Only do this once per logged state
+    	if (sample == this.lastSample) return;
+    	
+    	if (sample < burninInput.get()) {
+    		return;
+    	}
 		
 		BranchMutationSampler indels = indelInput.get();
 		if (indels != null) indelInput.get().sampleMutations(sample);
 	    	
-    	// Only do this once per logged state
-    	if (sample == this.lastSample) return;
+    	
     	
     	Tree tree = (Tree) treeInput.get();
     	int nbranches = tree.getNodeCount()-1;
@@ -93,7 +110,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     	
     	// We can just do this once at the start and not repeat on every branch
     	if (!nodeDependentInput.get()) {
-			qmatrixBase = MutationUtils.getTransitionRates(substitutionModel, null);
+			qmatrixBase = MutationUtils.getTransitionRates(substitutionModel, null, false);
 		}
     	
     	
@@ -125,30 +142,32 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     		int[] parentStates = super.getStatesForNode(tree, node.getParent());
     		
     		
-    		
     		// Mask any sites that correspond to deletions
-        	if (indelInput.get() != null) {
-        		
-        		int[] gapsChildCompact = indels.getStatesForNode(tree, node);
-        		int[] gapsParentCompact = indels.getStatesForNode(tree, node.getParent());
-        		boolean[] gapsChild = indelData.expandIndelCoding(gapsChildCompact);
-        		boolean[] gapsParent = indelData.expandIndelCoding(gapsParentCompact);
-        		
-        		
-        		if (gapsChild.length != siteStates.length) {
-        			throw new IllegalArgumentException("Please ensure that the original dataset in 'indel' is the same as this one. The lengths are not matching: " + gapsChild.length  + "!=" + siteStates.length);
-        		}
-        		
-        		for (int siteNr = 0; siteNr < nsites; siteNr ++) {
-        			if (!gapsChild[siteNr]) {
-        				siteStates[siteNr] = gapChar;
-        			}
-        			if (!gapsParent[siteNr]) {
-        				parentStates[siteNr] = gapChar;
-        			}
-        		}
-        		
-        	}
+    		maskWithGaps(indels, siteStates, node, nsites);
+    		
+    		
+//        	if (indelInput.get() != null) {
+//        		
+//        		int[] gapsChildCompact = indels.getStatesForNode(tree, node);
+//        		//int[] gapsParentCompact = indels.getStatesForNode(tree, node.getParent());
+//        		boolean[] gapsChild = indelData.expandIndelCoding(gapsChildCompact);
+//        		//boolean[] gapsParent = indelData.expandIndelCoding(gapsParentCompact);
+//        		
+//        		
+//        		if (gapsChild.length != siteStates.length) {
+//        			throw new IllegalArgumentException("Please ensure that the original dataset in 'indel' is the same as this one. The lengths are not matching: " + gapsChild.length  + "!=" + siteStates.length);
+//        		}
+//        		
+//        		for (int siteNr = 0; siteNr < nsites; siteNr ++) {
+//        			if (!gapsChild[siteNr]) {
+//        				siteStates[siteNr] = gapChar;
+//        			}
+////        			if (!gapsParent[siteNr]) {
+////        				parentStates[siteNr] = gapChar;
+////        			}
+//        		}
+//        		
+//        	}
     		
     		
     		double branchRate = this.branchRateModel.getRateForBranch(node);
@@ -186,6 +205,32 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     	
     	
     }
+	
+	
+	
+	private void maskWithGaps(BranchMutationSampler indels, int[] siteStates, Node node, int nsites) {
+		
+		
+		// Mask any sites that correspond to deletions
+    	if (indels != null) {
+    		
+    		int[] gapsChildCompact = indels.getStatesForNode(getTree(), node);
+    		boolean[] gapsChild = indelData.expandIndelCoding(gapsChildCompact);
+    		
+    		if (gapsChild.length != siteStates.length) {
+    			throw new IllegalArgumentException("Please ensure that the original dataset in 'indel' is the same as this one. The lengths are not matching: " + gapsChild.length  + "!=" + siteStates.length);
+    		}
+    		
+    		for (int siteNr = 0; siteNr < nsites; siteNr ++) {
+    			if (!gapsChild[siteNr]) {
+    				siteStates[siteNr] = gapChar;
+    			}
+    		}
+    		
+    	}
+		
+		
+	}
 	 
 	@Override
 	public List<Mutation> getMutationsOnBranch(int nodeNr){
@@ -225,7 +270,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 		 
 		 
 		 // Allow each node to have its own q matrix. But if the matrix changes mid branch, we will have problems
-		 double[][] qmatrixNode = qmatrixBase != null ? qmatrixBase : MutationUtils.getTransitionRates(qmatrix, node);
+		 double[][] qmatrixNode = qmatrixBase != null ? qmatrixBase : MutationUtils.getTransitionRates(qmatrix, node, this.nodeDependentInput.get());
 		 
 		 
 		 int loopNr = 0;
@@ -301,6 +346,11 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 			// Increment time, update parental state
 			from = nextState;
 			t = t + dt;
+			
+			if (arr.size() > MAX_MUT_BRANCH) {
+				 Log.warning(this.getID() + ": rs1 -- too many mutations on each branch! Perhaps branches are too long or clock rate too slow. Using parsimonious estimate.");
+				 return new ArrayList<Mutation>();
+			}
 			 
 		}
 		
@@ -368,6 +418,14 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 			// Increment time, update parental state
 			from = nextState;
 			t = t + dt;
+			
+			if (arr.size() > MAX_MUT_BRANCH) {
+				 Log.warning(this.getID() + ": rs2 -- too many mutations on each branch! Perhaps branches are too long or clock rate too slow. Using parsimonious estimate.");
+				 arr = new ArrayList<>();
+				 mut = new Mutation(parent, child, -1, siteNr, parent, child, node);
+				 arr.add(mut);
+				 return arr;
+			}
 			 
 		}
 		

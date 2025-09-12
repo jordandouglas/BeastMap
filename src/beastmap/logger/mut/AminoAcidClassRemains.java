@@ -3,6 +3,7 @@ package beastmap.logger.mut;
 import java.util.List;
 
 import beast.base.core.Description;
+import beast.base.evolution.tree.Node;
 import beastmap.util.Mutation;
 
 @Description("Counts the number of times an amino acid mutates into a different member of the same functional class")
@@ -12,7 +13,7 @@ public class AminoAcidClassRemains extends AminoAcidClassChanges {
 	
 	
 	@Override
-	public double getFilteredMutationSummary(List<Mutation> mutations) {
+	public double getFilteredMutationSummary(List<Mutation> mutations, Node node) {
 		
 		int count = 0;
 		for (Mutation mut : mutations) {
