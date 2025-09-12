@@ -1,5 +1,5 @@
 # BeastMap
-A BEAST 2 package for counting the number of synonymous, non-synonymous, and indel mutations on each branch
+A BEAST 2 package for counting the number of synonymous, non-synonymous, and indel mutations on each branch. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a mutation pathway along each branch. This all happens during MCMC, and the package is compatible with a wide range of existing BEAST 2 site, clock, and tree models.
 
 Warning: package is currently in pre-pre-release. It has passed the simulation studies, but the code is still quite volatile.
 
