@@ -71,7 +71,10 @@ Counts the total number of amino acid substitutions per branch such that the ami
 ``` <sampler spec="beastmap.logger.mut.AminoAcidClassRemains" sampler="@mutationsampler" />```
 
 
+### SubstitutionSummer
 
+Takes one of the other per-branch counters and adds all the numbers together across the whole tre
+ <log spec="beastmap.logger.SubstitutionSummer" counter="@ID_OF_COUNTER"  />
 
 
 ## Setting up counters in XML
