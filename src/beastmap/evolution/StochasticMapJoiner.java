@@ -8,6 +8,7 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Log;
 import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Sequence;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
@@ -24,7 +25,8 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 	
 	final public Input<List<StochasticMapper>> samplerInput = new Input<>("sampler", "mutation sampler to join", new ArrayList<>());
 	final public Input<String> joinInput = new Input<>("join", "how to join the alignments together", JOIN_OPTIONS[0], JOIN_OPTIONS);
-	public Input<BranchMutationSampler> indelInput = new Input<BranchMutationSampler>("indel", "another mapper can be used to remove all sites that are predicted to have gaps");
+	final public Input<BranchMutationSampler> indelInput = new Input<BranchMutationSampler>("indel", "another mapper can be used to remove all sites that are predicted to have gaps");
+	final public Input<Boolean> unconditionalInput = new Input<Boolean>("unconditional", "should this  count mutations unconditionally on data", false);
 	
 	
 	String join;
@@ -35,6 +37,8 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 	
 	int gapChar;
 	SimpleIndelCodingAlignment indelData;
+	StochasticMapJoiner unconditionalData = null;
+	
 	
 	@Override
 	public void initAndValidate() {
@@ -63,10 +67,10 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 		}
 		
 		// Ensure all samplers have the same datatype
-		DataType dt = samplerInput.get().get(0).getDataType();
+		DataType dt = samplerInput.get().get(0).getDataTypeOfMapper();
 		for (StochasticMapper mapper : samplerInput.get()) {
-			if (mapper.getDataType().getClass() != dt.getClass()) {
-				throw new IllegalArgumentException("Please ensure that all sampler datasets have the same datatype " + dt.getClass().getCanonicalName() + " != " + mapper.getDataType().getClass().getCanonicalName());
+			if (mapper.getDataTypeOfMapper().getClass() != dt.getClass()) {
+				throw new IllegalArgumentException("Please ensure that all sampler datasets have the same datatype " + dt.getClass().getCanonicalName() + " != " + mapper.getDataTypeOfMapper().getClass().getCanonicalName());
 			}
 		}
 		
@@ -88,17 +92,37 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 		
 		
 		
-    	gapChar = getDataType().stringToEncoding(""+DataType.GAP_CHAR).get(0);
+    	gapChar = getDataTypeOfMapper().stringToEncoding(""+DataType.GAP_CHAR).get(0);
 		
 		
-		
+    	
 		lastSample=-1;
 		
+		
+		
+		// Join the unconditional data simulators together as well
+//		if (!this.unconditionalInput.get()) {
+//			unconditionalData = new StochasticMapJoiner();
+//			List<StochasticMapper> unconditionals = new ArrayList<>();
+//			for (StochasticMapper mapper : samplerInput.get()) {
+//				unconditionals.add(mapper.getUnconditionalData());
+//			}
+//			unconditionalData.initByName("sampler", unconditionals, "join", joinInput.get(), "indel", indelInput.get(), "unconditional", true);
+//		}
+		
+		
+		
+		
+		
+		// Build a mock alignment
+
 		
 	}
 
 	@Override
 	public void sampleMutations(long sample) {
+		
+		//Log.warning(this.getID() + " sampling joint mutations " + this.unconditionalInput.get() + " " + sample);
 		
 		BranchMutationSampler indels = indelInput.get();
 		if (indels != null) indelInput.get().sampleMutations(sample);
@@ -110,6 +134,10 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 		for (StochasticMapper mapper : samplerInput.get()) {
 			mapper.sampleMutations(sample);
 		}
+		
+		if (!unconditionalInput.get() && unconditionalData != null) {
+    		unconditionalData.sampleMutations(sample);
+    	}
 
 		
 		Tree tree = this.getTree();
@@ -149,6 +177,7 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 
         			// Increment counter for the next alignment
         			siteNr += sampler.getPatternCount();
+        			
         			
         		}
     			
@@ -202,7 +231,9 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 
     		
     	}
+    	
 		
+    
 		
 		this.lastSample = sample;
 		
@@ -267,13 +298,21 @@ public class StochasticMapJoiner extends BEASTObject implements StochasticMapper
 
 
 	@Override
-	public DataType getDataType() {
-		return samplerInput.get().get(0).getDataType(); // All data types are the same
+	public DataType getDataTypeOfMapper() {
+		return samplerInput.get().get(0).getDataTypeOfMapper(); // All data types are the same
 	}
 
 	@Override
 	public int getPatternCount() {
 		return nsites;
+	}
+
+	@Override
+	public StochasticMapper getUnconditionalData() {
+		if (this.unconditionalInput.get()) {
+			return this;
+		}
+		return unconditionalData;
 	}
 	
 	

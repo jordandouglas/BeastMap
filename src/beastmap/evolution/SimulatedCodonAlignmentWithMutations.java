@@ -30,7 +30,7 @@ import codonmodels.evolution.datatype.GeneticCode;
  */
 @Description("An alignment containing sequences randomly generated using a"
         + "given site model down a given tree.")
-public class SimulatedCodonAlignmentWithMutations extends CodonAlignment implements RecordedMutationSimulator {
+public class SimulatedCodonAlignmentWithMutations extends CodonAlignment implements StochasticMapper {
     final public Input<Tree> m_treeInput = new Input<>("tree", "phylogenetic beast.tree with sequence data in the leafs", Validate.REQUIRED);
     final public Input<SiteModel.Base> m_pSiteModelInput = new Input<>("siteModel", "site model for leafs in the beast.tree", Validate.REQUIRED);
     final public Input<BranchRateModel.Base> m_pBranchRateModelInput = new Input<>("branchRateModel",
@@ -75,9 +75,11 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
      */
     protected double[][] m_probabilities;
     
+    long lastSampleNr;
+    
     
     int[][] sequencesAll;
-    List<List<Mutation>> mutationsTree;
+    List<List<Mutation>> mutationsAlongEachBranch;
     
     public SimulatedCodonAlignmentWithMutations() {
         
@@ -88,7 +90,7 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
     @Override
     public void initAndValidate() {
     	
-    	mutationsTree = new ArrayList<>();
+    	mutationsAlongEachBranch = new ArrayList<>();
         m_tree = m_treeInput.get();
         m_siteModel = m_pSiteModelInput.get();
         m_branchRateModel = m_pBranchRateModelInput.get();
@@ -184,9 +186,9 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
         
         this.sequencesAll[root.getNr()] = seq;
         
-        this.mutationsTree = new ArrayList<>();
+        this.mutationsAlongEachBranch = new ArrayList<>();
         for (int i = 0; i < m_tree.getNodeCount(); i++) {
-        	this.mutationsTree.add(null);
+        	this.mutationsAlongEachBranch.add(null);
         }
         traverse(root, seq, category);
 
@@ -214,7 +216,7 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
                 seq[i] = MutationUtils.simulateMutationsDownBranch(parentSequence[i], child, clockRate*siteRate, m_siteModel.getSubstitutionModel(), mutationsBranch, i);
             }
             
-            this.mutationsTree.set(child.getNr(), mutationsBranch);
+            this.mutationsAlongEachBranch.set(child.getNr(), mutationsBranch);
             this.sequencesAll[child.getNr()] = seq;
 
             if (child.isLeaf()) {
@@ -223,29 +225,15 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
                 traverse(child, seq, category);
             }
         }
-    } 
-    
-    
-    
-
-
-    @Override
-    public int getSiteCount() {
-    	return m_sequenceLength;
     }
 
-	@Override
-	public DataType getDataTypeOfSimulator() {
-		return super.getDataType();
-	}
-    	
-
-	@Override
-    public List<Mutation> getMutationsOnBranch(int nodeNr){
-		return this.mutationsTree.get(nodeNr);
-	}
-
+    
     @Override
+    public List<Mutation> getMutationsOnBranch(int nodeNr){
+		return this.mutationsAlongEachBranch.get(nodeNr);
+	}
+
+    
 	public int[] getSequenceForNode(Node node) {
 		return sequencesAll[node.getNr()];
 	}
@@ -255,12 +243,42 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
 		return m_tree;
 	}
 
+
 	@Override
-	public Alignment getData() {
+	public void sampleMutations(long sampleNr) {
+		if (lastSampleNr == sampleNr) return;
+		simulate();
+		lastSampleNr = sampleNr;
+	}
+
+
+	@Override
+	public List<Mutation> getMutationsOnBranchAtSite(int nodeNr, int siteNr){
+		List<Mutation> muts = this.mutationsAlongEachBranch.get(nodeNr);
+		List<Mutation> siteMutations = new ArrayList<>();
+		for (int i = 0; i < muts.size(); i ++) {
+			Mutation m = muts.get(i);
+			if (m.getSiteNr() == siteNr) {
+				siteMutations.add(m);
+			}
+		}
+		
+		return siteMutations;
+	}
+
+
+
+	@Override
+	public int[] getStatesForNode(Tree tree, Node node) {
+		return getSequenceForNode(node);
+	}
+
+
+	@Override
+	public StochasticMapper getUnconditionalData() {
 		return this;
 	}
-	
-	
+
 	@Override
 	public Codon getDataType() {
 		if (m_dataType == null) {
@@ -268,6 +286,63 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
 		}
 		return super.getDataType();
 	}
+
+	@Override
+	public DataType getDataTypeOfMapper() {
+		if (m_dataType == null) {
+			initDataType();
+		}
+		return super.getDataType();
+	}
+	
+	@Override
+	public int getPatternCount() {
+		return m_sequenceLength;
+	}
+
+    
+    
+
+
+//    @Override
+//    public int getSiteCount() {
+//    	return m_sequenceLength;
+//    }
+//
+//	@Override
+//	public DataType getDataTypeOfSimulator() {
+//		return super.getDataType();
+//	}
+//    	
+//
+//	@Override
+//    public List<Mutation> getMutationsOnBranch(int nodeNr){
+//		return this.mutationsTree.get(nodeNr);
+//	}
+//
+//    @Override
+//	public int[] getSequenceForNode(Node node) {
+//		return sequencesAll[node.getNr()];
+//	}
+//
+//	@Override
+//	public Tree getTree() {
+//		return m_tree;
+//	}
+//
+//	@Override
+//	public Alignment getData() {
+//		return this;
+//	}
+//	
+//	
+//	@Override
+//	public Codon getDataTypeOfMapper() {
+//		if (m_dataType == null) {
+//			initDataType();
+//		}
+//		return super.getDataType();
+//	}
 	    
     
 } // class SequenceAlignment

@@ -30,7 +30,6 @@ public class SampledSubstTreeLogger extends BEASTObject implements Loggable {
     final public Input<Boolean> sortTreeInput = new Input<>("sort", "whether to sort the tree before logging.", true);
 	final public Input<List<StochasticMapProperty>> samplerInput = new Input<>("sampler", "each sampler's metric of interest will be logged onto the branches",new ArrayList<>());
 	
-	
 	final public Input<BranchSubstLogger> lengthsInput = new Input<>("lengths", "report branch lengths as the value of this logger");
 	
 

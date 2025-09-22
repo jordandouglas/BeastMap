@@ -1,5 +1,6 @@
 <package name='beastmap' version='0.0.1'>
 	<depends on='BEAST.base' atleast='2.7.8'/>
+  <depends on='BEAST.app' atleast='2.7.8'/>
   <depends on='CodonSubstModels' atleast='2.0.1'/>
 
 
@@ -21,12 +22,14 @@
           <provider classname="beastmap.evolution.SimulatedCodonAlignmentWithMutations"/>
           <provider classname="beastmap.evolution.TimelessTree"/>
 
+          <provider classname="beastmap.logger.TypedTreeLogger"/>
 
 
           <provider classname="beastmap.logger.AncestralSequenceLogger"/>
           <provider classname="beastmap.logger.SampledSubstTreeLogger"/>
           <provider classname="beastmap.logger.SubstitutionSummer"/>
-
+          <provider classname="beastmap.logger.TreeEstimate_dNdS"/>
+          <provider classname="beastmap.logger.MutationLogger"/>
 
 
           <provider classname="beastmap.logger.mut.SubstitutionSum"/>
@@ -39,9 +42,17 @@
           <provider classname="beastmap.logger.mut.AminoAcidClassChanges"/>
           <provider classname="beastmap.logger.mut.NetSize"/>
           <provider classname="beastmap.logger.mut.TotalSize"/>
+          <provider classname="beastmap.logger.mut.Estimate_dNdS"/>
+          
 
 
           <provider classname="beastmap.indel.SimpleIndelCodingAlignment"/>
+
+
+          <packageapp description="SegmentedTreeAnnotator"
+              class="beastmap.tools.SegmentedTreeAnnotator"
+              args=""
+            />
 
 
      </service>

@@ -30,7 +30,7 @@ import beastmap.util.MutationUtils;
 
 @Description("An alignment containing sequences randomly generated using a"
         + "given site model down a given tree.")
-public class SimulatedAlignmentWithMutations extends Alignment implements RecordedMutationSimulator {
+public class SimulatedAlignmentWithMutations extends Alignment implements StochasticMapper {
     final public Input<Alignment> m_data = new Input<>("data", "alignment data which specifies datatype and taxa of the beast.tree", Validate.REQUIRED);
     final public Input<Tree> m_treeInput = new Input<>("tree", "phylogenetic beast.tree with sequence data in the leafs", Validate.REQUIRED);
     final public Input<SiteModel.Base> m_pSiteModelInput = new Input<>("siteModel", "site model for leafs in the beast.tree", Validate.REQUIRED);
@@ -49,7 +49,7 @@ public class SimulatedAlignmentWithMutations extends Alignment implements Record
     
     
     int[][] sequencesAll;
-    List<List<Mutation>> mutationsTree;
+    List<List<Mutation>> mutationsAlongEachBranch;
 
     /**
      * nr of samples to generate *
@@ -85,6 +85,7 @@ public class SimulatedAlignmentWithMutations extends Alignment implements Record
      * an array used to transfer transition probabilities
      */
     protected double[][] m_probabilities;
+    long lastSampleNr = -1;
     
     public SimulatedAlignmentWithMutations() {
         
@@ -96,7 +97,7 @@ public class SimulatedAlignmentWithMutations extends Alignment implements Record
     @Override
     public void initAndValidate() {
     	
-    	mutationsTree = new ArrayList<>();
+    	mutationsAlongEachBranch = new ArrayList<>();
         m_tree = m_treeInput.get();
         m_siteModel = m_pSiteModelInput.get();
         m_branchRateModel = m_pBranchRateModelInput.get();
@@ -193,25 +194,32 @@ public class SimulatedAlignmentWithMutations extends Alignment implements Record
     public void simulate() {
         Node root = m_tree.getRoot();
 
-
+        //Log.warning("simulate m_sequenceLength=" + m_sequenceLength);
+        
         double[] categoryProbs = m_siteModel.getCategoryProportions(root);
         int[] category = new int[m_sequenceLength];
         for (int i = 0; i < m_sequenceLength; i++) {
             category[i] = Randomizer.randomChoicePDF(categoryProbs);
         }
 
+        
+       
+        
         double[] frequencies = m_siteModel.getSubstitutionModel().getFrequencies();
         int[] seq = new int[m_sequenceLength];
         for (int i = 0; i < m_sequenceLength; i++) {
             seq[i] = Randomizer.randomChoicePDF(frequencies);
         }
         this.sequencesAll[root.getNr()] = seq;
+        
+        
+        
 
 
         //alignment.setDataType(m_siteModel.getFrequencyModel().getDataType());
-        this.mutationsTree = new ArrayList<>();
+        this.mutationsAlongEachBranch = new ArrayList<>();
         for (int i = 0; i < m_tree.getNodeCount(); i++) {
-        	this.mutationsTree.add(null);
+        	this.mutationsAlongEachBranch.add(null);
         }
         traverse(root, seq, category);
 
@@ -237,9 +245,11 @@ public class SimulatedAlignmentWithMutations extends Alignment implements Record
                 double clockRate = (m_branchRateModel == null ? 1.0 : m_branchRateModel.getRateForBranch(child));
                 double siteRate = m_siteModel.getRateForCategory(category[i], child);
                 seq[i] = MutationUtils.simulateMutationsDownBranch(parentSequence[i], child, clockRate*siteRate, m_siteModel.getSubstitutionModel(), mutationsBranch, i);
+               // Log.warning("site " + i);
+                
             }
             
-            this.mutationsTree.set(child.getNr(), mutationsBranch);
+            this.mutationsAlongEachBranch.set(child.getNr(), mutationsBranch);
             this.sequencesAll[child.getNr()] = seq;
 
             if (child.isLeaf()) {
@@ -252,61 +262,11 @@ public class SimulatedAlignmentWithMutations extends Alignment implements Record
     
     
     
-    /**
-     * Simulate directly using Gillespie's algorithm and return the child state
-     * @param node
-     * @param clockRate
-     * @param substModel
-     * @param mutations
-     * @return
-     */
-    public int simulateMutationsDownBranch(int parentState, Node node, double clockRate, SubstitutionModel qmatrix, List<Mutation> arr, int siteNr) {
-    	
 
-    		
-		int from = parentState;
-		double t = 0;
-		double time = node.getLength();
-		while (true) {
-			 
 
-			// Outgoing rate
-			double lambda = 0;
-			double[] outRates = MutationUtils.getTransitionRates(qmatrix, from, node);
-			for (int r = 0; r < outRates.length; r++) lambda += outRates[r]*clockRate;
-			
-			//When does the next mutation occur?
-			double dt = Randomizer.nextExponential(lambda);
-		 
-			if (t + dt > time) break;
-		 
-		 
-			// What was the mutation?
-			int nextState = Randomizer.randomChoicePDF(outRates);
-			//Log.warning("mutated from " + from + " to " + nextState + " with rates (" + outRates[0] + "," + outRates[1] + "," + outRates[2] + "," + outRates[3] + ")" );
-		 
-			// Make mutation
-			Mutation mut = new Mutation(from, nextState, t+dt, siteNr, parentState, -1, node);
-			arr.add(mut);
-		 
-		 
-			// Increment time, update parental state
-			from = nextState;
-			t = t + dt;
-			 
-		}
-    		
-    		 
-    	return from;
-    }
-
-	@Override
-	public DataType getDataTypeOfSimulator() {
-		return super.getDataType();
-	}
-    
+    @Override
     public List<Mutation> getMutationsOnBranch(int nodeNr){
-		return this.mutationsTree.get(nodeNr);
+		return this.mutationsAlongEachBranch.get(nodeNr);
 	}
 
     
@@ -319,12 +279,62 @@ public class SimulatedAlignmentWithMutations extends Alignment implements Record
 		return m_tree;
 	}
 
+
 	@Override
-	public Alignment getData() {
+	public void sampleMutations(long sampleNr) {
+		if (lastSampleNr == sampleNr) return;
+		simulate();
+		lastSampleNr = sampleNr;
+	}
+
+
+	@Override
+	public List<Mutation> getMutationsOnBranchAtSite(int nodeNr, int siteNr){
+		List<Mutation> muts = this.mutationsAlongEachBranch.get(nodeNr);
+		List<Mutation> siteMutations = new ArrayList<>();
+		for (int i = 0; i < muts.size(); i ++) {
+			Mutation m = muts.get(i);
+			if (m.getSiteNr() == siteNr) {
+				siteMutations.add(m);
+			}
+		}
+		
+		return siteMutations;
+	}
+
+
+	@Override
+	public int[] getStatesForNode(Tree tree, Node node) {
+		return getSequenceForNode(node);
+	}
+
+
+	@Override
+	public StochasticMapper getUnconditionalData() {
 		return this;
 	}
-    
 
+
+	@Override
+	public DataType getDataTypeOfMapper() {
+		return super.getDataType();
+	}
+	
+	@Override
+	public int getPatternCount() {
+		return m_sequenceLength;
+	}
+
+//	@Override
+//	public Alignment getData() {
+//		return this;
+//	}
+//    
+//	@Override
+//	public DataType getDataTypeOfSimulator() {
+//		return super.getDataType();
+//	}
+//    
     
     
     

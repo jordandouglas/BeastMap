@@ -6,7 +6,10 @@ import java.util.List;
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Log;
+import beast.base.core.Input.Validate;
 import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Sequence;
+import beast.base.evolution.branchratemodel.BranchRateModel;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.sitemodel.SiteModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
@@ -32,12 +35,18 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 	SiteModel.Base siteModel;
 	SubstitutionModel substitutionModel; 
 	
+	
 	double[][] qmatrixBase;
 
 	final int MAX_N_LOOPS = 1000000;
 	final int MAX_MUT_BRANCH = 10000; // Any more than this and we risk running out of memory
 	int gapChar;
 	
+	
+	int n1 = 0;
+	int n2 = 0;
+	
+	SimulatedAlignmentWithMutations unconditionalData; // Data simulated unconditional on the observed data
 	SimpleIndelCodingAlignment indelData;
 	
 	@Override
@@ -76,17 +85,37 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 			this.mutationsAlongEachBranch.add(new ArrayList<>());
 		}
 		
-    	
-    	
 		
+//		Log.warning("datatype " + getDataTypeOfMapper().getClass());		
+//		// Build a mock alignment
+//		List<Sequence> seqs = new ArrayList<>();
+//		for (int i = 0; i < tree.getLeafNodeCount(); i++) {
+//			Sequence s = new Sequence(tree.getNode(i).getID(), getDataTypeOfMapper().encodingToString(new int[] { 0 })); // Dummy sequence
+//			seqs.add(s);
+//		}
+//		Alignment mockData = new Alignment(seqs, getDataTypeOfMapper().getTypeDescription());
+//		
+//		unconditionalData = new SimulatedAlignmentWithMutations();
+//	    int nsites = dataInput.get().getPatternCount();
+//	    unconditionalData.initByName("data", mockData, "tree", tree, "siteModel", this.siteModel, "branchRateModel", this.branchRateModel, "sequencelength", nsites);
+//		
 	}
 
 	
+	@Override
+	public StochasticMapper getUnconditionalData() {
+		return unconditionalData;
+	}
+	
+
 
 
 
 	@Override
 	 public void sampleMutations(long sample) {
+		
+		
+		//Log.warning(this.getID() + " sampling regular mutations ");
 		
 		// Only do this once per logged state
     	if (sample == this.lastSample) return;
@@ -200,8 +229,29 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     	}
     	
     	
+    	// Sample unconditional
+    	if (unconditionalData != null) {
+    		unconditionalData.simulate();
+    	}
+    	
+    	
     	// Update sample number
 		sample = this.lastSample;
+		
+		
+		
+//		for (int nodeNr = 0; nodeNr < nbranches; nodeNr ++) {
+//			n1 += this.getMutationsOnBranch(nodeNr).size();
+//			n2 += unconditionalData.getMutationsOnBranch(nodeNr).size();
+//		}
+//		
+//		if (n1 > n2) {
+//			Log.warning("UNCOND " + n1 + " / " + n2);
+//		}else {
+//			Log.warning("COND " + n1 + " / " + n2);
+//		}
+//		
+		
     	
     	
     }
@@ -469,7 +519,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 
 
 	@Override
-	public DataType getDataType() {
+	public DataType getDataTypeOfMapper() {
 		return dataInput.get().getDataType();
 	}
 	

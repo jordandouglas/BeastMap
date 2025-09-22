@@ -4,7 +4,6 @@ import java.util.List;
 
 import beast.base.core.Description;
 import beast.base.core.Input;
-import beast.base.core.Log;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.Nucleotide;
 import beast.base.evolution.tree.Node;
@@ -14,16 +13,18 @@ import codonmodels.evolution.datatype.Codon;
 import codonmodels.evolution.datatype.GeneticCode;
 
 
-@Description("Number of synonymous mutations")
-public class SynonymousSubstSum extends BranchSubstLogger {
+@Description("Estimate of dN/dS")
+public class Estimate_dNdS extends BranchSubstLogger {
 
 	final public Input<Integer> readingFrameInput = new Input<>("readingFrame", "reading frame in position 1 2 or 3?", 1, new Integer[] { 1,2,3 });
 	final public Input<String> geneticCodeInput = new Input<>("code", "name of genetic code", "universal", GeneticCode.GENETIC_CODE_NAMES);
-	final public Input<Boolean> conditionalInput = new Input<>("conditional", "conditional on the data?", true);
 	
 	int frame;
 	GeneticCode code;
 	Codon codon;
+	
+	
+	final double pSpN = 1.0 * 138/438; // Number of possible synonymous vs non-synonymous changes, stop codons included
 	
 	@Override
     public void initAndValidate() {
@@ -44,26 +45,12 @@ public class SynonymousSubstSum extends BranchSubstLogger {
 	@Override
 	public double getFilteredMutationSummary(List<Mutation> mutations, List<Mutation> mutationsUnconditional, Node node) {
 		
+		int[] counts = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
+		int nS = counts[0];
+		int nN = counts[1];
+		if (nS == 0) return Double.POSITIVE_INFINITY; 
+		return nN/nS*pSpN;
 		
-		int[] counts = null;
-		if (conditionalInput.get()) {
-			counts = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
-		}else {
-			
-			//int[] counts1 = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
-			counts = super.getUnconditionalSynonymousAndNonSynonymousSubstitutionCount(mutationsUnconditional, code, codon, frame);
-			
-			
-//			if (counts1[0] + counts1[1] != mutations.size()) {
-//				Log.warning("cond: " + counts1[0] + "+" + counts1[1] + "=" + mutations.size());
-//			}
-//			if (counts[0] + counts[1] != mutationsUnconditional.size()) {
-//				Log.warning("uncond: " + counts[0] + "+" + counts[1] + "=" + mutationsUnconditional.size());
-//			}
-			
-			
-		}
-		return counts[0];
 	}
 
 	@Override

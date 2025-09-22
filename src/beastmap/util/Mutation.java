@@ -1,5 +1,7 @@
 package beastmap.util;
 
+import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.datatype.UserDataType;
 import beast.base.evolution.tree.Node;
 
 /**
@@ -57,8 +59,30 @@ public class Mutation implements Comparable<Mutation> {
 		return to;
 	 }
 	 
+	 
+	 public String getFrom(DataType dt) {
+		return dt.encodingToString(new int[] { this.from });
+	 }
+		
+	 public String getTo(DataType dt) {
+		return dt.encodingToString(new int[] { this.to });
+	 }
+	 
+	 public double getTime() {
+		 return time;
+	 }
+	 
 	 public void setSiteNr(int siteNr) {
 		 this.siteNr = siteNr;
+	 }
+	 
+	 @Override
+	 public String toString() {
+		 return "[" + this.from + "->" + this.to + "@" + this.time + "]";
+	 }
+
+	 public String getString(DataType dt) {
+		 return getFrom(dt) + "->" + getTo(dt) + "@" + this.time;
 	 }
 
 }

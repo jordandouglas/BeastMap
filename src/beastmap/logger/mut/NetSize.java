@@ -15,7 +15,7 @@ public class NetSize extends BranchSubstLogger {
 	
 	int gapChar;
     public void initAndValidate() {
-		gapChar = samplerInput.get().getDataType().stringToEncoding(""+DataType.GAP_CHAR).get(0);
+		gapChar = samplerInput.get().getDataTypeOfMapper().stringToEncoding(""+DataType.GAP_CHAR).get(0);
 		super.initAndValidate();
 	}
 	
@@ -25,7 +25,7 @@ public class NetSize extends BranchSubstLogger {
 	}
 
 	@Override
-	public double getFilteredMutationSummary(List<Mutation> mutations, Node node) {
+	public double getFilteredMutationSummary(List<Mutation> mutations, List<Mutation> mutationsUnconditional,Node node) {
 		
 		
 		// Child size

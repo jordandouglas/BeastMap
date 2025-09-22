@@ -36,6 +36,7 @@
 		<!-- <fileset dir="${beast2path}/lib" includes="fest.jar"/> -->
 		<!-- <fileset dir="${beast2path}/lib" includes="colt.jar"/> -->
 	<pathelement path="../codonsubstmodels/build"/>
+	<pathelement path="../BeastFX/build"/>
 	</path>
 
 
@@ -199,6 +200,7 @@
 		<mkdir dir="${Add_on_dir}/doc" />
 		<mkdir dir="${Add_on_dir}/fxtemplates" />
 		<mkdir dir="${Add_on_dir}/examples" />
+		<mkdir dir="${Add_on_dir}/icons" />
 
 		<copy todir="${Add_on_dir}">
 			<fileset file="version.xml"/>
@@ -208,6 +210,9 @@
 		</copy>
 		<copy todir="${Add_on_dir}/fxtemplates">
 			<fileset dir="fxtemplates" />
+		</copy>
+		<copy todir="${Add_on_dir}/icons">
+			<fileset dir="icons" />
 		</copy>
 		<!--
 		<copy todir="${Add_on_dir}/doc">

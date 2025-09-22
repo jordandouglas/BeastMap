@@ -19,6 +19,7 @@ public class NonSynonymousSubstSum extends BranchSubstLogger {
 	
 	final public Input<Integer> readingFrameInput = new Input<>("readingFrame", "reading frame in position 1 2 or 3?", 1, new Integer[] { 1,2,3 });
 	final public Input<String> geneticCodeInput = new Input<>("code", "name of genetic code", "universal", GeneticCode.GENETIC_CODE_NAMES);
+	final public Input<Boolean> conditionalInput = new Input<>("conditional", "conditional on the data?", true);
 	
 	
 	int frame;
@@ -44,8 +45,15 @@ public class NonSynonymousSubstSum extends BranchSubstLogger {
 	
 	
 	@Override
-	public double getFilteredMutationSummary(List<Mutation> mutations, Node node) {
-		int[] counts = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
+	public double getFilteredMutationSummary(List<Mutation> mutations, List<Mutation> mutationsUnconditional, Node node) {
+		
+		int[] counts = null;
+		if (conditionalInput.get()) {
+			counts = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
+		}else {
+			counts = super.getUnconditionalSynonymousAndNonSynonymousSubstitutionCount(mutationsUnconditional, code, codon, frame);
+		}
+		
 		return counts[1];
 	}
 	

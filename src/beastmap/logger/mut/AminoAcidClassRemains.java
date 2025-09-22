@@ -13,7 +13,7 @@ public class AminoAcidClassRemains extends AminoAcidClassChanges {
 	
 	
 	@Override
-	public double getFilteredMutationSummary(List<Mutation> mutations, Node node) {
+	public double getFilteredMutationSummary(List<Mutation> mutations, List<Mutation> mutationsUnconditional, Node node) {
 		
 		int count = 0;
 		for (Mutation mut : mutations) {

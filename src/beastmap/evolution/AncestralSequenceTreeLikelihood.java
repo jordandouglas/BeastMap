@@ -23,10 +23,8 @@ import beast.base.util.Randomizer;
 
 
 /**
- * Adapted from AncestralStateTreeLikelihood in beast classic
+ * Adapted from AncestralStateTreeLikelihood in beast classic, which came from BEAST X
  */
-
-
 @Description("Ancestral State Tree Likelihood")
 public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     public static final String STATES_KEY = "states";
@@ -239,7 +237,7 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     }
 
 
-    public DataType getDataType() {
+    public DataType getDataTypeOfMapper() {
         return dataType;
     }
 
@@ -377,7 +375,6 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
                         state[j] = drawChoice(conditionalProbabilities);
                     } catch (Error e) {
                         System.err.println(e.toString());
-                        System.err.println("Please report error to Marc");
                         state[j] = 0;
                     }
                     reconstructedStates[nodeNum][j] = state[j];
