@@ -1,7 +1,7 @@
 # BeastMap
-A BEAST 2 package for counting the number of synonymous, non-synonymous, and indel mutations on each branch. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a mutation pathway along each branch. This all happens during MCMC, and the package is compatible with a wide range of existing BEAST 2 site, clock, and tree models; and discrete data types (including nucleotide, codon, amino acid, 3Di, morphological, cognate, phoneme, geographical, etc.).
+A BEAST 2 package for counting the number of synonymous, non-synonymous, and indel mutations on each branch. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a mutation pathway along each branch. This all happens during MCMC. This package is compatible with a wide range of existing BEAST 2 site, clock, and tree models; and discrete data types (including nucleotide, codon, amino acid, 3Di, morphological, cognate, phoneme, and geographical).
 
-Warning: package is currently in pre-release. It has passed the simulation studies, and is fairly stable now.
+This package is currently in pre-release. It has passed the simulation studies, and is fairly stable.
 
 
 ## Install
@@ -129,19 +129,19 @@ You can also place these loggers in the trace file as well as the tree file to e
 
 ## Summarising a segmented tree
 
-Summarise a posterior distribution of segmented trees onto a summary treeusing:
+Summarise a posterior distribution of segmented trees onto a summary tree using:
 
 ```
 # Generate a summary tree first
 ~/beast/bin/TreeAnnotator tree.trees summary.nexus
 
-# Map the segments onto the summary tree
+# Then map the segments onto the summary tree
 ~/beast/bin/applauncher SegmentedTreeAnnotator -tree summary.nexus -segments beastmap.segments.trees -out segments.nexus 
 ```
 
 
 ## Examples
 
-There is an influenza H3N2 outbreak from New Zealand in the examples folder. This 96 taxon dataset was sampled from Jelley at al. 2025
+In the `examples` folder, there is an analysis based on the haemagglutinin segment sequenced from 96 cases of influenza A(H3N2) in New Zealand. This dataset was downsampled from over 1000 complete genomes produced by Jelley at al. 2025.
 
 Jelley, L., Douglas, J., Allais, M., Wang, J., O'Neill, M., ... & Huang, Q. S., Geoghegan, J.,  (2025). A decade of genomic surveillance tracks the disappearance and reintroduction of seasonal influenza virus in Aotearoa New Zealand.  https://doi.org/10.21203/rs.3.rs-7503135/v1
