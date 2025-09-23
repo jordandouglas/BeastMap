@@ -1,0 +1,43 @@
+<beast version='2.0'
+       namespace='beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.evolution.Tree.t:coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.math.distributions'>
+
+
+     <mergewith point='aux-panels'>
+   		<panel spec="beastfx.app.inputeditor.BeautiPanelConfig" panelname="Beast Map" tiptext="Stochastic mapping" 
+   			path="logger/log" 
+   			type="beastmap.evolution.BranchMutationSampler"
+   			hasPartitions="none" icon="2.pngx" forceExpansion="TRUE"/>
+
+
+		<subtemplate id='BeastMap' spec="beastfx.app.inputeditor.BeautiSubTemplate" class='beastmap.evolution.BranchMutationSampler' mainid='mutationsampler.t:$(n)' >
+
+			 <![CDATA[
+
+			 <plugin id='mutationsampler.t:$(n)' spec='beastmap.evolution.BranchMutationSampler' useAmbiguities='false' burnin='50000' >
+		         <tree idref='Tree.t:$(n)' />
+		         <siteModel idref='SiteModel.s:$(n)' />
+		         <branchRateModel idref='StrictClock.c:$(n)' />
+		         <data id="BeastMapPatternlessAlignment.$(n)" spec='beastmap.evolution.PatternlessAlignment' data='@$(n)' />
+		     </plugin>
+
+
+
+			<logger id='BeastMapSegmentLogger.t:$(n)' spec='beast.base.inference.Logger' logEvery='10000' fileName='beastmap.$(n).trees' mode='tree' >
+				<log id='BeastMapSegmentLog.t:$(n)' spec='beastmap.logger.TypedTreeLogger' tree='@Tree.t:$(n)' sampler="@mutationsampler.t:$(n)" />
+			</logger>
+
+            ]]>
+
+
+            <connect method='beastmap.app.beauti.BeastMapInputEditor.customConnector'/>
+            <connect srcID="BeastMapSegmentLogger.t:$(n)" targetID="mcmc" inputName="logger" if="inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true"/>
+
+
+
+		</subtemplate>
+
+
+	</mergewith>
+
+</beast>
+

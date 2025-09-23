@@ -29,7 +29,7 @@ import beast.base.util.Randomizer;
 public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     public static final String STATES_KEY = "states";
 
-    public Input<String> tagInput = new Input<String>("tag","label used to report trait", Validate.REQUIRED);
+    public Input<String> tagInput = new Input<String>("tag","label used to report trait", "seq");
     public Input<Boolean> useMAPInput = new Input<Boolean>("useMAP","whether to use maximum aposteriori assignments or sample", false);
     public Input<Boolean> returnMLInput = new Input<Boolean>("returnML", "report integrate likelihood of tip data", true);
     public Input<Boolean> sampleTipsInput = new Input<Boolean>("sampleTips", "if tips have missing data/ambigous values sample them for logging (default true)", false);
@@ -68,9 +68,14 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     
     @Override
     public void initAndValidate() {
-    	if (dataInput.get().getSiteCount() == 0) {
+    	
+    	// Beauti?
+    	if (dataInput.get().getSiteCount() == 0 || dataInput.get().getTaxonCount() == 0 || dataInput.get().getCounts().isEmpty()) {
     		return;
     	}
+    	
+//    	Log.warning("sites " + dataInput.get().getSiteCount());
+//    	Log.warning("taxa " + dataInput.get().getTaxonCount());
     	
     	
     	// Do not use beagle as the likelihood core is not implemented in beagle

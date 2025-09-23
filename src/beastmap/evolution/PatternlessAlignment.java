@@ -2,6 +2,7 @@ package beastmap.evolution;
 
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import beast.base.core.Description;
@@ -26,11 +27,16 @@ public class PatternlessAlignment extends FilteredAlignment {
     
     
     
+    
+    
+    
     public PatternlessAlignment() {
     	filterInput.setRule(Validate.OPTIONAL);
     	sequenceInput.setRule(Validate.OPTIONAL);
         siteWeightsInput.setRule(Validate.FORBIDDEN);
     }
+    
+
 	
 	@Override
     public void initAndValidate() {
@@ -42,15 +48,23 @@ public class PatternlessAlignment extends FilteredAlignment {
 //			filterStr = aln.filterInput.get();
 //		}
 		
+		if (alignmentInput.get().userDataTypeInput.get() != null) {
+			this.setInputValue(userDataTypeInput.getName(), alignmentInput.get().userDataTypeInput.get());
+		}
+		
 		
 		for (String input : alignmentInput.get().getInputs().keySet()) {
 			Object value = alignmentInput.get().getInputValue(input);
 			if (input.equals(constantSiteWeightsInput.getName())) continue;
 			if (input.equals(filterInput.getName())) continue;
 			if (input.equals(alignmentInput.getName())) continue;
+			if (input.equals(sequenceInput.getName())) continue;
+			if (input.equals(taxonSetInput.getName())) continue;
 			this.setInputValue(input, value);
 		}
 		
+		
+		Log.warning("filter " + filterStr + " " + alignmentInput.get().getTaxonCount());
 		this.setInputValue("filter", filterStr);
 		
 		parseFilterSpec();
