@@ -1,11 +1,11 @@
 # BeastMap
-A BEAST 2 package for counting the number of synonymous, non-synonymous, and indel mutations on each branch. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a mutation pathway along each branch. This all happens during MCMC, and the package is compatible with a wide range of existing BEAST 2 site, clock, and tree models.
+A BEAST 2 package for counting the number of synonymous, non-synonymous, and indel mutations on each branch. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a mutation pathway along each branch. This all happens during MCMC, and the package is compatible with a wide range of existing BEAST 2 site, clock, and tree models; and discrete data types (including nucleotide, codon, amino acid, 3Di, morphological, cognate, phoneme, geographical, etc.).
 
-Warning: package is currently in pre-pre-release. It has passed the simulation studies, but the code is still quite volatile.
+Warning: package is currently in pre-release. It has passed the simulation studies, and is fairly stable now.
+
 
 ## Install
 
-Package is currently not released.
 
 Download the zip file directly from the releases section. 
 
@@ -20,7 +20,11 @@ Please make sure to install the `CodonSubstModels` package too, as that is a dep
 
 ## BEAUti
 
-There is some very basic BEAUti support, with more on the way. Set up a BEAST 2 analysis as per usual. Then configure the stochastic mapping with the `Beast Map` tab. It has been tested on nucleotide and discrete trait data. The segmented tree logger will produce a tree containing one branch segment every time the sequence/state changes.
+There is some very basic BEAUti support, with more on the way. Set up a BEAST 2 analysis as per usual. Then at the very end, configure the stochastic mapping with the `Beast Map` tab. It has been tested on nucleotide and discrete trait data. 
+
+A segmented tree logger will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many mutations, as there will be a large number of states, and therefore the tree files may require a large amount of disk space.
+
+A substitution count logger (further detailed in the next section) will not report the timing of change events along each lineage, but it will summarise the events between each node and its parent (e.g. total number of changes along the branch). There is currently limited BEAUti support for this logger, which will only report the total number of changes and none of the other utilities below, which require XML file editing at this stage.
 
 ![alt text](figs/beautiFig.png)
 
