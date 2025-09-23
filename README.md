@@ -121,4 +121,6 @@ You can also place these loggers in the trace file as well as the tree file to e
 
 ## Examples
 
-See the xml file in examples.
+There is an influenza H3N2 outbreak from New Zealand in the examples folder. This 96 taxon dataset was sampled from Jelley at al. 2025
+
+Jelley, L., Douglas, J., Allais, M., Wang, J., O'Neill, M., ... & Huang, Q. S., Geoghegan, J.,  (2025). A decade of genomic surveillance tracks the disappearance and reintroduction of seasonal influenza virus in Aotearoa New Zealand.  https://doi.org/10.21203/rs.3.rs-7503135/v1
