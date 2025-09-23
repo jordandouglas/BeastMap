@@ -7,26 +7,30 @@ Warning: package is currently in pre-pre-release. It has passed the simulation s
 
 Package is currently not released.
 
-To build:
-
-Download the repository and use ant:
+Download the zip file directly from the releases section. 
 
 ```
 mkdir ~/.beast/2.7/beastmap/
-cd BeastMap/
-ant package
-cp build/dist/beastmap.package.v*.zip ~/.beast/2.7/beastmap/tmp.zip
+cp build/dist/beastmap.package.v*.zip ~/.beast/2.7/beastmap/tmp.zip # Downloaded file
 cd ~/.beast/2.7/beastmap/
 unzip -o tmp.zip
 ```
 
+Please make sure to install the `CodonSubstModels` package too, as that is a dependency.
 
-Or you can download the zip file directly from the releases section. Please make sure to install the `CodonSubstModels` package too, as that is a dependency.
+## BEAUti
+
+There is some very basic BEAUti support, with more on the way. Set up a BEAST 2 analysis as per usual. Then configure the stochastic mapping with the `Beast Map` tab. It has been tested on nucleotide and discrete trait data. The segmented tree logger will produce a tree containing one branch segment every time the sequence/state changes.
+
+[alt text](figs/beautiFig.png)
+
 
 
 ## Available counters
 
 Each counter requires a ```BranchMutationSampler```, which will stochastically sample the mutations at the time of logging. This ensures that the various mutation summarisers below will be in harmony.
+
+
 
 ### SubstitutionSum
 Counts the total number of substitutions per branch.
@@ -117,6 +121,18 @@ You can also place these loggers in the trace file as well as the tree file to e
 </logger>
 ```
 
+
+## Summarising a segmented tree
+
+Summarise a posterior distribution of segmented trees onto a summary treeusing:
+
+```
+# Generate a summary tree first
+~/beast/bin/TreeAnnotator tree.trees summary.nexus
+
+# Map the segments onto the summary tree
+~/beast/bin/applauncher SegmentedTreeAnnotator -tree summary.nexus -segments beastmap.segments.trees -out segments.nexus 
+```
 
 
 ## Examples
