@@ -22,7 +22,8 @@ Please make sure to install the `CodonSubstModels` package too, as that is a dep
 
 There is some very basic BEAUti support, with more on the way. Set up a BEAST 2 analysis as per usual. Then configure the stochastic mapping with the `Beast Map` tab. It has been tested on nucleotide and discrete trait data. The segmented tree logger will produce a tree containing one branch segment every time the sequence/state changes.
 
-[alt text](figs/beautiFig.png)
+![alt text](figs/beautiFig.png)
+
 
 
 
