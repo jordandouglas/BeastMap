@@ -27,6 +27,6 @@ public interface StochasticMapper {
 	public int getPatternCount();
 
 	public StochasticMapper getUnconditionalData();
-	
+
 
 }

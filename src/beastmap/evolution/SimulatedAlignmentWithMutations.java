@@ -119,6 +119,14 @@ public class SimulatedAlignmentWithMutations extends Alignment implements Stocha
             Log.info.println("Random number seed for alignment simulation: " + customSeed);
             Log.info.println();
         }
+        
+        
+        // determine data type, either user defined or one of the standard ones
+        if (userDataTypeInput.get() != null) {
+            m_dataType = userDataTypeInput.get();
+        } else {
+            initDataType();
+        }
 
         try {
             Randomizer.setSeed(seedToUse);
@@ -244,7 +252,7 @@ public class SimulatedAlignmentWithMutations extends Alignment implements Stocha
             for (int i = 0; i < m_sequenceLength; i++) {
                 double clockRate = (m_branchRateModel == null ? 1.0 : m_branchRateModel.getRateForBranch(child));
                 double siteRate = m_siteModel.getRateForCategory(category[i], child);
-                seq[i] = MutationUtils.simulateMutationsDownBranch(parentSequence[i], child, clockRate*siteRate, m_siteModel.getSubstitutionModel(), mutationsBranch, i);
+                seq[i] = MutationUtils.simulateMutationsDownBranch(parentSequence[i], child, clockRate*siteRate, m_siteModel.getSubstitutionModel(), mutationsBranch, i, this.getDataTypeOfMapper().getStateCount());
                // Log.warning("site " + i);
                 
             }
@@ -324,6 +332,9 @@ public class SimulatedAlignmentWithMutations extends Alignment implements Stocha
 	public int getPatternCount() {
 		return m_sequenceLength;
 	}
+
+
+
 
 //	@Override
 //	public Alignment getData() {

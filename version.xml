@@ -3,6 +3,7 @@
 	<depends on='BEAST.base' atleast='2.7.8'/>
   <depends on='BEAST.app' atleast='2.7.8'/>
   <depends on='CodonSubstModels' atleast='2.0.1'/>
+  <depends on='starbeast3' atleast='1.2.1'/>
 
 
   <service type="beastfx.app.inputeditor.InputEditor">
@@ -23,17 +24,18 @@
         <provider classname="beastmap.evolution.AncestralSequenceTreeLikelihood"/>
         <provider classname="beastmap.evolution.PatternlessAlignment"/>
         <provider classname="beastmap.evolution.BranchMutationSampler"/>
+        <!-- <provider classname="beastmap.evolution.BranchMutationSamplerSpeciesTree"/> -->
         <provider classname="beastmap.evolution.StochasticMapJoiner"/>
         <provider classname="beastmap.evolution.SimulatedAlignmentWithMutations"/>
         <provider classname="beastmap.evolution.SimulatedCodonAlignmentWithMutations"/>
         <provider classname="beastmap.evolution.TimelessTree"/>
 
+
         <provider classname="beastmap.logger.TypedTreeLogger"/>
-
-
         <provider classname="beastmap.logger.AncestralSequenceLogger"/>
         <provider classname="beastmap.logger.SampledSubstTreeLogger"/>
         <provider classname="beastmap.logger.SubstitutionSummer"/>
+        <provider classname="beastmap.logger.SubstitutionSummerPerBranch"/>
         <provider classname="beastmap.logger.TreeEstimate_dNdS"/>
         <provider classname="beastmap.logger.MutationLogger"/>
 

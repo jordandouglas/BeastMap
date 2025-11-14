@@ -37,6 +37,7 @@
 		<!-- <fileset dir="${beast2path}/lib" includes="colt.jar"/> -->
 	<pathelement path="../codonsubstmodels/build"/>
 	<pathelement path="../BeastFX/build"/>
+	<pathelement path="../starbeast3/build"/>
 	</path>
 
 

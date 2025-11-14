@@ -213,7 +213,7 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
             for (int i = 0; i < m_sequenceLength; i++) {
                 double clockRate = (m_branchRateModel == null ? 1.0 : m_branchRateModel.getRateForBranch(child));
                 double siteRate = m_siteModel.getRateForCategory(category[i], child);
-                seq[i] = MutationUtils.simulateMutationsDownBranch(parentSequence[i], child, clockRate*siteRate, m_siteModel.getSubstitutionModel(), mutationsBranch, i);
+                seq[i] = MutationUtils.simulateMutationsDownBranch(parentSequence[i], child, clockRate*siteRate, m_siteModel.getSubstitutionModel(), mutationsBranch, i, this.getDataTypeOfMapper().getStateCount());
             }
             
             this.mutationsAlongEachBranch.set(child.getNr(), mutationsBranch);

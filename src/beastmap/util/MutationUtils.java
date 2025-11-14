@@ -1,6 +1,7 @@
 package beastmap.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,10 +10,12 @@ import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.substitutionmodel.GeneralSubstitutionModel;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 import beast.base.util.Randomizer;
 import beastmap.evolution.StochasticMapper;
 import codonmodels.evolution.datatype.Codon;
 import codonmodels.evolution.datatype.GeneticCode;
+import starbeast3.evolution.speciation.GeneTreeForSpeciesTreeDistribution;
 
 public class MutationUtils {
 	
@@ -29,11 +32,10 @@ public class MutationUtils {
 	 * @param node
 	 * @return
 	 */
-	public static double[] getTransitionRates(SubstitutionModel substModel, int fromState, Node node) {
+	public static double[] getTransitionRates(SubstitutionModel substModel, int fromState, Node node, int nstates) {
 		
 		
 		
-		int nstates = substModel.getStateCount();
 		double[] matrix = new double[nstates*nstates];
 		
 		// From time 0 to time epsilon, assuming a clock rate of 1 change per unit of time. If epsilon is too small, the probabilities may underflow
@@ -71,7 +73,7 @@ public class MutationUtils {
 	}
 	
 	
-	public static double[][] getTransitionRates(SubstitutionModel substModel, Node node, boolean nodeDependent) {
+	public static double[][] getTransitionRates(SubstitutionModel substModel, Node node, boolean nodeDependent, int nstates) {
 		
 		
 		
@@ -83,7 +85,6 @@ public class MutationUtils {
 		}
 		
 		
-		int nstates = substModel.getStateCount();
 		double[] matrix = new double[nstates*nstates];
 		
 		// From time 0 to time epsilon, assuming a clock rate of 1 change per unit of time. If epsilon is too small, the probabilities may underflow
@@ -111,6 +112,73 @@ public class MutationUtils {
 		//Log.warning(outRates[0] + " " + outRates[1] + " " + outRates[2] + " " + outRates[3]) ;
 		
 		return outRates;
+		
+		
+	}
+	
+	
+	/**
+	 * Returns the sequence at any point in the tree, not just on a node
+	 * @param mapper
+	 * @param tree
+	 * @param node
+	 * @param height
+	 * @return
+	 */
+	public static int[] getStatesForBranchAtTime(StochasticMapper mapper, Tree tree, Node node, double height, boolean inclusive) {
+		
+		
+		if (height < 0 || node.isRoot() || height <= node.getHeight()) {
+			return mapper.getStatesForNode(tree, node);
+		}
+		
+		if (height > node.getParent().getHeight()) {
+			throw new IllegalArgumentException("Dev error 3443: invalid height. " + node.getParent().getHeight() + " !> " + height + " !> " + node.getHeight());
+			//return null;
+		}
+		
+		
+		// Get the sequence on the bottom of this branch
+		int[] statesOnNode = mapper.getStatesForNode(tree, node);
+		statesOnNode = Arrays.copyOf(statesOnNode, statesOnNode.length);
+		
+		
+		// Go backwards in time until we hit the right height
+		List<Mutation> mutationsOnbranch = mapper.getMutationsOnBranch(node.getNr());
+		Collections.sort(mutationsOnbranch);
+		for (int i = mutationsOnbranch.size()-1; i >= 0; i --) {
+			
+			Mutation mutation = mutationsOnbranch.get(i);
+			double heightOfMutation = node.getParent().getHeight() - mutation.getTime();
+			
+			//Log.warning("heightOfMutation=" + heightOfMutation);
+			
+			if (inclusive) {
+				if (heightOfMutation >= height) break;
+			}else {
+				if (heightOfMutation > height) break;
+			}
+			
+			
+			
+			
+			int siteNr = mutation.getSiteNr();
+			int from = mutation.getFrom();
+			int to = mutation.getTo();
+			
+			if (statesOnNode[siteNr] != to) {
+				throw new IllegalArgumentException("Dev error 274278: " + statesOnNode[siteNr] + " != " + to);
+			}
+			
+			// Mutate backwards
+			statesOnNode[siteNr] = from;
+			
+		}
+		
+		
+		//Log.warning("broken at=" + height);
+		
+		return statesOnNode;
 		
 		
 	}
@@ -213,7 +281,7 @@ public class MutationUtils {
      * @param mutations
      * @return
      */
-    public static int simulateMutationsDownBranch(int parentState, Node node, double clockRate, SubstitutionModel qmatrix, List<Mutation> arr, int siteNr) {
+    public static int simulateMutationsDownBranch(int parentState, Node node, double clockRate, SubstitutionModel qmatrix, List<Mutation> arr, int siteNr, int nstates) {
     	
 
     	
@@ -225,7 +293,7 @@ public class MutationUtils {
 
 			// Outgoing rate
 			double lambda = 0;
-			double[] outRates = MutationUtils.getTransitionRates(qmatrix, from, node);
+			double[] outRates = MutationUtils.getTransitionRates(qmatrix, from, node, nstates);
 			for (int r = 0; r < outRates.length; r++) lambda += outRates[r]*clockRate;
 			
 			//When does the next mutation occur?
@@ -256,9 +324,8 @@ public class MutationUtils {
     
     
 
-	
-	// Number of synonymous and non-synonymous, when using codon data
-	public static int[] getSNCountForCodons(List<Mutation> mutations, GeneticCode code, Codon codon, StochasticMapper mapper) {
+    public static int[] getSNCountForCodons(List<Mutation> mutations, GeneticCode code, Codon codon, StochasticMapper mapper) {
+
 		
 		
 		if (mutations.isEmpty()) return new int[] {0, 0};
@@ -267,9 +334,16 @@ public class MutationUtils {
 		
 		// Get child and parent sequences
 		Node child = mutations.get(0).getNode();
-		Node parent = child.getParent();
-		int[] childSequence = mapper.getStatesForNode(mapper.getTree(), child);
-		int[] parentSequence = mapper.getStatesForNode(mapper.getTree(), parent);
+		//Node parent = child.getParent();
+		
+		
+		// Multispecies coalescent? -- start the count at the point where this gene branch extends into the species node parent
+		double maxHeight = child.getParent().getHeight() - mutations.get(0).getTime();
+		double minHeight = child.getParent().getHeight() - mutations.get(mutations.size()-1).getTime();
+		
+		// Reconstruct sequence at the desired height, in case this is a gene tree within a species tree
+		int[] childSequence = MutationUtils.getStatesForBranchAtTime(mapper, mapper.getTree(), child, minHeight, true);
+		int[] parentSequence = MutationUtils.getStatesForBranchAtTime(mapper, mapper.getTree(), child, maxHeight, false);
 		
 		int nNonSyn = 0;
 		int nSyn = 0;
@@ -359,16 +433,29 @@ public class MutationUtils {
 	
 
 	
-	// Number of synonymous and non-synonymous, when using nucleotide data
 	public static int[] getSNCountForNucleotides(List<Mutation> mutations, GeneticCode code, Codon codon, int openReadingFrame, StochasticMapper mapper) {
+
 			
+		
 		if (mutations.isEmpty()) return new int[] {0, 0};
+		
 		
 		// Get child and parent sequences
 		Node child = mutations.get(0).getNode();
-		Node parent = child.getParent();
-		int[] childSequence = mapper.getStatesForNode(mapper.getTree(), child);
-		int[] parentSequence = mapper.getStatesForNode(mapper.getTree(), parent);
+		
+		
+		
+		// Multispecies coalescent? -- start the count at the point where this gene branch extends into the species node parent
+		double maxHeight = child.getParent().getHeight() - mutations.get(0).getTime();
+		double minHeight = child.getParent().getHeight() - mutations.get(mutations.size()-1).getTime();
+		
+		// Reconstruct sequence at the desired height, in case this is a gene tree within a species tree
+		int[] childSequence = MutationUtils.getStatesForBranchAtTime(mapper, mapper.getTree(), child, minHeight, true);
+		int[] parentSequence = MutationUtils.getStatesForBranchAtTime(mapper, mapper.getTree(), child, maxHeight, false);
+		
+		
+//		Log.warning("ch: " + Arrays.toString(childSequence));
+//		Log.warning("pa: " + Arrays.toString(parentSequence));
 		
 		
 		int nNonSyn = 0;
@@ -392,6 +479,8 @@ public class MutationUtils {
 			// Sort by time along branch (forward in time)
 			Collections.sort(codonMutations);
 			if (codonMutations.isEmpty()) continue;
+			
+			
 			
 			
 			// Parent state

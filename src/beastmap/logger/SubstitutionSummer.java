@@ -1,7 +1,8 @@
 package beastmap.logger;
 
 import java.io.PrintStream;
-
+import beast.base.core.Function;
+import beast.base.core.BEASTInterface;
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Loggable;
@@ -10,10 +11,10 @@ import beast.base.inference.CalculationNode;
 
 
 @Description("Sums an entire vector of BranchSubstLogger terms")
-public class SubstitutionSummer extends CalculationNode implements  StochasticMapProperty, Loggable {
+public class SubstitutionSummer extends CalculationNode implements StochasticMapProperty, Loggable {
 
 	
-	final public Input<BranchSubstLogger> counterInput = new Input<>("counter", "counter to log", Input.Validate.REQUIRED);
+	final public Input<Function> counterInput = new Input<>("counter", "counter to log", Input.Validate.REQUIRED);
 	
 	@Override
 	public void initAndValidate() {
@@ -30,7 +31,8 @@ public class SubstitutionSummer extends CalculationNode implements  StochasticMa
 	@Override
 	public void log(long sample, PrintStream out) {
 		
-		counterInput.get().sampleMutations(sample);
+		sampleMutations(sample);
+		
 		
 		double sum = 0 ;//(Double) getPropertyOfNode(null);
 		for (int i = 0; i < counterInput.get().getDimension(); i ++) {
@@ -48,13 +50,24 @@ public class SubstitutionSummer extends CalculationNode implements  StochasticMa
 
 	@Override
 	public String getName() {
-		return "sum." + counterInput.get().getID();
+		
+		String id = "";
+		Function f = counterInput.get();
+		if (f instanceof BEASTInterface) {
+			id = ((BEASTInterface)f).getID();
+		}
+		return "sum." + id;
 	}
 
 
 	@Override
 	public void sampleMutations(long sampleNr) {
-		counterInput.get().sampleMutations(sampleNr);
+		
+		Function f = counterInput.get();
+		if (f instanceof StochasticMapProperty) {
+			((StochasticMapProperty)f).sampleMutations(sampleNr);
+		}
+		
 	}
 
 

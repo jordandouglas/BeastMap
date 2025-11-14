@@ -1,6 +1,7 @@
 package beastmap.evolution;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import beast.base.core.Description;
@@ -115,7 +116,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 	 public void sampleMutations(long sample) {
 		
 		
-		//Log.warning(this.getID() + " sampling regular mutations ");
+		//Log.warning(this.getID() + " sampling " + sample + " / " + lastSample);
 		
 		// Only do this once per logged state
     	if (sample == this.lastSample) return;
@@ -139,7 +140,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     	
     	// We can just do this once at the start and not repeat on every branch
     	if (!nodeDependentInput.get()) {
-			qmatrixBase = MutationUtils.getTransitionRates(substitutionModel, null, false);
+			qmatrixBase = MutationUtils.getTransitionRates(substitutionModel, null, false, this.getDataTypeOfMapper().getStateCount());
 		}
     	
     	
@@ -169,6 +170,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     		if (node.isRoot()) continue;
     		int[] siteStates = super.getStatesForNode(tree, node);
     		int[] parentStates = super.getStatesForNode(tree, node.getParent());
+    		
     		
     		
     		// Mask any sites that correspond to deletions
@@ -209,6 +211,12 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     			
     			List<Mutation> mutationsSite = sampleMutationsConditionalEndPoints(parentStates[siteNr], siteStates[siteNr], node.getLength(), siteNr, this.substitutionModel, branchRate*siteRate, node);
     			mutationsBranch.addAll(mutationsSite);
+    			
+//    			if (parentStates[siteNr] != siteStates[siteNr]) {
+//        			Log.warning(parentStates[siteNr] + " -> " + siteStates[siteNr] + " nmut = " + mutationsSite.size());
+//    			}
+//    			
+    			
     		}
     		
     		
@@ -236,7 +244,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     	
     	
     	// Update sample number
-		sample = this.lastSample;
+    	this.lastSample = sample;
 		
 		
 		
@@ -309,10 +317,13 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 	private List<Mutation> sampleMutationsConditionalEndPoints(int parent, int child, double time, int siteNr,  SubstitutionModel qmatrix, double clockRate, Node node){
 		 
 		 List<Mutation> arr = null;
-		 int nstates = qmatrix.getStateCount();
+		 int nstates = getDataTypeOfMapper().getStateCount();
 		 
 		 // What do to if gap? or ambiguous?
 		 if (parent < 0 || child < 0 || parent >= nstates || child >= nstates) {
+			 
+			 
+			 //Log.warning("qmatrixNode " + nstates);
 			 
 			 // TODO
 			 return new ArrayList<>();
@@ -320,7 +331,9 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 		 
 		 
 		 // Allow each node to have its own q matrix. But if the matrix changes mid branch, we will have problems
-		 double[][] qmatrixNode = qmatrixBase != null ? qmatrixBase : MutationUtils.getTransitionRates(qmatrix, node, this.nodeDependentInput.get());
+		 double[][] qmatrixNode = qmatrixBase != null ? qmatrixBase : MutationUtils.getTransitionRates(qmatrix, node, this.nodeDependentInput.get(), nstates);
+		 
+		 //Log.warning("qmatrixNode " + Arrays.toString(qmatrixNode[0]));
 		 
 		 
 		 int loopNr = 0;

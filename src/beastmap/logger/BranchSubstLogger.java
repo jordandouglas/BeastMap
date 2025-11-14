@@ -2,6 +2,7 @@ package beastmap.logger;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import beast.base.core.Description;
@@ -9,6 +10,7 @@ import beast.base.core.Function;
 import beast.base.core.Input;
 import beast.base.core.Loggable;
 import beast.base.core.Input.Validate;
+import beast.base.core.Log;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.Nucleotide;
 import beast.base.evolution.tree.Node;
@@ -19,6 +21,7 @@ import beastmap.util.Mutation;
 import beastmap.util.MutationUtils;
 import codonmodels.evolution.datatype.Codon;
 import codonmodels.evolution.datatype.GeneticCode;
+import starbeast3.evolution.speciation.GeneTreeForSpeciesTreeDistribution;
 
 
 @Description("Counts the number and type of substitutions on each branch")
@@ -27,6 +30,12 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	
 	final public Input<StochasticMapper> samplerInput = new Input<>("sampler", "mutation sampler to log");
 	final public Input<StochasticMapper> truthInput = new Input<>("truth", "mutation sampler to log", Validate.XOR, samplerInput);
+	final public Input<Boolean> includeRootInput = new Input<>("includeRoot", "count the root too?", false);
+	
+	
+	final public Input<GeneTreeForSpeciesTreeDistribution> geneInput = new Input<>("gene", "map branches to a species tree?");
+	//final public Input<Tree> speciesTreeInput = new Input<>("speciesTree", "map branches to a species tree?");
+	
 	
 	final public Input<String> filterInput = new Input<>("filter", "specifies which of the sites in the input alignment we will restrict to" +
 	            "First site is 1." +
@@ -38,6 +47,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	
 
 	 protected List<Integer> filter;
+	 GeneTreeForSpeciesTreeDistribution geneTreePrior;
 	 
 	 
     
@@ -54,15 +64,28 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     		this.filter = MutationUtils.parseFilterSpec(getSiteAndPatternCount(), filterInput.get());
     	}
     	
+    	
+    	this.geneTreePrior = geneInput.get();
+    	if (this.geneTreePrior != null) {
+    		
+    		
+    		Tree geneTreeOther = samplerInput.get() == null ? (Tree) truthInput.get().getTree() : (Tree) samplerInput.get().getTree();
+    		if (this.geneTreePrior.getGeneTree() != geneTreeOther) {
+    			throw new IllegalArgumentException("mismatching gene trees " + this.geneTreePrior.getGeneTree().getID() + " != " + geneTreeOther);
+    		}
+    	}
+    	
     }
     
     
 
-    private double getMutationSummary(List<Mutation> mutations, List<Mutation> mutationsUnconditional, Node node){
+    protected double getMutationSummary(List<Mutation> mutations, Node node){
+    	
+    	//Log.warning("getMutationSummary " + mutations.size());
     	
     	
     	if (this.filter == null) {
-    		return getFilteredMutationSummary(mutations, mutationsUnconditional, node);
+    		return getFilteredMutationSummary(mutations, node);
     	}else {
     		
     		// Filter the mutations and then give the remainder to the child class
@@ -74,21 +97,12 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
         	}
         	
         	
-        	// Filter the mutations and then give the remainder to the child class
-    		List<Mutation> filteredMutationsUnconditional = new ArrayList<Mutation>();
-        	for (Mutation mutation : mutationsUnconditional) {
-        		if (this.filter.contains(mutation.getSiteNr())){
-        			filteredMutationsUnconditional.add(mutation);
-        		}
-        	}
-        	
-        	return getFilteredMutationSummary(filteredMutations, filteredMutationsUnconditional, node);
+        	return getFilteredMutationSummary(filteredMutations, node);
     	}
     	
     	
-    	
-    	
     }
+    
     
     
     @Override
@@ -102,7 +116,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
      * @param nodeNr
      * @return
      */
-    public abstract double getFilteredMutationSummary(List<Mutation> mutations, List<Mutation> mutationsUnconditional, Node node);
+    public abstract double getFilteredMutationSummary(List<Mutation> mutations, Node node);
     
     
     
@@ -137,27 +151,113 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     public double getArrayValue(int dim) {
     	
     	
-    	List<Mutation> mutations;
-    	List<Mutation> mutationsUnconditional;
-    	if (samplerInput.get() != null) {
+    	Node speciesNode = this.getTree().getNode(dim);
+    	List<Node> nodes = getAllNodesOnBranch(speciesNode);
+    	double total = 0;
+    	
+    	for (Node node : nodes) {
     		
-    		// Make sure to call sampleMutations before calling this method so that it depends on the current stochastic sample
-    		mutations = samplerInput.get().getMutationsOnBranch(dim);
-    		if (samplerInput.get().getUnconditionalData() != null) {
-    			mutationsUnconditional = samplerInput.get().getUnconditionalData().getMutationsOnBranch(dim);
-    		}else {
-    			mutationsUnconditional = null;
+    		List<Mutation> mutations;
+    		if (samplerInput.get() != null) {
+        		
+        		// Make sure to call sampleMutations before calling this method so that it depends on the current stochastic sample
+        		mutations = getSpeciesTreeMutationSummary(dim, node);
+        		
+        	}else {
+        		mutations = truthInput.get().getMutationsOnBranch(dim); // TODO implement on MSC for simulation
+        	}
+        	
+    		
+    		Collections.sort(mutations);
+    		
+    		double x = getMutationSummary(mutations, node);
+    		if (this.geneTreePrior != null) {
+    			//Log.warning("snode=" + dim + " gnode=" + node.getNr() + " nmut=" + mutations.size() + " x=" + x);
     		}
     		
-    	}else {
-    		mutations = truthInput.get().getMutationsOnBranch(dim);
-    		mutationsUnconditional = mutations;
+    		total += x;
     	}
     	
-    	Node node = this.getTree().getNode(dim);
+    	return total;
     	
-    	//if (mutationsUnconditional == null) mutationsUnconditional = mutations;
-    	return getMutationSummary(mutations, mutationsUnconditional, node);
+    	
+    	
+    }
+    
+    
+    // Get all nodes within this species branch (or just return the branch itself if there aren't any)
+    private List<Node> getAllNodesOnBranch(Node speciesNode){
+    	
+    	List<Node> nodes = new ArrayList<>();
+    	if (this.geneTreePrior == null) {
+    		nodes.add(speciesNode);
+    	}else {
+    		
+    		Tree geneTree = (Tree) this.geneTreePrior.getGeneTree();
+			for (Node geneNode : geneTree.getRoot().getAllChildNodesAndSelf()) {
+				
+				if (geneNode.isRoot()) continue;
+				
+				// Consider only the gene branches that reside within this species branch
+				if (!this.geneTreePrior.mapGeneBranchToSpeciesNodes(geneNode.getNr()).contains(speciesNode)) {
+					continue;
+				}
+				nodes.add(geneNode);
+			}
+    		
+    	}
+    	
+    	return nodes;
+    	
+    }
+    
+    
+    // If we are counting a species tree, then consider all gene tree branch segments within this species branch
+    protected List<Mutation> getSpeciesTreeMutationSummary(int speciesNodeNr, Node geneNode){
+    	
+
+    	if (this.geneTreePrior == null) {
+    		return samplerInput.get().getMutationsOnBranch(speciesNodeNr);
+    	}else {
+    		
+    		List<Mutation> mutationsSpeciesBranch = new ArrayList<Mutation>();
+    		
+    		if (geneNode.isRoot()) return mutationsSpeciesBranch;
+    		
+    		Tree speciesTree = this.getTree();
+    		Node speciesNode = speciesTree.getNode(speciesNodeNr);
+    		//Tree geneTree = (Tree) this.geneTreePrior.getGeneTree();
+
+    		// Start and end times of interval
+    		double start = speciesNode.isRoot() ? Double.POSITIVE_INFINITY : speciesNode.getParent().getHeight();
+    		double end = speciesNode.getHeight();
+    		
+			
+			// Consider only the gene branches that reside within this species branch
+			if (!this.geneTreePrior.mapGeneBranchToSpeciesNodes(geneNode.getNr()).contains(speciesNode)) {
+				return mutationsSpeciesBranch;
+			}
+			
+			
+			List<Mutation> mutationsGeneBranch = samplerInput.get().getMutationsOnBranch(geneNode.getNr());
+			
+			// Renumber the mutations on the branch
+			for (Mutation mut : mutationsGeneBranch) {
+				
+				// Count all mutations that occur within this species branch
+				double mutHeight = geneNode.getParent().getHeight() - mut.getTime();
+				if (mutHeight < 0) mutHeight = 0;
+				if (mutHeight < start && mutHeight >= end) {
+					mutationsSpeciesBranch.add(mut);
+				}
+			}
+				
+        	
+        	return mutationsSpeciesBranch;
+    		
+    	}
+    	
+    	
     }
 
 
@@ -191,6 +291,12 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	}
 	
 	protected Tree getTree() {
+		
+		if (geneInput.get() != null) {
+			return geneInput.get().speciesTreeInput.get();
+		}
+		
+		// Locus tree
 		if (samplerInput.get() == null) {
 			return (Tree) truthInput.get().getTree();
 		}else {
@@ -208,7 +314,9 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	
     @Override
     public int getDimension() {
+    	
     	Tree tree = getTree();
+    	if (includeRootInput.get()) return tree.getNodeCount();
         return tree.getNodeCount()-1;
     }
 

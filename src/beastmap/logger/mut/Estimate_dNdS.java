@@ -43,7 +43,7 @@ public class Estimate_dNdS extends BranchSubstLogger {
 	
 	
 	@Override
-	public double getFilteredMutationSummary(List<Mutation> mutations, List<Mutation> mutationsUnconditional, Node node) {
+	public double getFilteredMutationSummary(List<Mutation> mutations, Node node) {
 		
 		int[] counts = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
 		int nS = counts[0];

@@ -7,6 +7,7 @@ import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.tree.Node;
 import beastmap.logger.BranchSubstLogger;
 import beastmap.util.Mutation;
+import beastmap.util.MutationUtils;
 
 
 @Description("Records the change in length from parent to child. The length is the number of non-gap sites.")
@@ -25,12 +26,15 @@ public class NetSize extends BranchSubstLogger {
 	}
 
 	@Override
-	public double getFilteredMutationSummary(List<Mutation> mutations, List<Mutation> mutationsUnconditional,Node node) {
+	public double getFilteredMutationSummary(List<Mutation> mutations ,Node node) {
+		
+		
+	
 		
 		
 		// Child size
 		int ungappedSizeChild = 0;
-		int[] sequenceChild = samplerInput.get().getStatesForNode(getTree(), node);
+		int[] sequenceChild = samplerInput.get().getStatesForNode(getTree(), node); // TODO: make compatible with MSC
 		for (int i = 0; i < sequenceChild.length; i ++) {
 			int c = sequenceChild[i];
 			if (c != gapChar) ungappedSizeChild++;
@@ -39,7 +43,7 @@ public class NetSize extends BranchSubstLogger {
 		// Parent size
 		int ungappedSizeParent = 0;
 		if (node.getParent() != null) {
-			int[] sequenceParent = samplerInput.get().getStatesForNode(getTree(), node.getParent());
+			int[] sequenceParent = samplerInput.get().getStatesForNode(getTree(), node.getParent()); // TODO: make compatible with MSC
 			for (int i = 0; i < sequenceParent.length; i ++) {
 				int c = sequenceParent[i];
 				if (c != gapChar) ungappedSizeParent++;

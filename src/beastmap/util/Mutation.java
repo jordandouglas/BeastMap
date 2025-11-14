@@ -68,6 +68,10 @@ public class Mutation implements Comparable<Mutation> {
 		return dt.encodingToString(new int[] { this.to });
 	 }
 	 
+	 /**
+	  * The forward time along the lineage from parent to child. To convert into height, subtract from parent height
+	  * @return
+	  */
 	 public double getTime() {
 		 return time;
 	 }

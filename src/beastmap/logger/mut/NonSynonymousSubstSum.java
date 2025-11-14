@@ -45,15 +45,9 @@ public class NonSynonymousSubstSum extends BranchSubstLogger {
 	
 	
 	@Override
-	public double getFilteredMutationSummary(List<Mutation> mutations, List<Mutation> mutationsUnconditional, Node node) {
+	public double getFilteredMutationSummary(List<Mutation> mutations, Node node) {
 		
-		int[] counts = null;
-		if (conditionalInput.get()) {
-			counts = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
-		}else {
-			counts = super.getUnconditionalSynonymousAndNonSynonymousSubstitutionCount(mutationsUnconditional, code, codon, frame);
-		}
-		
+		int[] counts = super.getSynonymousAndNonSynonymousSubstitutionCount(mutations, code, codon, frame);
 		return counts[1];
 	}
 	

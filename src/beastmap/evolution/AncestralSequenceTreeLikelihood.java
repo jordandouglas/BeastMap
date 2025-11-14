@@ -306,25 +306,62 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     }
 
 
+    
+    // More stable
+    private int drawChoiceLog(double[] logProbs) {
+    	
+    	// Max prob
+    	double max = logProbs[0];
+        for (int i = 1; i < logProbs.length; i++) {
+            if (logProbs[i] > max) {
+                max = logProbs[i];
+            }
+        }
+        
+        
+        // Return a u.a.r character
+        if (Double.isInfinite(max) || Double.isNaN(max)) {
+        	int rand = Randomizer.nextInt(logProbs.length);
+    		return rand;
+        }
+		
+    	
+        // Convert to relative probabilities in a stable fashion
+    	double[] probs = new double[logProbs.length];
+    	for (int i = 0; i < logProbs.length; i++) {
+    		probs[i] = Math.exp(logProbs[i] - max);
+    		//Log.warning(logProbs[i] + " max = " + max + " " + probs[i]);
+    	}
+    	
+    	
+    	
+    	return drawChoice(probs);
+        	
+    }
 
-    private int drawChoice(double[] measure) {
+    private int drawChoice(double[] probs) {
         if (useMAP) {
-            double max = measure[0];
+            double max = probs[0];
             int choice = 0;
-            for (int i = 1; i < measure.length; i++) {
-                if ((measure[i] - max)/(measure[i] + max) > 1e-10) {
-                    max = measure[i];
+            for (int i = 1; i < probs.length; i++) {
+                if ((probs[i] - max)/(probs[i] + max) > 1e-10) {
+                    max = probs[i];
                     choice = i;
                 }
             }
             return choice;
         } else {
         	
-        	if (Randomizer.getTotal(measure) <= 1e-100) {
-        		//Log.warning("Warning: 0 sum");
-        		return measure.length-1;
+        	if (Randomizer.getTotal(probs) <= 1e-100) {
+        		Log.warning("Warning: ancestral state reconstruction probabilities sum to 0, suggesting numerical issues. Selecting a state unicormly at random.");
+        		
+        		// Return a u.a.r character
+        		int rand = Randomizer.nextInt(probs.length);
+        		return rand;
+        		//return measure.length-1;
+        		
         	}
-        	return Randomizer.randomChoicePDF(measure);
+        	return Randomizer.randomChoicePDF(probs);
         	
         }
     }
@@ -374,10 +411,13 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
             		System.arraycopy(rootPartials, j * stateCount, conditionalProbabilities, 0, stateCount);
 
                     for (int i = 0; i < stateCount; i++) {
-                        conditionalProbabilities[i] *= rootFrequencies[i];
+                        //conditionalProbabilities[i] *= rootFrequencies[i];
+                        conditionalProbabilities[i] = Math.log(conditionalProbabilities[i]) + Math.log(rootFrequencies[i]);
                     }
                     try {
-                        state[j] = drawChoice(conditionalProbabilities);
+                        //state[j] = drawChoice(conditionalProbabilities);
+                        state[j] = drawChoiceLog(conditionalProbabilities);
+                        
                     } catch (Error e) {
                         System.err.println(e.toString());
                         state[j] = 0;
@@ -404,11 +444,13 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
                     int childIndex = j * stateCount;
 
                     for (int i = 0; i < stateCount; i++) {
-                        conditionalProbabilities[i] = partialLikelihood[childIndex + i] * probabilities[parentIndex + i];
+                        //conditionalProbabilities[i] = partialLikelihood[childIndex + i] * probabilities[parentIndex + i];
+                        conditionalProbabilities[i] = Math.log(partialLikelihood[childIndex + i]) + Math.log(probabilities[parentIndex + i]);
                     }
 
                     
-                    state[j] = drawChoice(conditionalProbabilities);
+                    //state[j] = drawChoice(conditionalProbabilities);
+                    state[j] = drawChoiceLog(conditionalProbabilities);
                     reconstructedStates[nodeNum][j] = state[j];
 
                     double contrib = probabilities[parentIndex + state[j]];
@@ -440,10 +482,12 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
 		                    
 	                    boolean [] stateSet = dataType.getStateSet(thisState);
 	                    for (int i = 0; i < stateCount; i++) {
-	                        conditionalProbabilities[i] =  stateSet[i] ? probabilities[parentIndex + i] : 0;
+	                        //conditionalProbabilities[i] =  stateSet[i] ? probabilities[parentIndex + i] : 0;
+	                        conditionalProbabilities[i] =  stateSet[i] ? Math.log(probabilities[parentIndex + i]) : 0;
 	                    }
 	                    
-	                    reconstructedStates[nodeNum][j] = drawChoice(conditionalProbabilities);
+	                    //reconstructedStates[nodeNum][j] = drawChoice(conditionalProbabilities);
+	                    reconstructedStates[nodeNum][j] = drawChoiceLog(conditionalProbabilities);
 	                }
 	
 	                double contrib = probabilities[parentIndex + reconstructedStates[nodeNum][j]];

@@ -26,10 +26,10 @@ public class TotalSize extends BranchSubstLogger {
 	}
 
 	@Override
-	public double getFilteredMutationSummary(List<Mutation> mutations, List<Mutation> mutationsUnconditional, Node node) {
+	public double getFilteredMutationSummary(List<Mutation> mutations, Node node) {
 		
 		int ungappedSize = 0;
-		int[] sequence = samplerInput.get().getStatesForNode(getTree(), node);
+		int[] sequence = samplerInput.get().getStatesForNode(getTree(), node); // TODO: make compatible with MSC
 		for (int i = 0; i < sequence.length; i ++) {
 			int c = sequence[i];
 			if (c != gapChar) ungappedSize++;
