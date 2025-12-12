@@ -132,7 +132,15 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	 * @param dataType
 	 * @return
 	 */
-	protected abstract boolean canHandleDataType(DataType dataType);
+	public abstract boolean canHandleDataType(DataType dataType);
+	
+	
+	/**
+	 * Does it make sense to sum this object across the whole tree?
+	 * @param dataType
+	 * @return
+	 */
+	public abstract boolean isSummable();
     
 	
     /**

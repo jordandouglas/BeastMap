@@ -4,22 +4,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
+
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Log;
+import beast.base.core.ProgramStatus;
 import beast.base.core.Input.Validate;
 import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.alignment.Sequence;
 import beast.base.evolution.branchratemodel.BranchRateModel;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.sitemodel.SiteModelInterface;
 import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeInterface;
 import beast.base.util.Randomizer;
 import beastmap.indel.SimpleIndelCodingAlignment;
 import beastmap.util.Mutation;
 import beastmap.util.MutationUtils;
+
 
 @Description("Stochastically samples a mutation trajectory along each branch for a given state")
 public class BranchMutationSampler extends AncestralSequenceTreeLikelihood implements StochasticMapper{
@@ -29,6 +35,8 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 	public Input<Boolean> nodeDependentInput = new Input<Boolean>("substModelIsNodeDependent", "set to false if the substituion model does not vary among branches (and gain some extra efficiency). but this will return the wrong answer for epoch subst models", true);
 	public Input<BranchMutationSampler> indelInput = new Input<BranchMutationSampler>("indel", "another mapper can be used to remove all sites that are predicted to have gaps");
 	public Input<Integer> burninInput = new Input<Integer>("burnin", "do not print any numbers until we have reached this state number (in case the tree branches are too long at the initial state)", 0);
+	
+	
 	
 	
 	long lastSample;
@@ -50,9 +58,19 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 	SimulatedAlignmentWithMutations unconditionalData; // Data simulated unconditional on the observed data
 	SimpleIndelCodingAlignment indelData;
 	
+	
+
+	
 	@Override
 	public void initAndValidate() {
 		super.initAndValidate();
+		
+		// Beauti?
+		boolean inBEAUti = ProgramStatus.name.equals("BEAUti");
+    	if (inBEAUti || dataInput.get().getSiteCount() == 0 || dataInput.get().getTaxonCount() == 0 || dataInput.get().getCounts().isEmpty()) {
+    		return;
+    	}
+		
 		this.lastSample = -1;
 		
 		this.siteModel = (SiteModel.Base) siteModelInput.get();
@@ -521,6 +539,11 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 
 	@Override
 	public Tree getTree() {
+		
+		if (treeInput.get() == null) {
+			return (Tree) likelihoodInput.get().treeInput.get();
+		}
+		
 		return (Tree) treeInput.get();
 	}
 

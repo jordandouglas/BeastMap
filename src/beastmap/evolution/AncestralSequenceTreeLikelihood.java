@@ -7,10 +7,12 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
 import beast.base.core.Log;
+import beast.base.core.ProgramStatus;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.UserDataType;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
 import beast.base.evolution.likelihood.LikelihoodCore;
 import beast.base.evolution.likelihood.TreeLikelihood;
 import beast.base.evolution.sitemodel.SiteModel;
@@ -19,6 +21,7 @@ import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeInterface;
 import beast.base.util.Randomizer;
+import beastfx.app.beauti.Beauti;
 
 
 
@@ -33,6 +36,16 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     public Input<Boolean> useMAPInput = new Input<Boolean>("useMAP","whether to use maximum aposteriori assignments or sample", false);
     public Input<Boolean> returnMLInput = new Input<Boolean>("returnML", "report integrate likelihood of tip data", true);
     public Input<Boolean> sampleTipsInput = new Input<Boolean>("sampleTips", "if tips have missing data/ambigous values sample them for logging (default true)", false);
+    
+    
+    public Input<GenericTreeLikelihood> likelihoodInput = new Input<GenericTreeLikelihood>("likelihood", "tree likelihood that we will use to get the site, clock, and tree");
+    
+    
+    public AncestralSequenceTreeLikelihood() {
+		treeInput.setRule(Validate.OPTIONAL);
+		siteModelInput.setRule(Validate.OPTIONAL);
+		branchRateModelInput.setRule(Validate.OPTIONAL);
+	}
     
 
 	int[][] storedTipStates;
@@ -70,13 +83,22 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     public void initAndValidate() {
     	
     	// Beauti?
-    	if (dataInput.get().getSiteCount() == 0 || dataInput.get().getTaxonCount() == 0 || dataInput.get().getCounts().isEmpty()) {
+    	boolean inBEAUti = ProgramStatus.name.equals("BEAUti");
+    	if (inBEAUti || dataInput.get().getSiteCount() == 0 || dataInput.get().getTaxonCount() == 0 || dataInput.get().getCounts().isEmpty()) {
     		return;
     	}
     	
 //    	Log.warning("sites " + dataInput.get().getSiteCount());
 //    	Log.warning("taxa " + dataInput.get().getTaxonCount());
     	
+    	
+    	
+    	
+    	if (likelihoodInput.get() != null) {
+    		treeInput.setValue(likelihoodInput.get().treeInput.get(), this);
+    		siteModelInput.setValue(likelihoodInput.get().siteModelInput.get(), this);
+    		branchRateModelInput.setValue(likelihoodInput.get().branchRateModelInput.get(), this);
+    	}
     	
     	// Do not use beagle as the likelihood core is not implemented in beagle
     	implementationInput.setValue(AncestralSequenceTreeLikelihood.class.getName(), this);
@@ -330,6 +352,7 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     	double[] probs = new double[logProbs.length];
     	for (int i = 0; i < logProbs.length; i++) {
     		probs[i] = Math.exp(logProbs[i] - max);
+    		if (Double.isNaN(probs[i])) probs[i] = 0;
     		//Log.warning(logProbs[i] + " max = " + max + " " + probs[i]);
     	}
     	
@@ -340,6 +363,7 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     }
 
     private int drawChoice(double[] probs) {
+    	
         if (useMAP) {
             double max = probs[0];
             int choice = 0;
@@ -350,19 +374,35 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
                 }
             }
             return choice;
+            
         } else {
         	
         	if (Randomizer.getTotal(probs) <= 1e-100) {
-        		Log.warning("Warning: ancestral state reconstruction probabilities sum to 0, suggesting numerical issues. Selecting a state unicormly at random.");
+        		Log.warning("Warning: ancestral state reconstruction probabilities sum to 0, suggesting numerical issues. Selecting a state uniformly at random.");
         		
         		// Return a u.a.r character
         		int rand = Randomizer.nextInt(probs.length);
         		return rand;
-        		//return measure.length-1;
         		
         	}
-        	return Randomizer.randomChoicePDF(probs);
         	
+        	try {
+        		return Randomizer.randomChoicePDF(probs);
+        	}catch(Exception e) {
+        		
+        		// Use MAP state
+        		Log.warning("Warning: ancestral state encountered error, suggesting numerical issues. Selecting a state uniformly at random.");
+        		double max = probs[0];
+                int choice = 0;
+                for (int i = 1; i < probs.length; i++) {
+                    if ((probs[i] - max)/(probs[i] + max) > 1e-10) {
+                        max = probs[i];
+                        choice = i;
+                    }
+                }
+                return choice;
+        		
+        	}
         }
     }
 
@@ -449,8 +489,14 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
                     }
 
                     
-                    //state[j] = drawChoice(conditionalProbabilities);
-                    state[j] = drawChoiceLog(conditionalProbabilities);
+                    // Sampled ancestor?
+                    if (node.getLength() <= 0) {
+                    	 state[j] = parentState[j];
+                    }else {
+                    	 state[j] = drawChoiceLog(conditionalProbabilities);
+                    }
+                    
+                   
                     reconstructedStates[nodeNum][j] = state[j];
 
                     double contrib = probabilities[parentIndex + state[j]];
@@ -486,8 +532,17 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
 	                        conditionalProbabilities[i] =  stateSet[i] ? Math.log(probabilities[parentIndex + i]) : 0;
 	                    }
 	                    
+	                    
+	                    // Sampled ancestor?
+	                    if (node.getLength() <= 0) {
+	                    	reconstructedStates[nodeNum][j] = parentState[j];
+	                    }else {
+	                    	reconstructedStates[nodeNum][j] = drawChoiceLog(conditionalProbabilities);
+	                    }
+	                    
+	                    
 	                    //reconstructedStates[nodeNum][j] = drawChoice(conditionalProbabilities);
-	                    reconstructedStates[nodeNum][j] = drawChoiceLog(conditionalProbabilities);
+	                    
 	                }
 	
 	                double contrib = probabilities[parentIndex + reconstructedStates[nodeNum][j]];

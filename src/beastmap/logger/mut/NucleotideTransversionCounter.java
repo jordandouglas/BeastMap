@@ -49,8 +49,14 @@ public class NucleotideTransversionCounter extends BranchSubstLogger {
 	}
 
 	@Override
-	protected boolean canHandleDataType(DataType dataType) {
+	public boolean canHandleDataType(DataType dataType) {
 		return dataType instanceof Nucleotide;
+	}
+	
+	
+	@Override
+	public boolean isSummable() {
+		return true;
 	}
 
 }

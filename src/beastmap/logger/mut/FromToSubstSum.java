@@ -53,7 +53,7 @@ public class FromToSubstSum extends BranchSubstLogger {
 	}
 
 	@Override
-	protected boolean canHandleDataType(DataType dataType) {
+	public boolean canHandleDataType(DataType dataType) {
 		
 		try {
 			dataType.stringToEncoding(fromInput.get());
@@ -63,6 +63,12 @@ public class FromToSubstSum extends BranchSubstLogger {
 			return false;
 		}
 		
+		return true;
+	}
+	
+	
+	@Override
+	public boolean isSummable() {
 		return true;
 	}
 

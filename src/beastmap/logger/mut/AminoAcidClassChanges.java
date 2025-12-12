@@ -104,8 +104,13 @@ public class AminoAcidClassChanges extends BranchSubstLogger {
 	}
 
 	@Override
-	protected boolean canHandleDataType(DataType dataType) {
+	public boolean canHandleDataType(DataType dataType) {
 		return dataType instanceof Aminoacid;
+	}
+
+	@Override
+	public boolean isSummable() {
+		return true;
 	}
 
 }

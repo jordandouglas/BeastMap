@@ -11,8 +11,11 @@ import beast.base.core.Description;
 import beast.base.core.Function;
 import beast.base.core.Input;
 import beast.base.core.Loggable;
+import beast.base.core.ProgramStatus;
 import beast.base.core.Input.Validate;
 import beast.base.evolution.branchratemodel.BranchRateModel;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
+import beast.base.evolution.likelihood.TreeLikelihood;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.StateNode;
@@ -23,7 +26,10 @@ import beast.base.inference.parameter.RealParameter;
 @Description("Logs the number of mutations on each branch")
 public class SampledSubstTreeLogger extends BEASTObject implements Loggable {
 
-    final public Input<Tree> treeInput = new Input<>("tree", "tree to be logged", Validate.REQUIRED);
+    final public Input<Tree> treeInput = new Input<>("tree", "tree to be logged");
+    final public Input<GenericTreeLikelihood> likelihoodInput = new Input<>("likelihood", "tree to be logged", Validate.XOR, treeInput);
+    	
+    
     final public Input<List<Function>> parameterInput = new Input<>("metadata", "meta data to be logged with the tree nodes",new ArrayList<>());
     final public Input<BranchRateModel.Base> clockModelInput = new Input<>("branchratemodel", "rate to be logged with branches of the tree");
     final public Input<Integer> decimalPlacesInput = new Input<>("dp", "the number of decimal places to use writing branch lengths, rates and real-valued metadata, use -1 for full precision (default = full precision)", -1);
@@ -38,9 +44,27 @@ public class SampledSubstTreeLogger extends BEASTObject implements Loggable {
 
     private DecimalFormat df;
     private boolean sortTree;
+    
+    
+    public Tree getTree() {
+    	if (likelihoodInput.get() != null) {
+    		Tree x = ((Tree) likelihoodInput.get().treeInput.get());
+    		return (Tree) x.getCurrent();
+    	}else {
+    		return (Tree) treeInput.get().getCurrent();
+    	}
+    }
 
     @Override
     public void initAndValidate() {
+    	
+    	
+    	// Beauti?
+    	if (ProgramStatus.name.equals("BEAUti")) {
+    		return;
+    	}
+    	
+    	
         int dp = decimalPlacesInput.get();
         if (dp < 0) {
             df = null;
@@ -64,7 +88,7 @@ public class SampledSubstTreeLogger extends BEASTObject implements Loggable {
 	@Override
     public void log(long sampleNr, PrintStream out) {
         // make sure we get the current version of the inputs
-        Tree tree = (Tree) treeInput.get().getCurrent();
+        Tree tree = getTree();
         List<Function> metadata = new ArrayList<>();
         metadata.addAll(parameterInput.get());
         for (int i = 0; i < metadata.size(); i++) {
@@ -233,12 +257,12 @@ public class SampledSubstTreeLogger extends BEASTObject implements Loggable {
 
     @Override
     public void init(PrintStream out) {
-        treeInput.get().init(out);
+    	getTree().init(out);
     }
 
     @Override
     public void close(PrintStream out) {
-        treeInput.get().close(out);
+    	getTree().close(out);
     }
 
 

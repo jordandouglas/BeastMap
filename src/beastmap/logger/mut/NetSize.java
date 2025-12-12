@@ -58,8 +58,14 @@ public class NetSize extends BranchSubstLogger {
 	}
 
 	@Override
-	protected boolean canHandleDataType(DataType dataType) {
+	public boolean canHandleDataType(DataType dataType) {
 		return true;
+	}
+	
+	
+	@Override
+	public boolean isSummable() {
+		return false;
 	}
 
 }

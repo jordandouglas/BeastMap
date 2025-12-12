@@ -15,6 +15,8 @@ import beast.base.core.Loggable;
 import beast.base.core.Input.Validate;
 import beast.base.core.Log;
 import beast.base.evolution.branchratemodel.BranchRateModel;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
+import beast.base.evolution.likelihood.TreeLikelihood;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
 import beast.base.inference.parameter.Parameter;
@@ -28,7 +30,9 @@ import beastmap.util.MutationUtils;
 @Description("Logs the tree such that each branch has a difference reconsturcted sequence. Will no longer be a strictly binary tree.")
 public class TypedTreeLogger extends BEASTObject implements Loggable {
 
-	final public Input<Tree> treeInput = new Input<>("tree", "tree to be logged", Validate.REQUIRED);
+	final public Input<Tree> treeInput = new Input<>("tree", "tree to be logged");
+	final public Input<GenericTreeLikelihood> likelihoodInput = new Input<>("likelihood", "tree to be logged", Validate.XOR, treeInput);
+	    
 	final public Input<StochasticMapper> samplerInput = new Input<>("sampler", "mutation sampler to log", Validate.REQUIRED);
 	final public Input<Integer> decimalPlacesInput = new Input<>("dp", "the number of decimal places to use writing branch lengths, rates and real-valued metadata, use -1 for full precision (default = full precision)", -1);
 	final public Input<String> typeLabelInput = new Input<>("typeLabel", "the name of the branch metadata variable that stores the state", "state");
@@ -49,6 +53,7 @@ public class TypedTreeLogger extends BEASTObject implements Loggable {
 	StochasticMapper sampler;
 	
 	private DecimalFormat df;
+	
 
     @Override
     public void initAndValidate() {
@@ -72,6 +77,15 @@ public class TypedTreeLogger extends BEASTObject implements Loggable {
 
     }
 
+    
+    public Tree getTree() {
+    	if (likelihoodInput.get() != null) {
+    		Tree x = ((Tree) likelihoodInput.get().treeInput.get());
+    		return (Tree) x.getCurrent();
+    	}else {
+    		return (Tree) treeInput.get().getCurrent();
+    	}
+    }
 
 	@Override
 	public void init(PrintStream out) {
@@ -194,7 +208,7 @@ public class TypedTreeLogger extends BEASTObject implements Loggable {
 		sampler.sampleMutations(sampleNr);
 		
 		// Convert the tree into a tree where each node has a difference sequence
-		Tree originalTree = treeInput.get();
+		Tree originalTree = getTree();
 		Node newRoot = originalTree.getRoot().copy(); // Clone
 		List<Node> newNodes = newRoot.getAllChildNodesAndSelf();
 		
