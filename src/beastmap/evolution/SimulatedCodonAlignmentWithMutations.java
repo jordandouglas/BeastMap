@@ -295,10 +295,15 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
 		return super.getDataType();
 	}
 	
+//	@Override
+//	public int getPatternCount() {
+//		return m_sequenceLength;
+//	}
+	
 	@Override
 	public int getPatternCount() {
-		return m_sequenceLength;
-	}
+        return super.getPatternCount();
+    }
 
     
     

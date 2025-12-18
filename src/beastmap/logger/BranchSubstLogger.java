@@ -9,6 +9,7 @@ import beast.base.core.Description;
 import beast.base.core.Function;
 import beast.base.core.Input;
 import beast.base.core.Loggable;
+import beast.base.core.ProgramStatus;
 import beast.base.core.Input.Validate;
 import beast.base.core.Log;
 import beast.base.evolution.datatype.DataType;
@@ -58,10 +59,17 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     	if (!this.canHandleDataType(dt)) {
     		throw new IllegalArgumentException(this.getID() + " cannot support datatype " + dt.getClass());
     	}
-    	
+
     	this.filter = null;
     	if (filterInput.get() != null && !filterInput.get().isEmpty()) {
     		this.filter = MutationUtils.parseFilterSpec(getSiteAndPatternCount(), filterInput.get());
+    	}
+    	
+    	
+    	
+    	// Beauti?
+    	if (ProgramStatus.name.equals("BEAUti")) {
+    		return;
     	}
     	
     	

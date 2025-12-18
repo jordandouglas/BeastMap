@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihoodbeast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="" version="2.7">
+
+
+
+
+<map name="Beta">beast.base.inference.distribution.Beta</map>
+<map name="Exponential">beast.base.inference.distribution.Exponential</map>
+<map name="InverseGamma">beast.base.inference.distribution.InverseGamma</map>
+<map name="LogNormal">beast.base.inference.distribution.LogNormalDistributionModel</map>
+<map name="Gamma">beast.base.inference.distribution.Gamma</map>
+<map name="Uniform">beast.base.inference.distribution.Uniform</map>
+<map name="prior">beast.base.inference.distribution.Prior</map>
+<map name="LaplaceDistribution">beast.base.inference.distribution.LaplaceDistribution</map>
+<map name="OneOnX">beast.base.inference.distribution.OneOnX</map>
+<map name="Normal">beast.base.inference.distribution.Normal</map>
+<map name="taxon">beast.base.evolution.alignment.Taxon</map>
+<map name="taxonset">beast.base.evolution.alignment.TaxonSet</map>
+<map name="Dirichlet" >beast.base.inference.distribution.Dirichlet</map>
+
+
+<!-- We need this to help the codon frequencies initialise -->
+<likelihood id="treeLikelihood.codon" spec="TreeLikelihood" data="@simulatedData" tree="@simulatedTree" useAmbiguities="true">
+	<siteModel spec="SiteModel">
+		<substModel id="substModel.dummy" spec="codonmodels.M0Model" kappa="1" omega="1">
+			 <frequencies id="codonFreqs.s:codon" spec="codonmodels.GeneralCodonFrequencies" estimate="false"> 
+            	<freq id="BMT_frequencies1.s:codon" spec="beast.base.inference.parameter.RealParameter" lower="0.0" upper="1.0" dimension="4" value="0.25"/>
+            </frequencies>
+		</substModel>
+	</siteModel>
+	 <branchRateModel spec="beast.base.evolution.branchratemodel.StrictClockModel" clock.rate="1"/>
+	 
+</likelihood>
+
+
+<data id="simulatedData" spec='beastmap.evolution.SimulatedCodonAlignmentWithMutations' sequencelength="200" outputFileName="simulated.xml" dataType="codon" geneticCode="universal">
+	<tree id="simulatedTree" spec='beast.base.evolution.tree.TreeParser' newick="$(tree)" IsLabelledNewick="true" adjustTipHeights="false"/>
+
+
+
+	<data id="mockData" spec="beast.base.evolution.alignment.Alignment" dataType="nucleotide">
+		 <plate var="n" range="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30">
+        	<sequence totalcount="4" taxon="$(n)">AAA</sequence>
+   		 </plate>
+	</data>
+
+
+	<siteModel id="siteModel" spec='beast.base.evolution.sitemodel.SiteModel' shape="$(gammaShape)" gammaCategoryCount="4" >
+
+		<substModel id="substModel.codon" spec="codonmodels.GeneralCodonSubstitutionModel" omega="$(omega)" mnmPenalty="0 0" substitutionRate="1 1 1" > 
+
+
+
+        	<substModel id="trueRevJump.s:codon" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" 
+            modelIndicator="30" 
+            rates="$(rates.codon.1)"
+            modelSet="transitionTransversionSplit">
+	    	    <frequencies id="trueBMTfreqs.s:codon" spec="Frequencies" frequencies="0.25 0.25 0.25 0.25"/>
+    	    </substModel>
+    	    
+        	<substModel id="trueRevJump2.s:codon" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" 
+            modelIndicator="30" 
+            rates="$(rates.codon.2)"
+            modelSet="transitionTransversionSplit">
+	    	    <frequencies id="trueBMTfreqs2.s:codon" spec="Frequencies" frequencies="0.25 0.25 0.25 0.25"/>
+    	    </substModel>
+    	    
+        	<substModel id="trueRevJump3.s:codon" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" 
+            modelIndicator="30" 
+            rates="$(rates.codon.3)"
+            modelSet="transitionTransversionSplit">
+	    	    <frequencies id="trueBMTfreqs3.s:codon" spec="Frequencies" frequencies="0.25 0.25 0.25 0.25"/>
+    	    </substModel>
+
+
+
+			 <frequencies id="codonFreqs" spec="codonmodels.GeneralCodonFrequencies" estimate="false"> 
+            	<freq id="codonFreqs.61" spec="beast.base.inference.parameter.RealParameter" lower="0.0" upper="1.0" dimension="61" value="$(frequencies.codon)"/>
+            </frequencies>
+
+		</substModel>
+
+
+   </siteModel>
+
+
+     <branchRateModel id="clockModel" spec="beast.base.evolution.branchratemodel.UCRelaxedClockModel" clock.rate="1" rates="$(branchRates)" tree="@simulatedTree">
+           <LogNormal id="ORCLogNormalDistributionModel.c:tree" M="1" S="$(clockSD)" meanInRealSpace="true" name="distr" />
+    </branchRateModel>
+
+
+
+
+</data>
+
+
+	
+<!-- dummy -->
+<run id="mcmc" spec="beast.base.inference.MCMC" chainLength="1">
+
+
+
+    <state id="state" spec="beast.base.inference.State" storeEvery="50000">
+		<parameter id="popMean" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.1</parameter>
+		<tree id="tree" spec="beast.base.evolution.tree.Tree" name="stateNode">
+            <taxonset  spec="beast.base.evolution.alignment.TaxonSet">
+                <data idref="simulatedData" name="alignment"/>
+            </taxonset>
+        </tree>
+
+    </state>
+
+
+
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
+	
+		 <prior id="popMean.prior" name="distribution" x="@popMean">
+                <LogNormal meanInRealSpace="true" name="distr" M="0.05" S="0.5"/>
+            </prior>
+
+    </distribution>
+
+
+	<operator id="Scale.popmean" spec="kernel.BactrianScaleOperator" parameter="@popMean" upper="10.0" weight="1.0"/>
+
+
+	<logger fileName="simulated.log" id="tracelog" logEvery="1" sanitiseHeaders="true" sort="smart">
+			<log idref="popMean"/>
+
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@SubstitutionSum"  />
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@NonSynonymousSubstSum"  />
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@FromToSubstSum"  />
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@SynonymousSubstSum"  />
+
+            <log idref="SubstitutionSum"  />
+            <log idref="SynonymousSubstSum"  />
+            <log idref="NonSynonymousSubstSum"  />
+            <log idref="FromToSubstSum"  />
+	</logger>
+
+    <logger id="screenlog" spec="Logger" logEvery="10000">
+		<log idref="popMean"/>
+		<log idref="treeLikelihood.codon"/>
+		
+    </logger>
+
+
+	<logger id="treelog" spec="Logger" fileName="simulated.trees" logEvery="1" mode="tree">
+	    <log id="SampledSubstTreeLogger" spec="beastmap.logger.SampledSubstTreeLogger" tree="@simulatedTree">
+	        <sampler id="SubstitutionSum" spec="beastmap.logger.mut.SubstitutionSum" truth="@simulatedData" />
+	        <sampler id="SynonymousSubstSum" spec="beastmap.logger.mut.SynonymousSubstSum" truth="@simulatedData" code="universal" />
+	        <sampler id="NonSynonymousSubstSum" spec="beastmap.logger.mut.NonSynonymousSubstSum" truth="@simulatedData"  code="universal" />
+	        <sampler id="FromToSubstSum" spec="beastmap.logger.mut.FromToSubstSum" truth="@simulatedData" from="AAA" to="AAT" />
+	    </log>
+	</logger>
+
+
+	
+
+
+
+
+</run>
+
+</beast>

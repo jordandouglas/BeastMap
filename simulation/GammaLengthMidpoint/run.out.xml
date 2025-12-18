@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate="Standard" beautistatus="" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.5:BICEPS v1.1.2:bModelTest v1.3.3:OBAMA v1.1.1:ORC v1.1.2:BEASTLabs v2.0.2" version="2.7">
+
+
+    <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+
+    <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+
+    <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+
+    <map name="Normal" >beast.base.inference.distribution.Normal</map>
+
+    <map name="Beta" >beast.base.inference.distribution.Beta</map>
+
+    <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+
+    <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+
+    <map name="prior" >beast.base.inference.distribution.Prior</map>
+
+    <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+
+    <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
+
+    <map name="Poisson" >beast.base.inference.distribution.Poisson</map>
+
+    <map name="Dirichlet" >beast.base.inference.distribution.Dirichlet</map>
+
+
+    <log id="mutationsampler" spec="beastmap.evolution.BranchMutationSampler" tag="seq" useAmbiguities="false" substModelIsNodeDependent="false" burnin="10000" >
+         <tree idref="tree" />
+         <siteModel idref="siteModel" />
+         <branchRateModel idref="clockModel" />
+         <data spec="beastmap.evolution.PatternlessAlignment" data="@data" />
+    </log>
+
+
+
+    <data id="data" spec="beast.base.evolution.alignment.Alignment" dataType="nucleotide">
+            <sequence spec='beast.base.evolution.alignment.Sequence' taxon='1' value='TTAGTGCCAGATAGACTGTCATTAGAACGGAATTTTCTACTCAAATTTATGTAATGGTGAAGGACGACAACTATAGCCGCCCGGATTGCCATTGCGAGAGTCTGACAAAGGGCCTATATCCAAGGTTTGATGACATATGGACCAATGGAAGAATTCGATCGTAAGGCAAGGACTAACATATATAATAAGAGTTGTTCAAGTAGAAAGTAAGAATAAGACTGGGATACCTCAATATTGTCGATGATGTCACTCGGAAATAAGGTTGCTGTAAGGGTCATCGCAAAACAGCATCAAGATTTA'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='2' value='TTAGTGTCAGATAGACGGTCATTAGAACGGAATTTTCCACTCACATTTATATACTGGTGAAAGACGACAACTAGAGACGCCAGGATTGCCATTGCGAGAGTCTGACAAAGGTTCTATGTCCAGGGTATGATGACATATGGACCAAGGGAAGAATTCGATCGTAAGGCAAGAACTAACATATATAATAAAAGCTGTTCAAGTAGAAAGTAAAAGTAAGACTGGGATACCTCAATATTGTCGATGATGTCATTCGGAAATAAGGTTGCTGTGAGAGTCATCATAAAACAGCATCAAAATTGC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='3' value='TTAGTGCCAGATAGACGGTCATTAGAACGGAATTTTCCACTCATATTTATGTACTGGTGAAAGACGACAACTAGAGACGCCAGGATTGCCATTGCGAGAGTCTGACAAAGGATCTATATCCAGGGTATGATGACATATGGACCAAGGGAAGAATTCGATCGTAAGGCTAGAACTAACACATATAATAAAAGTTGTTCAAGTAGAAAGTACGAGTAAGACTGGGATACCTCAATATTGTCGATGATGTCATTCGGAAATAAGGTTGCTGTAAGAATCATCGTAAAACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='4' value='TTAGTGCCAGATAGACTGTCATTAGAACGGAATTTTCTACTCAAATTGATGTACTGGTGAAGGGCGATAACCAGAGACGCCCGGATTGCCATTGCGAGAGTCTGACAGAGGATCTATACCCAAGGTTTGATGACATATGGACCAAGGAAAGAATACGATGGTAAGGCAAGGACTAACATATATCATAAGAGTTCTTCAAGTAGAAGGGAAGAATAAGGCTGTGATACCTCGATATTGACGATGATGTCACTCGGAAATAAGGTTGCTGTAAGGGTCATCGCAAGACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='5' value='TTAGTGCCAGATAGACTGTCATCAGAACGGAATTTTCTACTCAAATTGATGTACTGGTGAAGGGCGACAACCAGAGCCGCCCGGATTGCCATTGCGAGAGTCTGACAGAGGATCTATATCCAGGGTTTGATGACATATGGACCAGGGAAAGAATACGATCGTAAGGCAAGGACTAACATATATGATAAGAGTTCTTCAAGTAGACGGTAAGAATAAGGCTGTGATACCTCGATATTGACGATGATGTCACTCAGAAATAAGGTTGCTGTAAGGGTCATCGCAAGACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='6' value='TTAGTGCCTGATAGACTGTCATTAGAACGGAATTTTTTACTCAAATTGATGTACTGGTGAAGGGCGACAACCAGAGCCGCCCGGATTGCCATTGCGAGAGTCTGACAGAGGATCTATATCTAGGGTTTGATGACATATGGACCAAGGAAAGAATTCGTTCGTAAGGCAAGGACTAACATATATCATAAGAGTTCTTCAAGTAGAAGGTAAGAATAAGGCTGTGATACCTCAATATTGTCGATGATATCACTCGGAAATAAGGTTGCTGTAAGGGTCATCGCAAGACAACATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='7' value='TTAGTGCCAGATAGACTGTCATTAGAACGGAATTTTCTACTCAAATTGATGTACTGGTGAAGGGCGACAACCAGAGCCGCCCGGATTGCCATTGCGAGAGTCTGACAGAGGATCTATATCCAGGGTTTGATGACATATGGATCAAGGAAAGAATTCGATCGTAAGGCAAGGACTAACATATCTAATAAGAGTTGTTCGAGTAGAAGGTAAGAATAAGGCTGTGATACCTCAATATTGACGATGATGTGACTCGGAAATAAGGTTGCTGTAAGGGTCATCGCAAAACAGCATCAAAGTTCC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='8' value='TTAGTGCCAGATAGACTGTCATTAGAACGGAATTTTCTACTCAAATTGATGTACTGGTGAAGGGCGACAACCAGAGCCGTCCGGATTGCCATTGCGAGAGTCTGACAGAGGATCTATATCCAGGGTTTGATGACATATGGACCAAGGAAAGAATTCGATCGTAAGGCAAGGACTAACATATATAATAAGAGTTGTTCAAGTAGAAGGTAAGAATAAGGCTGTGATACCTCAATATTGACGATGATGTCACTCGGAAATAAGGTTGCTGTAAGGGTCATCGCAAAACAGCATCAAAGTTCC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='9' value='TTAGTCGCGGATAGACTTTCATTTGATCGGAATATTCGACTCAAATTGCTCTACTGGTAAAGGGCGGCGACTTGAGCCGCCCGGATTCCCATTTCGAGAGCCTGACAGAGGTTCTATATCCATGTTTTGTTGACATATGGAGCAACGGAAGAGTTCGTTCGTAAAGTAATGACTAACATATGTAATAAAAGTTTTTCAAGTAGTAGGTAAGAATAAGACCGGGATACCTCAATATTGTCGATGATGTCACTTGAAAGAAAGGTTGCTGGAAGGATCATCGCAAAACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='10' value='TTAGTCGCGGATAGACTTTCATTTGATCGGAATATTCGACTCAAATTGCTCTACTGGTAAAGGGCGGCGACTAGAGCCGCCCGGATTCCCATTTCGAGAGCCTGACAGAGGTTCTATATCCATGTTTTGTTGACATATGGAGCAACGGAAGAGTTCGTTCGTAAAGTAATGACTAACATATATAATAAGAGTTTTTCAAGTAGTAGGTAAGAATAAGACCGGGATACCTCAATATTGTCGATGAGGTCACTTGAAAGAAAGGTTGCTGGAAGGGTCATCGCAAAACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='11' value='TTAGTCGCAGATAGACTGTCATTAGATCGGAATTTTCTACTCAAATTGATGTACTAGTAAAGAGCGGCGACTAGGGCCACCCGGATTGCCATTGCGAGAGGCTGACAGAGGGTCTATATCCAGGGTATGTTGACATATGGACCAAAGAAAGAGTTCGATTGTAAACTAATGACTAACATATATAATAAAAGTTGTTCAAGTAGAAGGTAAAAATAAGACCGGGATACCTCAACATTGTCGATGATGTCACGCGGAAGTAAGGTTGCTGAAAGGGTCATCGCGAAACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='12' value='TTAGTCGCAGATAGACTGTCATTAGATCGGAATTTTCTACTCAAATTGATGTACTAGTAAAGAGCGGCGACTAGAGCCGCCCGGATTGCCATTGCGAGAGTCTGACAGAGGGTCTATATCCAGGGTTTGTTGACATATGGACCAAAGAAAGAGTTCGATCGTAAAGTAATGACTAACATATATAATAAGAGTTGTTCAAGTAGAAGGTAAAAATAAGACCGGGATACCTCAATATTGTCGATGATGTCACGCGGAAGTAAGGTTGCTGAAAGGGTCATCGCGAAACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='13' value='TTAGTCGCAGATAGACTGTCATTAGATCAGAATTTTCTACTCAAATTGATGTACTAGTAAAGAACGGCGACTAGAGCCGCCCGGATTGCCATTGCGAGAGTCTGACAGAGGGTCTATATCCAGGGTTTGTTGACATATGGACCAAAGAAAGGGTTCGATCGTAAAGTAATGACTAACATATATAATAAGAGTTGTTCAAGTAGAAGGTAAGAATAAGACCGGGATACCTCAATATTGTCGATGATGTCACGCGGAAGTAAGGTTGCTGAAAGGGTCATCGCAAAACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='14' value='TTAGTCCCTGATAGACTGTCATTAGATCGGAATTCTCTACTCAAATTGATGTACTAGTAAAGAGCGGCGACTAGAGCCGCCCAGATTGCCATTACGAGAGTCTGACAGAGGGTCTATATCGAGGGTTTGTTGACATATGGGCCAAGGGAAGAGTTCGATCGTAAAGTATTGACTAACAAATATAATAAGAGTTGTTCAAGTAGAGGGTAAAAATAAGACCGGGATACCTCAATATTGTCGATAATGTCACGCGGAAGTAAGGTTGCTGAAAGGATCATCGTAAAACAGGATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='15' value='TTAGTCCCTGATAGACTGTCATTAGATCGGAATTCTCTACTCACATTGATGTACTAGTAAAGAGCGGCGACTAGAGCCGCCCGGCTTGCCATTACGAGAGCCTGACAGAGGGTCTATATCGAGGGTTTGTTGACATATGGGCCAAGGGAAGAGTTCGATCGTAAAGTATTGACTAACAAATATAATAAGAGTTGTTCAAGTAGAGGGTAAAAATAAGACCGGGATACCTCAATATTGTCGATGATGTCACGCGGAAGTAAGGTTGCTGAAAGAGTCATCGTAAAACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='16' value='TTAGTCGCAGATAGACTGTCATTAGATTAGAATTTTCTACTCAAATTGATGTATTAGTAAAGAGCGGCAACTAGAGCCGCCCGGATTGCCATTGCGAGAGTCTGACAGAGGGTCTACATCAAGGGTTTGTTGACATATGGACCAACGGAAAAGTTCAATCGAAAAGTAATGACTAACATATATAATAAGAGTTGTTCAAGTAGAAGGTAAGAATAAGACCGGGATACCTCAATATTGTCGATGATGTCACGCGGAAGTAAGGTTGCTGAAAGGGTCATCGCAAAACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='17' value='TTAGTCGCAGATAGACTGTCATTAGATTAGGATTTTCTACTCAGATTGATGTATTAGTAAAGGGCGGCGACTAGAGCCACCCGGATTGCCATTGCGAGAGTCTGACAGAGGGTCTACATCCAGGGTTTGTTGACATATGGATCAAGGAAAAAGGTCAATCGTAAAGTAATAACTAACATATATAATAAGAGTTGTTCAAGTAGAAGGTAAGAATAAGACCGGGATACCTCAATATTGTCGATGATGTCACGCGGAAGTAAGGTTGCTGAAAGGGTCATCGCAAAACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='18' value='TTAGTCGCAGATAGACTGTCATTAGATCGGAATTTTCTACTCAAATTGATGTATTAGTAAAGAGCGGCGACTAGAGCCACCCGGATTGCGATTGCGAGGGTCTGACAGAGGGTCTATATCCAGGGTTTGTTGACATATGGACCAACGGAAGAGTTCAATCGTAAAGTAATGACTAACATATATAATAAGAGTTGTTCAAGTAGAAGGTAAGAATAAGACCGGGATACCTCAATATTGTCGATGATGTCACGCGGAAGTAAGGTTGCTGAAAGGGTCATCGCAAAACAGCATCAAAATTTC'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='19' value='TTAGTCACAGATAGACTGTCATTAGATCGGGATTTTCTACTCAAATCGATGTATTGGTAAAGAGCGGCGACTAGAGCCGCCGGGATTGCCATTGCGAGAGTCTGACAGAGGGTCTATATCAAGGGTTTGTTGACATATGGACCAACGGAAGAGTTCGATAGTAAAGTTATGACTAACACATATAATAAGAGTTGTTCAAGTGGAGGGTAAAAATAAGACGGGGATACTTCAATATTGTCGATGATGGCATGCGCAAGTAAGGTTGCTGAAAGGGTCACCGCAAAACAATATCAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='20' value='TTAGTCACAGATAGACTGTCATTAGATCGGGATTTTCTACTCAAATCGATGTATTGGTAAAGAGCGGCGACTAGAGCCGCCGGGATTGCCATTGCGAGAGTCTGACAGAGGGTCTATATCAAGGGTTTGTTGACATATGGACCAACGGAAGAGTTCGATAGTAAAGTTATGACTAACACATATAATAAGAGTTGTTCAAGTGGAGGGTAAAAATAAGACGGGGATACTTCAATATTGTCGATGATGTCATGCGCAAGTAAGGTTGCTGAAAGGGTCACCGCAAAACAATATCAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='21' value='TGAGTCACAGATAGACTGTCATTAGATCGGAATTTTCTACTCAAATTGATGTATTGGTAAAGAGCGGCAACTAGAGATGCCGGGATTACCATTGCGAGAGTTTGACAGAGGGTCTATATCAAGGGTATGTTGACATATGGACCAACGGAAGAGTTCGATGGTAAGGTGATGACTAACATTTATAATAAGAGTTGTTCAAGTAGAGGGTAAAAATAAGACGGGGATACTTCAATATTGTCGATGATGTCATGCGGTAGTAAGGTTGCTGAAAGGGTCATCAAAAGAGAGCATCAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='22' value='TTAGTCACAGATAGAATGTCATTAGATCGGAATTTTCTACTCAAATTGATGTATTGGTGAAGAGCGGCGACTAGAGACGCCGGGATTGCCATTGCGAGAGTTTGACAAAGGGTCTATATCAAGGGTATGTTGACATATGGACCAACGGAAGAGTTCGATGGTAAAGTTACGCCTAACATTTATGATAAGAATTGTTCAAGTAGAGGGTAAAAATAAGACGGGGATACTTCAATATTGTCGATGATGTTATGCGGAAGTAAGGTTGTTGAAAGGGTCATCAAAAAACAGCATCAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='23' value='CTAGTCGAAGATAGGCTGTCATTAGATCAGGATTTTCTACTCAAATCGATGTATTGGTAAAGAGCGGCGACCAGAGCCGCCGGGATTCCCATTGGGAGAGGTTGACAGAGGGTCTATGTCAAAGGTATGTTGACATATGGACCAACGTAAAAGTTCGATGGTAAAGTTATAACTAACATTTATAATAAGAGTTGTTCAAGTAGCGTGTAAAATTAAGCCGGGGACACTTCAATATTGTCGATGATGTCATGCGGAAGTAAGGTTGCTGAAAGAGGCACCAAAAAACAGCATCAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='24' value='TTAGTCGCAGATAGACTCTCATTAGATCGGGATTTTCTACTCAGATCGATGTCTTGGCAAAGAGCGGCAACCAGAGACGCCGGGATTCCCATTGGGAGAGTTCGACAGAAGGTCTATGTCAAAGGTTTGTTGACATATGGACCAAAGAAAGAGTTCGATGGTAAAGTTATAACTAACAATTATAATAAGAGTTGTTCAAGTAGCGTGTAAAATTAAAACGGGAATACTTCAATATTGTCGATGATGTCCTGCGGAAGTAAGGTTGCTGAAAGAGGCAACAAAAAACAGCATCAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='25' value='TTAGTCGCAGATAGACTCTCATTAGATCGGGATTTTCTACTCAGATCGATGTCTTGGTAAAGAGCGGCAGCCAGAGACGCCGGGATTCCCATTGGGAGAGTTCGACAGAAGGTCTATGTCAAAGGTTTGTTGACATATGGACCAAAGAAAGAGTTCGATGGTAAAGTTATAACTAACAATTATAATAAGAGTTGTTCAAGTAGCGTGTAAAATTAAAACGGGAATACTTCAATATTGTCGATGATGTCCTGCGGAAGTAAGGTTGCTGAAAGAGGCAACAAAAAACAGCATCAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='26' value='TTAGTCGCAGATAGACTGTCATTAGATCGGGATTTTCTACTCAAATCGATGTATTGGTAAAGAGCGGCGACCAGAGACGCCGGGATTCCCATTGGGAGAGTTTGACAGAGGGTCTATGTCAAGGGTATGTTGACATATGGACCAACGAAAGAGTTCGATGGTAAAGTTATGACTAACATTTATAATAAGAGTTGTTCAAGTAGCGTGTAAAAATAAGACGGGGATACTTCAATATTGTCGATGATGTCATGCGGAAGTAAGGTTGCTGAAAGAGGCATCAAAAAACAGCATCAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='27' value='TTAGTCACAGATAGACTGTCATTAGATCGGAATTTTCTACTCAAATCGATATATTGGTAAAGAGCGGTAACCAGAGCCGCCGGGATTGCCATTGCGAGAGTCTGACAGAGGATCTATATCAACGGTTTGTTGACATATGGACCAACGGAAGAGTTCGATGGTAAAGTTATGACTAACACACATAATAAGAGTTGTTCAAGTAGAGGGTAAAAATAAGACCGGGATACTTCAATATTGTCGATGATGTCATGCGGAAGTAAGGTGGCTGAAAGTGTCATCGCAAAACAGCATAAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='28' value='TTAGTCACAGATAGACTGTCATTGGATCAGAATTTTTTGCTCAAATCGATGTATTGGAAAAGAGCGACGACTAGGGCCGCCGGGATTACCATTGGGAGAGTCTGACAGAGGGTCTATATCAAGGGTCTGTTGACATATGGACCAACGGAAAAGTTCGATGGTCATGTTGTGACTAACATATATAATAAGAGTTGTTCAAGTAGAGGGTAAAAATGAGACCGGGAAACGTCAATATTGTCGATGATGTCATGCGGAAGTAAGGTTGATGAAATTGTCATCGCAAAACACCATCAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='29' value='TTAGTCACAGATAGACTGTCATTGGATCAGAATTTTTTGCTCAAATCGATGTATTGGAAAAGAGCGACGACTAGGGCCGCCGGGATTACCATTGGGAGAGTCTGACAGAGGGTCTATATCAAGGGTTTGTTGACATATGGACCAACGGAAAAGTTCGATGGTCATGTTGTGACTAACATATATAATAAGAGTTGTTCAAGTAGAGGGTAAAAATGAGACCGGGAAACGTCAATATTGTCGATGATGTCATGCGGAAGTAAGGTTGCTGAAAGTGTCATCGCAAAACACCATCAAAATTTT'/>
+    <sequence spec='beast.base.evolution.alignment.Sequence' taxon='30' value='TTAATCACAGATAGACTGTCATTGGATCGGAATCATTTGCTCAAATCGATGTATTGGAAAAGAACGACGACTAGGGCCGCCGGGATTACCATTGGGAGAGTCTGACAGAGGGTCTATATCGAGGGTTTGTTGACATATGGACCAACGGAAAAGTTCGATGGTCATGTTGTGACTAACATATATAATGAGAGTTGTTCAAGTAGAGGGTAAAAATGAGACCGGGAAACTTCAATATTGTCGATGATGTCATGCGGAAGTAAGGTCGCTGAAAGTGTCACCGCAAAACACCGTCAAAATTTT'/>
+    </data>
+
+
+
+    <run id="mcmc" spec="MCMC" chainLength="0">
+        <state id="state" spec="State" storeEvery="100000">
+
+
+
+            <!-- Start on a random tree  -->
+            <tree id="tree" spec="beastmap.evolution.TimelessTree" name="stateNode">
+                <taxonset id="taxonset" spec="TaxonSet">
+                    <alignment idref="data"/>
+                </taxonset>
+            </tree>
+
+
+            <parameter id="lengthMean" spec="parameter.RealParameter" name="stateNode" lower="0">0.05</parameter>
+            <parameter id="lengthShape" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+            <parameter id="midpointAlpha" spec="parameter.RealParameter" name="stateNode" lower="1">50</parameter>
+            <parameter id="gammaShape" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+            <parameter id="kappa" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+            <parameter id="frequencies" spec="parameter.RealParameter" name="stateNode" lower="0" upper="1.0">0.25 0.25 0.25 0.25</parameter>
+
+
+
+           
+        </state>
+
+
+
+        <distribution id="posterior" spec="CompoundDistribution">
+            <distribution id="prior" spec="CompoundDistribution">
+               
+
+
+                      
+
+                  <distribution id="treePrior" spec="beastmap.distribution.UnconstrainedTreePrior" tree="@tree" mean="@lengthMean" shape="@lengthShape" midpoint="@midpointAlpha" /> 
+
+
+
+                 <prior name="distribution" x="@lengthMean">
+                    <LogNormal name="distr" meanInRealSpace="true" M="0.05" S="1"/>
+                 </prior>
+
+                <prior name="distribution" x="@lengthShape">
+                    <LogNormal name="distr" meanInRealSpace="true" M="2" S="1"/>
+                 </prior>
+             
+                <prior name="distribution" x="@gammaShape">
+                    <Exponential name="distr" mean="1"/>
+                 </prior> 
+
+                <prior name="distribution" x="@kappa">
+                    <LogNormal name="distr" meanInRealSpace="true" M="3" S="0.5"/>
+                </prior> 
+
+                  <prior name="distribution" x="@frequencies">
+                    <Dirichlet name="distr" alpha="2 2 2 2"/>
+                 </prior> 
+
+
+
+            </distribution>
+
+             <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution">
+
+                <distribution data="@data" id="treeLikelihood" spec="TreeLikelihood" tree="@tree">
+                    <siteModel id="siteModel" spec="beast.base.evolution.sitemodel.SiteModel" shape="@gammaShape" gammaCategoryCount="4">
+                       <substModel id="substModel" spec="HKY" kappa="@kappa">
+                            <frequencies spec="Frequencies" frequencies="@frequencies" />
+                        </substModel>
+                   </siteModel>
+                   <branchRateModel id="clockModel" spec="beast.base.evolution.branchratemodel.StrictClockModel" clock.rate="1.0" />
+                </distribution>
+
+
+            </distribution>
+
+
+           
+
+            
+
+        </distribution>
+
+
+
+        <!-- Unconstrained tree operators -->
+        <operator id="TipDatesRandomWalker" spec="beastmap.operator.UnconstrainedTipRandomWalker" tree="@tree"  windowSize="0.1" weight="10.0"/>
+        <operator id="BranchLengthScaler" spec="beastmap.operator.BranchLengthScaler" tree="@tree" scaleFactor="0.1" weight="10.0"/>
+
+
+        <!-- Regular tree operators -->
+        <operator id="NarrowExchange.tree" spec="beast.base.evolution.operator.Exchange"  tree="@tree" weight="10.0"/>
+        <operator id="WideExchange.tree" spec="beast.base.evolution.operator.Exchange"  tree="@tree" isNarrow="false" weight="5.0"/>
+        <operator id="SubtreeSlide" spec="kernel.BactrianSubtreeSlide" tree="@tree" weight="5.0"/>
+        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="5.0"/>
+        <operator id="UniformOperator.t" spec="kernel.BactrianNodeOperator" tree="@tree" weight="10.0"/>
+        <operator id="TreeScale" spec="kernel.BactrianScaleOperator" tree="@tree" scaleFactor="0.1" weight="10.0"/>
+
+         <operator id="AVMN.tree.prior" spec="beastmap.operator.AVMNTimelessTree" beta="0.05" burnin="2000" initial="2000" weight="5">
+            <transformations spec="operator.kernel.Transform$LogTransform">
+                 <f idref="lengthMean"/>
+                 <f idref="lengthShape"/>
+                 <f idref="tree"/>
+            </transformations>
+        </operator> 
+        <operator id="YuleModelBICEPSEpochTop." spec="EpochFlexOperator" scaleFactor="0.1" tree="@tree" weight="5.0"/>
+        <operator id="YuleModelBICEPSEpochAll." spec="EpochFlexOperator" fromOldestTipOnly="false" scaleFactor="0.1" tree="@tree" weight="5.0"/>
+        <operator id="YuleModelBICEPSTreeFlex." spec="TreeStretchOperator" scaleFactor="0.01" tree="@tree" weight="5.0"/>
+       
+
+
+
+        <operator id="_KappaScaler.s:dna" spec="ScaleOperator" parameter="@kappa" scaleFactor="0.5" weight="0.5"/>
+        <operator id="_gammaShapeScaler.s:dna" spec="ScaleOperator" parameter="@gammaShape" scaleFactor="0.5" weight="0.5"/>
+        <operator id="FreqExchange.s:dna" spec="beast.base.inference.operator.kernel.BactrianDeltaExchangeOperator" parameter="@frequencies" delta="0.1" weight="2"/>
+
+        <!-- Tree prior operators -->
+        <operator id="lengthMean.scale" spec="kernel.BactrianScaleOperator" parameter="@lengthMean" scaleFactor="0.1" weight="1"/>
+        <operator id="lengthShape.scale" spec="kernel.BactrianScaleOperator" parameter="@lengthShape" scaleFactor="0.1" weight="1"/>
+        <operator id="AVMN.site.prior" spec="beastmap.operator.AVMNTimelessTree" beta="0.05" burnin="2000" initial="2000" weight="1">
+            <transformations spec="operator.kernel.Transform$LogTransform">
+                 <f idref="kappa"/>
+                 <f idref="gammaShape"/>
+            </transformations>
+             <transformations spec="operator.kernel.Transform$LogConstrainedSumTransform">
+                 <f idref="frequencies"/>
+            </transformations>
+        </operator> 
+
+
+
+
+
+
+        <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log idref="lengthMean"/>
+            <log idref="lengthShape"/>
+            <log idref="midpointAlpha"/>
+            <log idref="gammaShape"/>
+            <log idref="kappa"/>
+            <log idref="frequencies"/>
+            <log id="treeHeight" spec="beast.base.evolution.tree.TreeStatLogger" tree="@tree"/>
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@SubstitutionSum"  />
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@NonSynonymousSubstSum"  />
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@FromToSubstSum"  />
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@NucleotideTransitionCounter"  />
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@NucleotideTransversionCounter"  />
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@SynonymousSubstSum"  />
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@SubstitutionSumFiltered"  />
+            <log idref="SubstitutionSum"  />
+            <log idref="SynonymousSubstSum"  />
+            <log idref="NonSynonymousSubstSum"  />
+            <log idref="FromToSubstSum"  />
+            <log idref="NucleotideTransitionCounter"  />
+            <log idref="NucleotideTransversionCounter"  />
+            <log idref="SubstitutionSumFiltered"  />
+
+        </logger>
+        <logger id="screenlog" spec="Logger" logEvery="10000">
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@SubstitutionSum"  />
+            <log idref="lengthMean"/>
+            <log idref="lengthShape"/>
+        </logger>
+
+
+        <logger id="treelog" spec="Logger" fileName="$(filebase).trees" logEvery="10000" mode="tree">
+            <log id="SampledSubstTreeLogger" spec="beastmap.logger.SampledSubstTreeLogger"  tree="@tree">
+                <sampler id="SubstitutionSum" spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" />
+                <sampler id="SynonymousSubstSum" spec="beastmap.logger.mut.SynonymousSubstSum" sampler="@mutationsampler" code="universal" readingFrame="1"/>
+                <sampler id="NonSynonymousSubstSum" spec="beastmap.logger.mut.NonSynonymousSubstSum" sampler="@mutationsampler"  code="universal" readingFrame="1"/>
+                <sampler id="FromToSubstSum" spec="beastmap.logger.mut.FromToSubstSum" sampler="@mutationsampler" from="A" to="G" />
+                <sampler id="NucleotideTransitionCounter" spec="beastmap.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />
+                <sampler id="NucleotideTransversionCounter" spec="beastmap.logger.mut.NucleotideTransversionCounter" sampler="@mutationsampler" />
+                <sampler id="SubstitutionSumFiltered" spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" filter="2,1-99\3" />
+            </log>
+        </logger>
+
+
+        <operatorschedule id="OperatorSchedule" spec="OperatorSchedule" autoOptimizeDelay="5000"/>
+    </run>
+
+</beast>

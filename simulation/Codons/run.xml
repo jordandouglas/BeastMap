@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate="Standard" beautistatus="" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.5:BICEPS v1.1.2:bModelTest v1.3.3:OBAMA v1.1.1:ORC v1.1.2:BEASTLabs v2.0.2" version="2.7">
+
+
+    <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+
+    <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+
+    <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+
+    <map name="Normal" >beast.base.inference.distribution.Normal</map>
+
+    <map name="Beta" >beast.base.inference.distribution.Beta</map>
+
+    <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+
+    <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+
+    <map name="prior" >beast.base.inference.distribution.Prior</map>
+
+    <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+
+    <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
+
+    <map name="Poisson" >beast.base.inference.distribution.Poisson</map>
+
+    <map name="Dirichlet" >beast.base.inference.distribution.Dirichlet</map>
+
+
+    <log id="mutationsampler" spec="beastmap.evolution.StochasticMapJoiner" join="intersperse" >
+
+        <plate var="c" range="1,2,3">
+            <sampler id="mutationsampler.$(c)" spec="beastmap.evolution.BranchMutationSampler" tag="seq" useAmbiguities="false" burnin="10000" >
+                 <tree idref="tree" />
+                <siteModel idref="siteModel.$(c)" />
+                 <branchRateModel idref="clockModel" />
+                 <data spec="beastmap.evolution.PatternlessAlignment" data="@data.$(c)" />
+            </sampler>
+        </plate>
+
+    </log>
+
+
+    <data id="data" spec="beast.base.evolution.alignment.Alignment" dataType="nucleotide">
+        $(seq-data)
+    </data>
+
+    <branchRateModel id="clockModel" spec="beast.base.evolution.branchratemodel.UCRelaxedClockModel" clock.rate="1" rates="@branchRates" tree="@tree">
+        <LogNormal id="ORCLogNormalDistributionModel.c:tree" M="1" S="@clockSD" meanInRealSpace="true" name="distr" />
+    </branchRateModel>
+
+    <data id="data.1" spec="beast.base.evolution.alignment.FilteredAlignment" data="@data" filter="1-600\3" />
+    <data id="data.2" spec="beast.base.evolution.alignment.FilteredAlignment" data="@data" filter="2-600\3" />
+    <data id="data.3" spec="beast.base.evolution.alignment.FilteredAlignment" data="@data" filter="3-600\3" />
+
+
+    <run id="mcmc" spec="MCMC" chainLength="2500000">
+        <state id="state" spec="State" storeEvery="100000">
+
+
+
+            <!-- Start on a random tree  -->
+            <tree id="tree" name="stateNode">
+                <taxonset id="taxonset" spec="TaxonSet">
+                    <alignment idref="data"/>
+                </taxonset>
+            </tree>
+
+
+
+            <parameter id="lambda" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+            <parameter id="r0" spec="parameter.RealParameter" name="stateNode" lower="0" >2</parameter>
+
+
+            <parameter id="codon.rate.1" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+            <parameter id="codon.rate.2" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+            <parameter id="codon.rate.3" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+
+
+            <parameter id="branchRates" spec="parameter.RealParameter" name="stateNode" lower="0" dimension="1">1</parameter> 
+            <parameter id="clockSD" spec="parameter.RealParameter" name="stateNode" lower="0">0.2</parameter>
+
+
+            <plate var="c" range="1,2,3">
+
+                <parameter id="free.weights.codon.$(c)" spec="parameter.RealParameter" name="stateNode" lower="0.0" dimension="4">0.25 0.25 0.25 0.25</parameter>
+                <parameter id="free.rates.codon.$(c)" spec="parameter.RealParameter" name="stateNode" lower="0.0" dimension="4">0.25 0.25 0.25 0.25</parameter>
+
+                <stateNode id="BMT_ModelIndicator.s:tree.$(c)" spec="parameter.IntegerParameter" lower="0" upper="5">5</stateNode>
+                <parameter id="BMT_Rates.s:tree.$(c)" spec="parameter.RealParameter" dimension="6" lower="0.01" name="stateNode" upper="100.0">1.0</parameter>
+                <parameter id="BMT_gammaShape.s:tree.$(c)" spec="parameter.RealParameter" name="stateNode" lower="0.0">1.0</parameter>
+                <parameter id="BMT_ProportionInvariable.s:tree.$(c)" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="1.0">0.1</parameter>
+                <stateNode id="hasInvariableSites.s:tree.$(c)" spec="parameter.IntegerParameter">0</stateNode>
+                <stateNode id="hasGammaRates.s:tree.$(c)" spec="parameter.IntegerParameter">1</stateNode>
+                <stateNode id="hasEqualFreqs.s:tree.$(c)" spec="parameter.BooleanParameter">false</stateNode>
+                <parameter id="BMT_frequencies.s:tree.$(c)" spec="parameter.RealParameter" dimension="4" name="stateNode">0.25 0.25 0.25 0.25</parameter>
+            </plate>    
+           
+        </state>
+
+
+        <init id="RandomTree.tree" spec="RandomTree" estimate="false" initial="@tree" taxa="@data">
+            <populationModel spec="ConstantPopulation" popSize="0.1" />
+        </init>
+
+
+
+        <distribution id="posterior" spec="CompoundDistribution">
+            <distribution id="prior" spec="CompoundDistribution">
+               
+
+
+                      
+
+                <distribution id="treePrior" spec="gammaspike.distribution.StumpedTreePrior" r0="@r0" lambda="@lambda" ignoreTreePrior="false" ignoreStubPrior="false" tree="@tree"> 
+                 </distribution>
+
+
+
+                 <prior name="distribution" x="@lambda">
+                    <LogNormal name="distr" meanInRealSpace="true" M="1" S="2"/>
+                 </prior>
+
+                <prior name="distribution" x="@r0">
+                    <LogNormal name="distr" meanInRealSpace="true" M="3" S="0.5"/>
+                 </prior>
+             
+
+                <plate var="c" range="1,2,3">
+
+                    <prior id="free.rates.codon.$(c).prior" name="distribution" x="@free.rates.codon.$(c)">
+                        <distr spec="distribution.Dirichlet" alpha="1 1 1 1" />
+                    </prior>
+
+
+                     <prior id="free.weights.codon.$(c).prior" name="distribution" x="@free.weights.codon.$(c)">
+                        <distr spec="distribution.Dirichlet" alpha="4 4 4 4" />
+                    </prior>
+
+
+
+                      <distribution id="BMT_RatesPrior.s:tree.$(c)" spec="bmodeltest.math.distributions.NucleotideRevJumpSubstModelRatePrior" modelIndicator="@BMT_ModelIndicator.s:tree.$(c)" x="@BMT_Rates.s:tree.$(c)">
+                            <substModel id="RevJump.s:tree.$(c)" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" modelIndicator="@BMT_ModelIndicator.s:tree.$(c)" rates="@BMT_Rates.s:tree.$(c)">
+                                <frequencies id="BMTfreqs.s:tree.$(c)" spec="bmodeltest.evolution.substitutionmodel.ModelFrequencies" empirical="false" frequencies="@BMT_frequencies.s:tree.$(c)" hasEqualFreqs="@hasEqualFreqs.s:tree.$(c)"/>
+                            </substModel>
+                            <Exponential id="BMT_RatesPrior.s:treex.$(c)" name="distr"/>
+                        </distribution>
+                        <distribution id="BMT_GammaShapePrior.s:tree.$(c)" spec="bmodeltest.math.distributions.BMTPrior" count="@hasGammaRates.s:tree.$(c)" x="@BMT_gammaShape.s:tree.$(c)">
+                             <Exponential name="distr" mean="1"/>
+                        </distribution>
+                        <distribution id="BMT_PropInvariablePrior.s:tree.$(c)" spec="bmodeltest.math.distributions.BMTPrior" count="@hasInvariableSites.s:tree.$(c)" x="@BMT_ProportionInvariable.s:tree.$(c)">
+                            <Beta id="Beta.0.$(c)" name="distr">
+                                <alpha id="Function$Constant.2.$(c)" spec="Function$Constant" value="1.0"/>
+                                <beta id="Function$Constant.3.$(c)" spec="Function$Constant" value="4.0"/>
+                            </Beta>
+                        </distribution>
+                        <prior id="BMT_freqsPrior.s:tree.$(c)" name="distribution" x="@BMT_frequencies.s:tree.$(c)">
+                            <distr id="Dirichlet.0.$(c)" spec="distribution.Dirichlet">
+                                <alpha id="Function$Constant.4.$(c)" spec="Function$Constant" value="1.0 1.0 1.0 1.0"/>
+                            </distr>
+                        </prior>
+                    </plate>
+
+                 <prior name="distribution" x="@clockSD">
+                    <LogNormal id="sigmaPrior" name="distr" meanInRealSpace="true" M="0.4" S="0.5"/>
+                 </prior> 
+
+                <prior name="distribution" spec="gammaspike.distribution.BranchRatePrior" branchRates="@branchRates" tree="@tree" sigma="@clockSD"/>
+
+
+            </distribution>
+
+             <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution">
+
+
+
+
+                <plate var="c" range="1,2,3">
+                     <distribution  id="treeLikelihood.codon.$(c)" spec="TreeLikelihood" tree="@tree">
+                        <data idref="data.$(c)" />
+
+                        <siteModel id="siteModel.$(c)" spec="freerates.evolution.sitemodel.FreeRateModel" weights="@free.weights.codon.$(c)" rates="@free.rates.codon.$(c)" substModel="@RevJump.s:tree.$(c)">
+                            <mutationRate idref="codon.rate.$(c)" />
+                        </siteModel>
+                        <branchRateModel idref="clockModel" />
+                    </distribution>
+
+                </plate>
+
+            </distribution>
+
+        </distribution>
+
+
+
+        <!-- Regular tree operators -->
+        <operator id="NarrowExchange.tree" spec="beast.base.evolution.operator.Exchange"  tree="@tree" weight="10.0"/>
+        <operator id="WideExchange.tree" spec="beast.base.evolution.operator.Exchange"  tree="@tree" isNarrow="false" weight="5.0"/>
+        <operator id="SubtreeSlide" spec="kernel.BactrianSubtreeSlide" tree="@tree" weight="5.0"/>
+        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="5.0"/>
+        <operator id="UniformOperator.t" spec="kernel.BactrianNodeOperator" tree="@tree" weight="10.0"/>
+        <operator id="TreeScale" spec="kernel.BactrianScaleOperator" tree="@tree" scaleFactor="0.1" weight="10.0"/>
+        <operator id="YuleModelBICEPSEpochTop." spec="EpochFlexOperator" scaleFactor="0.1" tree="@tree" weight="5.0"/>
+        <operator id="YuleModelBICEPSEpochAll." spec="EpochFlexOperator" fromOldestTipOnly="false" scaleFactor="0.1" tree="@tree" weight="5.0"/>
+        <operator id="YuleModelBICEPSTreeFlex." spec="TreeStretchOperator" scaleFactor="0.01" tree="@tree" weight="5.0"/>
+
+
+         <operator id="AVMN.tree.prior" spec="beastmap.operator.AVMNTimelessTree" beta="0.05" burnin="2000" initial="2000" weight="5">
+            <transformations spec="operator.kernel.Transform$LogTransform">
+                 <f idref="lambda"/>
+                 <f idref="r0" />
+                 <f idref="tree"/>
+            </transformations>
+        </operator> 
+
+
+         <operator id="codon.rate.prior" spec="beastmap.operator.AVMNTimelessTree" beta="0.05" burnin="2000" initial="2000" weight="5">
+            <transformations spec="operator.kernel.Transform$LogConstrainedSumTransform" sum="3">
+                 <f idref="codon.rate.1"/>
+                 <f idref="codon.rate.2" />
+                 <f idref="codon.rate.3"/>
+            </transformations>
+        </operator> 
+
+
+       
+
+
+        <!-- Tree prior operators -->
+        <operator id="lambda.scale" spec="kernel.BactrianScaleOperator" parameter="@lambda" scaleFactor="0.1" weight="1"/>
+        <operator id="r0.scale" spec="kernel.BactrianScaleOperator" parameter="@r0" scaleFactor="0.1" weight="1"/>
+
+
+        <plate var="c" range="1,2,3">
+
+
+              <operator id="free.rates.codon.avmn.$(c)" spec="beastmap.operator.AVMNTimelessTree" beta="0.05" burnin="2000" initial="2000" weight="5">
+                <transformations spec="operator.kernel.Transform$LogConstrainedSumTransform" sum="1">
+                     <f idref="free.rates.codon.$(c)"/>
+                </transformations>
+                 <transformations spec="operator.kernel.Transform$LogConstrainedSumTransform" sum="1">
+                     <f idref="free.weights.codon.$(c)"/>
+                </transformations>
+            </operator> 
+
+
+
+            <operator id="BMT_ModelTestOperator.s:tree.$(c)" spec="bmodeltest.evolution.operators.BMTMergeSplitOperator" modelIndicator="@BMT_ModelIndicator.s:tree.$(c)" rates="@BMT_Rates.s:tree.$(c)" substModel="@RevJump.s:tree.$(c)" weight="1.0"/>
+            <operator id="BMT_Ratescaler.s:tree.$(c)" spec="bmodeltest.evolution.operators.BMTExchangeOperator" delta="0.15" modelIndicator="@BMT_ModelIndicator.s:tree.$(c)" rates="@BMT_Rates.s:tree.$(c)" substModel="@RevJump.s:tree.$(c)" weight="1.0"/>
+            <operator id="BMT_gammaShapeScaler.s:tree.$(c)" spec="bmodeltest.evolution.operators.BMTScaleOperator" count="@hasGammaRates.s:tree.$(c)" parameter="@BMT_gammaShape.s:tree.$(c)" scaleFactor="0.5" weight="0.5"/>
+            <operator id="BMT_ProportionInvariableScaler.s:tree.$(c)" spec="bmodeltest.evolution.operators.BMTScaleOperator" count="@hasInvariableSites.s:tree.$(c)" parameter="@BMT_ProportionInvariable.s:tree.$(c)" scaleFactor="0.5" weight="0.5"/>
+            <operator id="BMT_hasGammaRatesFlipper.s:tree.$(c)" spec="bmodeltest.evolution.operators.BMTBirthDeathOperator" count="@hasGammaRates.s:tree.$(c)" rates="@BMT_gammaShape.s:tree.$(c)" weight="0.1"/>
+            <operator id="BMT_hasInvariableSitesFlipper.s:tree.$(c)" spec="bmodeltest.evolution.operators.BMTBirthDeathOperator" count="@hasInvariableSites.s:tree.$(c)" rates="@BMT_ProportionInvariable.s:tree.$(c)" weight="0.1"/>
+            <operator id="BMT_FreqsFlipOperator.s:tree.$(c)" spec="operator.BitFlipOperator" parameter="@hasEqualFreqs.s:tree.$(c)" weight="0.1"/>
+            <operator id="BMT_FrequenciesExchanger.s:tree.$(c)" spec="operator.kernel.BactrianDeltaExchangeOperator" delta="0.01" weight="0.2">
+                <parameter idref="BMT_frequencies.s:tree.$(c)"/>
+            </operator>
+
+        </plate>
+
+
+        <operator id="ORCAdaptableOperatorSampler_sigma.c:tree" spec="beast.base.evolution.operator.AdaptableOperatorSampler" weight="3.0">
+            <parameter idref="clockSD" />
+            <operator id="ORCucldStdevScaler.c:tree" spec="orc.consoperators.UcldScalerOperator" distr="@ORCLogNormalDistributionModel.c:tree" rates="@branchRates" scaleFactor="0.5" stdev="@clockSD" weight="1.0">
+                <kernel spec="beast.base.inference.operator.kernel.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+            </operator>
+            <operator id="ORCUcldStdevRandomWalk.c:tree" spec="beast.base.inference.operator.kernel.BactrianRandomWalkOperator" parameter="@clockSD" weight="1" scaleFactor="0.1">
+                <kernelDistribution spec="beast.base.inference.operator.kernel.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+            </operator>
+            <operator id="ORCUcldStdevScale.c:tree" spec="beast.base.evolution.operator.kernel.BactrianScaleOperator" scaleFactor="0.5" parameter="@clockSD" weight="1">
+                <kernelDistribution spec="beast.base.inference.operator.kernel.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+            </operator>
+        </operator>
+
+
+        <operator id="ORCAdaptableOperatorSampler_rates_root.c:tree" spec="beast.base.evolution.operator.AdaptableOperatorSampler" parameter="@branchRates" tree="@tree" weight="1.0">
+            <operator id="ORCRootOperator1.c:tree" spec="orc.consoperators.SimpleDistance" twindowSize="0.005" tree="@tree" clockModel="@clockModel" rates="@branchRates"  weight="1">
+                <kernel spec="beast.base.inference.operator.kernel.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+            </operator>
+            <operator id="ORCRootOperator2.c:tree" spec="orc.consoperators.SmallPulley" dwindowSize="0.005" tree="@tree" clockModel="@clockModel" rates="@branchRates"  weight="1">
+                <kernel spec="beast.base.inference.operator.kernel.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+            </operator>
+        </operator>
+
+
+
+        <operator id="ORCAdaptableOperatorSampler_rates_internal.c:tree" spec="beast.base.evolution.operator.AdaptableOperatorSampler" parameter="@branchRates" tree="@tree" weight="20">
+            <operator id="ORCInternalnodesOperator.c:tree" spec="orc.consoperators.InConstantDistanceOperator" twindowSize="0.005"  tree="@tree" clockModel="@clockModel" rates="@branchRates"  weight="1">
+                <kernel spec="beast.base.inference.operator.kernel.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+            </operator>
+            <operator id="ORCRatesRandomWalk.c:tree" spec="beast.base.inference.operator.kernel.BactrianRandomWalkOperator" parameter="@branchRates" weight="1" scaleFactor="0.1">
+                <kernelDistribution spec="beast.base.inference.operator.kernel.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+            </operator>
+            <operator id="ORCRatesScale.c:tree" spec="beast.base.evolution.operator.kernel.BactrianScaleOperator" scaleFactor="0.5" parameter="@branchRates" weight="1">
+                <kernelDistribution spec="beast.base.inference.operator.kernel.KernelDistribution$Bactrian" m="0.95" mode="bactrian_normal"/>
+            </operator>
+        </operator>
+
+
+
+
+
+
+        <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log idref="lambda"/>
+            <log idref="r0"/>
+            <log idref="codon.rate.1"/>
+            <log idref="codon.rate.2"/>
+            <log idref="codon.rate.3"/>
+            <log idref="clockSD"/>
+
+            <log id="nN" spec="beastmap.logger.SubstitutionSummer" counter="@NonSynonymousSubstSum"  />
+            <log id="nS" spec="beastmap.logger.SubstitutionSummer" counter="@SynonymousSubstSum"  />
+
+            <log id="treeHeight" spec="beast.base.evolution.tree.TreeStatLogger" tree="@tree"/>
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@SubstitutionSum"  />
+            
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@FromToSubstSum"  />
+            <log idref="SubstitutionSum"  />
+            <log idref="SynonymousSubstSum"  />
+            <log idref="NonSynonymousSubstSum"  />
+            <log idref="FromToSubstSum"  />
+             
+             <plate var="c" range="1,2,3">
+                <log idref="free.rates.codon.$(c)"/>
+                <log idref="free.weights.codon.$(c)" />
+                <log idref="RevJump.s:tree.$(c)"/>
+                <log idref="BMT_ModelIndicator.s:tree.$(c)"/>
+                <log idref="BMT_gammaShape.s:tree.$(c)"/>
+                <log idref="BMT_ProportionInvariable.s:tree.$(c)"/>
+                <log idref="hasGammaRates.s:tree.$(c)"/>
+                <log idref="hasInvariableSites.s:tree.$(c)"/>
+                <log id="ActivePropInvariable.s:tree.$(c)" spec="bmodeltest.evolution.substitutionmodel.ActiveLogger" mask="@hasInvariableSites.s:tree.$(c)" parameter="@BMT_ProportionInvariable.s:tree.$(c)"/>
+                <log id="ActiveGammaShape.s:tree.$(c)" spec="bmodeltest.evolution.substitutionmodel.ActiveLogger" mask="@hasGammaRates.s:tree.$(c)" parameter="@BMT_gammaShape.s:tree.$(c)"/>
+                <log idref="hasEqualFreqs.s:tree.$(c)"/>
+                <log idref="BMT_frequencies.s:tree.$(c)"/>
+            </plate>
+        </logger>
+
+        <logger id="screenlog" spec="Logger" logEvery="1000000">
+            <log idref="likelihood"  />
+            <log idref="nN" />
+            <log idref="nS" />
+        </logger>
+
+
+        <logger id="treelog" spec="Logger" fileName="$(filebase).trees" logEvery="10000" mode="tree">
+            <log id="SampledSubstTreeLogger" spec="beastmap.logger.SampledSubstTreeLogger" metadata="@branchRates" tree="@tree">
+                <sampler id="SubstitutionSum" spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" />
+                <sampler id="SynonymousSubstSum" spec="beastmap.logger.mut.SynonymousSubstSum" sampler="@mutationsampler" code="universal" />
+                <sampler id="NonSynonymousSubstSum" spec="beastmap.logger.mut.NonSynonymousSubstSum" sampler="@mutationsampler"  code="universal" />
+                <sampler id="FromToSubstSum" spec="beastmap.logger.mut.FromToSubstSum" sampler="@mutationsampler" from="AAA" to="AAT" />
+                
+            </log>
+        </logger>
+
+
+        <operatorschedule id="OperatorSchedule" spec="OperatorSchedule" autoOptimizeDelay="5000"/>
+    </run>
+
+</beast>

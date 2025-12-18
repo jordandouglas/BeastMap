@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" version="2.0">
+
+
+
+
+
+    
+<map name="Beta">beast.base.inference.distribution.Beta</map>
+<map name="Exponential">beast.base.inference.distribution.Exponential</map>
+<map name="InverseGamma">beast.base.inference.distribution.InverseGamma</map>
+<map name="LogNormal">beast.base.inference.distribution.LogNormalDistributionModel</map>
+<map name="Gamma">beast.base.inference.distribution.Gamma</map>
+<map name="Uniform">beast.base.inference.distribution.Uniform</map>
+<map name="prior">beast.base.inference.distribution.Prior</map>
+<map name="LaplaceDistribution">beast.base.inference.distribution.LaplaceDistribution</map>
+<map name="OneOnX">beast.base.inference.distribution.OneOnX</map>
+<map name="Normal">beast.base.inference.distribution.Normal</map>
+<map name="taxon">beast.base.evolution.alignment.Taxon</map>
+<map name="taxonset">beast.base.evolution.alignment.TaxonSet</map>
+<map name="Dirichlet" >beast.base.inference.distribution.Dirichlet</map>
+
+
+<data id="data" spec="beast.base.evolution.alignment.Alignment" name="alignment">
+    <plate var="n" range="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30">
+    <!-- <plate var="n" range="1,2,3,4,5"> -->
+       <sequence taxon="$(n)" value="?" />
+    </plate>
+</data>
+
+
+<parameter id="nstubs.branch" spec="beast.base.inference.parameter.IntegerParameter">0</parameter>
+
+<taxonset id='allTaxa' alignment='@aaRS'/>
+    <taxon id="taxa" spec="TaxonSet">
+       $(taxa)
+    </taxon>
+    
+    
+<parameter id="lengthMean" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+<parameter id="lengthShape" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+<parameter id="midpointAlpha" spec="parameter.RealParameter" name="stateNode" lower="1">50</parameter>
+<parameter id="gammaShape" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+<parameter id="kappa" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+<parameter id="frequencies" spec="parameter.RealParameter" name="stateNode" lower="0" upper="1.0">0.25 0.25 0.25 0.25</parameter>
+
+
+
+
+
+<tree id="tree" spec="beastmap.evolution.TimelessTree" name="stateNode">
+    <taxonset id="TaxonSet" spec="beast.base.evolution.alignment.TaxonSet">
+        <data idref="data" name="alignment"/>
+    </taxonset>
+</tree>
+
+<run spec="beast.base.inference.DirectSimulator" nSamples="200">
+
+
+
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
+
+
+
+
+        <distribution id="treePrior" spec="beastmap.distribution.UnconstrainedTreePrior" tree="@tree" mean="@lengthMean" shape="@lengthShape" midpoint="@midpointAlpha" /> 
+
+
+
+         <prior name="distribution" x="@lengthMean">
+            <LogNormal name="distr" meanInRealSpace="true" M="0.05" S="1"/>
+         </prior>
+
+        <prior name="distribution" x="@lengthShape">
+            <LogNormal name="distr" meanInRealSpace="true" M="2" S="1"/>
+         </prior>
+
+
+        <prior name="distribution" x="@gammaShape">
+            <Exponential name="distr" mean="1"/>
+         </prior> 
+
+        <prior name="distribution" x="@kappa">
+            <LogNormal name="distr" meanInRealSpace="true" M="3" S="0.5"/>
+        </prior> 
+
+          <prior name="distribution" x="@frequencies">
+            <Dirichlet name="distr" alpha="2 2 2 2"/>
+         </prior> 
+                    
+    
+    </distribution>
+
+
+        <logger id="tracelog" spec="Logger" fileName="truth.log" logEvery="1" model="@posterior" sort="smart">
+            <log idref="lengthMean"/>
+            <log idref="lengthShape"/>
+            <log idref="midpointAlpha"/>
+            <log idref="gammaShape"/>
+            <log idref="kappa"/>
+            <log idref="frequencies"/>
+            <log id="treeHeight" spec="beast.base.evolution.tree.TreeStatLogger" tree="@tree"/>
+        </logger>
+
+
+
+        <logger id="screenlog" spec="Logger" logEvery="1">
+            <log idref="lengthMean"/>
+        </logger>
+
+
+        <logger fileName="truth.trees" id="treelog.t:aaRS" logEvery="1" mode="tree">
+             <log spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@tree" /> 
+        </logger>
+
+
+    </run>
+
+</beast>
