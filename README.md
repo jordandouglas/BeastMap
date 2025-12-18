@@ -43,6 +43,9 @@ The first `burnin` steps of the MCMC chain will not have any stochastic mapping.
 There is also BEAUti support for BeastMap in [StarBeast3](https://github.com/rbouckaert/starbeast3).
 
 
+
+
+
 ## Subsitution counters
 
 Each counter shares a common ```BranchMutationSampler``` for any given tree likelihood, which will stochastically sample the mutations at the time of logging. This ensures that the various mutation summarisers below will be in harmony.
@@ -159,6 +162,33 @@ Summarise a posterior distribution of segmented trees onto a summary tree using:
 ```
 
 
+
+## Setting up the gamma-length midpoint tree prior using BEAUti
+
+
+Although time trees (e.g. birth-death, coalescent) may be preferrable over substitution trees on most biological datasets, if you are interested in using the unconstrained gamma-length midpoint (GM) tree prior, follow the steps below. This may serve as a useful null hypothesis to test whether time trees are indeed appropriate. In this tree prior, branch lengths are independently sampled from a gamma distribution. The tree is rooted using a Bayesian extension of the midpoint method. 
+
+
+
+1. Open BEAUti
+2. Load the data and set up partitions and site models, as per usual.
+3. It is recommended to use a strict clock in the `Clock Model` tab. A relaxed or local clock will not be identifiable with the tree.
+4. Open the `Priors` tab and select `Gamma Length Midpoint Prior` from the tree dropdown.
+
+![alt text](figs/gammaLengthMidpoint.png)
+
+
+5. The `Midpoint` constant will determine where the root should lie on the longest path between the furtherest pair of tips. path. Specifically, the root is assumed to lie 0 < F < 1 along this path, where F ~ beta(Midpoint, Midpoint). If this term is 50, then we expect the midpoint to lie between 40-60% of the way along this path (with 95% probability). If this term is 1, then the root is equally likely to lie anywhere on the path.
+
+6. The `GMprior_LengthMean` parameter is the average branch length (under a gamma distribution prior).
+
+7. The `GMprior_LengthShape` parameter is the shape of branch lengths (under a gamma distribution prior).
+
+8. Optionally, open the `Beast Map` tab to also do stochastic mapping on this tree.
+
+9. Save the XML file and run in BEAST 2, as per usual.
+
+
 ## Examples
 
 In the `examples` folder, there is an analysis based on the haemagglutinin segment sequenced from 96 cases of influenza A(H3N2) in New Zealand. This dataset was downsampled from over 1000 complete genomes produced by Jelley at al. 2025.
@@ -172,6 +202,8 @@ Jelley, L., Douglas, J., Allais, M., Wang, J., O'Neill, M., ... & Huang, Q. S., 
 
 
 - Please finalise all partitions in the `Partitions` tab before configuring the `Beast Map` tab. For example, If a partition is removed after stochastic mapping has been enabled on it, there may be unexpected issues. 
+
+- When using the segmented tree logger, please ensure that the taxon names are primarily alphanumeric, with no non-ascii characters and none of the following symbols, or it can interfere with newick parsing: []():;!@#$%^&*
 
 
 

@@ -36,7 +36,9 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 	final public Input<RealParameter> shapeInput = new Input<>("shape", "gamma distribution prior shape of branch lengths. Set to 1 for exponential distribution.", Input.Validate.REQUIRED);
 	
 	
-	final public Input<RealParameter> midpointInput = new Input<>("midpoint", "the relative position of the root between the two furtherest tips is a beta(alpha, alpha), where alpha is large (e.g. 100)", Input.Validate.OPTIONAL);
+	final public Input<RealParameter> midpointInput = new Input<>("midpoint", "the relative position of the root between the two furtherest tips is a "
+			+ "beta(alpha, alpha). When alpha is large (e.g. 50), this approaches the midpoint. When alpha is small (e.g., 1), all root placements "
+			+ "are equally likely along this path.", Input.Validate.OPTIONAL);
 	
 	
 	org.apache.commons.math.distribution.GammaDistribution gammaDist = new GammaDistributionImpl(1, 1);
@@ -45,7 +47,7 @@ public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 	public void initAndValidate() {
 		
 		if (! (treeInput.get() instanceof TimelessTree)) {
-			throw new IllegalArgumentException("The tree must be a TimelessTree");
+			Log.warning("Warning: assuming that " + treeInput.get().getID() + " is an unconstrained substitution tree.");
 		}
 		
 		super.initAndValidate();

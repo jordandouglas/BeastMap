@@ -1,0 +1,138 @@
+<beast version='2.0'
+       namespace='beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.base.util:beast.base.math:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.math.distributions:orc.operators:orc.ner'>
+
+
+    <mergewith point='treePriorTemplates'>
+
+       <!-- Gamma-length midpoint prior -->
+        <subtemplate id='GammaLengthMidpointPrior' class='beastmap.distribution.UnconstrainedTreePrior'
+                     mainid='GammaLengthMidpointPrior.t:$(n)'
+                     suppressInputs='
+					 beastmap.distribution.UnconstrainedTreePrior.tree,
+					 beastmap.distribution.UnconstrainedTreePrior.treeIntervals,
+					 beastmap.distribution.UnconstrainedTreePrior.useTipDates
+					 '>
+            <![CDATA[
+            
+
+
+               <distribution id="GammaLengthMidpointPrior.t:$(n)" spec="beastmap.distribution.UnconstrainedTreePrior" tree="@Tree.t:$(n)" mean="@GMprior_LengthMean.t:$(n)" shape="@GMprior_LengthShape.t:$(n)">
+                  <midpoint id="GMprior_MidpointAlpha.t:$(n)" spec="parameter.RealParameter">50</midpoint>
+               </distribution> 
+
+            	  <parameter id="GMprior_LengthMean.t:$(n)" spec="parameter.RealParameter" name="stateNode" lower="0">0.05</parameter>
+            	  <parameter id="GMprior_LengthShape.t:$(n)" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+  
+
+  
+                 <prior id="GMprior_LengthMeanPrior.t:$(n)" name="distribution" x="@GMprior_LengthMean.t:$(n)">
+                    <LogNormal name="distr" meanInRealSpace="true" M="0.05" S="1"/>
+                 </prior>
+
+                 <prior id="GMprior_LengthShapePrior.t:$(n)" name="distribution" x="@GMprior_LengthShape.t:$(n)">
+                    <LogNormal name="distr" meanInRealSpace="true" M="2" S="1"/>
+                 </prior> 
+
+
+                 <operator id="GMprior_TipDatesRandomWalker.t:$(n)" spec="beastmap.operator.UnconstrainedTipRandomWalker" tree="@Tree.t:$(n)"  windowSize="0.1" weight="10.0"/>
+                 <operator id="GMprior_BranchLengthScaler.t:$(n)" spec="beastmap.operator.BranchLengthScaler" tree="@Tree.t:$(n)" scaleFactor="0.1" weight="10.0"/>
+
+                 <operator id="GMprior_NarrowExchange.t:$(n)" spec="beast.base.evolution.operator.Exchange"  tree="@Tree.t:$(n)" weight="10.0"/>
+                 <operator id="GMprior_WideExchange.t:$(n)" spec="beast.base.evolution.operator.Exchange"  tree="@Tree.t:$(n)" isNarrow="false" weight="5.0"/>
+                 <operator id="GMprior_SubtreeSlide.t:$(n)" spec="kernel.BactrianSubtreeSlide" tree="@Tree.t:$(n)" weight="5.0"/>
+                 <operator id="GMprior_WilsonBalding.t:$(n)" spec="WilsonBalding" tree="@Tree.t:$(n)" weight="5.0"/>
+                 <operator id="GMprior_UniformOperator.t:$(n)" spec="kernel.BactrianNodeOperator" tree="@Tree.t:$(n)" weight="10.0"/>
+
+                 <operator id="GMprior_EpochFlexOperatorTop.t:$(n)" spec="EpochFlexOperator" scaleFactor="0.1" tree="@Tree.t:$(n)" weight="5.0"/>
+                 <operator id="GMprior_EpochFlexOperatorAll.t:$(n)" spec="EpochFlexOperator" fromOldestTipOnly="false" scaleFactor="0.1" tree="@Tree.t:$(n)" weight="5.0"/>
+
+
+                 <operator id="GMprior_LengthMean.scale.t:$(n)" spec="kernel.BactrianScaleOperator" parameter="@GMprior_LengthMean.t:$(n)" scaleFactor="0.1" weight="1"/>
+
+                 <operator id="GMprior_LengthShape.scale.t:$(n)" spec="kernel.BactrianScaleOperator" parameter="@GMprior_LengthShape.t:$(n)" scaleFactor="0.1" weight="1"/>
+
+
+			]]>
+
+         <plate fragment="TreeOperators" var="m" range="BirthDeathModelWithStubs"/>
+			
+         <connect srcID='GMprior_LengthMean.t:$(n)' targetID='state' inputName='stateNode'
+                  if='inposterior(GammaLengthMidpointPrior.t:$(n)) and GMprior_LengthMean.t:$(n)/estimate=true'/>
+         <connect srcID='GMprior_LengthShape.t:$(n)' targetID='state' inputName='stateNode'
+                  if='inposterior(GammaLengthMidpointPrior.t:$(n)) and GMprior_LengthShape.t:$(n)/estimate=true'/>
+      
+
+         <connect srcID='GMprior_LengthMeanPrior.t:$(n)' targetID='prior' inputName='distribution'
+                  if='inposterior(GammaLengthMidpointPrior.t:$(n)) and GMprior_LengthMean.t:$(n)/estimate=true'>Mean branch length of partition t:$(n)
+         </connect>
+         <connect srcID='GMprior_LengthShapePrior.t:$(n)' targetID='prior' inputName='distribution'
+                  if='inposterior(GammaLengthMidpointPrior.t:$(n)) and GMprior_LengthShape.t:$(n)/estimate=true'>Branch length shape of partition t:$(n)
+         </connect>
+           
+            
+			<connect srcID='GammaLengthMidpointPrior.t:$(n)' targetID='tracelog' inputName='log' if='inposterior(GammaLengthMidpointPrior.t:$(n))'/>
+
+
+         <connect srcID='GMprior_LengthMean.t:$(n)' targetID='tracelog' inputName='log' if='inposterior(GammaLengthMidpointPrior.t:$(n)) and GMprior_LengthMean.t:$(n)/estimate=true'/>
+         <connect srcID='GMprior_LengthShape.t:$(n)' targetID='tracelog' inputName='log' if='inposterior(GammaLengthMidpointPrior.t:$(n)) and GMprior_LengthShape.t:$(n)/estimate=true'/>
+            
+
+            
+            <connect srcID='GMprior_LengthMean.scale.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and GMprior_LengthMean.t:$(n)/estimate=true'>
+                     Scale mean branch length of partition t:$(n)
+            </connect>
+            <connect srcID='GMprior_LengthShape.scale.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and GMprior_LengthShape:$(n)/estimate=true'>
+                     Scale branch shape parameter of partition t:$(n)
+            </connect>
+
+
+
+            <connect srcID='GMprior_TipDatesRandomWalker.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and Tree.t:$(n)/estimate=true'>
+                     Random walker on the tips of tree t:$(n)
+            </connect>
+             <connect srcID='GMprior_BranchLengthScaler.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and Tree.t:$(n)/estimate=true'>
+                     Branch length scaler of tree t:$(n)
+            </connect>
+            <connect srcID='GMprior_NarrowExchange.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and Tree.t:$(n)/estimate=true'>
+                     Narrow exchange for tree t:$(n)
+            </connect>
+            <connect srcID='GMprior_WideExchange.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and Tree.t:$(n)/estimate=true'>
+                     Wide exchange for tree t:$(n)
+            </connect>
+            <connect srcID='GMprior_SubtreeSlide.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and Tree.t:$(n)/estimate=true'>
+                     Subtree slide for tree t:$(n)
+            </connect>
+            <connect srcID='GMprior_WilsonBalding.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and Tree.t:$(n)/estimate=true'>
+                     Wilson balding for tree t:$(n)
+            </connect>
+            <connect srcID='GMprior_UniformOperator.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and Tree.t:$(n)/estimate=true'>
+                     Uniform operator for tree t:$(n)
+            </connect>
+            <connect srcID='GMprior_EpochFlexOperatorTop.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and Tree.t:$(n)/estimate=true'>
+                     Epoch flex operator for tree t:$(n)
+            </connect>
+            <connect srcID='GMprior_EpochFlexOperatorAll.t:$(n)' targetID='mcmc' inputName='operator'
+                     if='inposterior(GammaLengthMidpointPrior.t:$(n)) and Tree.t:$(n)/estimate=true'>
+                     Epoch flex operator for tree t:$(n)
+            </connect>
+
+
+
+        </subtemplate>
+
+
+
+
+
+	</mergewith>
+</beast>

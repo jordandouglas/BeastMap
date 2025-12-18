@@ -2,14 +2,22 @@
        namespace='beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.evolution.Tree.t:coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.math.distributions'>
 
 
-     <mergewith point='aux-panels'>
+	<mergewith point='aux-panels'>
    		<panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname='Beast Map' tiptext='Stochastic mapping' 
    			path='logger/log[id="DUMMY_VARIABLE.dde5c6df-3a36-488f-a87b-d40dc82c5e92"]' 
    			type='beastmap.evolution.BranchMutationSampler'
    			hasPartitions='none' icon='2.pngx' forceExpansion='TRUE'/>
-
-
-
 	</mergewith>
+
+
+	
+ 	<mergewith point='aux-sb3-panels'>
+   		<panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname='Beast Map' tiptext='Stochastic mapping' 
+   			path='logger/log[id="DUMMY_VARIABLE.dde5c6df-3a36-488f-a87b-d40dc82c5e92"]' 
+   			type='beastmap.evolution.BranchMutationSampler'
+   			hasPartitions='none' icon='2.pngx' forceExpansion='TRUE'/>
+	</mergewith>
+
+
 
 </beast>
