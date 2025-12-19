@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import beast.base.core.BEASTInterface;
 import beast.base.core.BEASTObject;
@@ -35,6 +36,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -98,6 +100,9 @@ public class BeastMapInputEditor extends ListInputEditor {
 //	}
 	
 	
+	
+	protected static TableView<LoggerSelection> table;
+	
     @Override
     public void init(Input<?> input, BEASTInterface beastObject, int itemNr, ExpandOption isExpandOption, boolean addButtons) {
     	
@@ -131,7 +136,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 		
 		
 	    // Add table to page
-		TableView<LoggerSelection> table = this.prepareTable();
+		table = this.prepareTable();
 	    pane.getChildren().add(table);
 	    
 		    
@@ -170,8 +175,6 @@ public class BeastMapInputEditor extends ListInputEditor {
 			Log.warning(id);
 			
 			boolean likelihoodActive = false;
-			
-			List<PartitionContext> partitions = doc.partitionNames;
 			
 			for (PartitionContext partition : doc.partitionNames) {
 				
@@ -293,22 +296,31 @@ public class BeastMapInputEditor extends ListInputEditor {
 
 
 				
-				// Loggable
-				List<Loggable> substLoggables = new ArrayList<>();
-				SampledSubstTreeLogger typedTreeLogger = new SampledSubstTreeLogger();
-				typedTreeLogger.initByName("likelihood", likelihood); //, "sampler", substCounters);
-				typedTreeLogger.setID("BeastMap.SampledSubstTreeLogger." + id);
-				substLoggables.add(typedTreeLogger);
+				substTreeLogger = getTreeLoggerForLikelihood((Tree) likelihood.treeInput.get());
 				
-				// Loggers
-				substTreeLogger = new Logger();
-				String outfile = "beastmap." + id + ".trees";
-				substTreeLogger.initByName("fileName", outfile, "logEvery", 10000, "mode", "tree", "log", substLoggables);
-				substTreeLogger.setID(substTreeLoggerID);
+				if (substTreeLogger == null) {
+					
+					// Loggable
+					List<Loggable> substLoggables = new ArrayList<>();
+					SampledSubstTreeLogger typedTreeLogger = new SampledSubstTreeLogger();
+					typedTreeLogger.initByName("likelihood", likelihood); //, "sampler", substCounters);
+					typedTreeLogger.setID("BeastMap.SampledSubstTreeLogger." + id);
+					substLoggables.add(typedTreeLogger);
+					
+					// Loggers
+					substTreeLogger = new Logger();
+					String outfile = "beastmap." + id + ".trees";
+					substTreeLogger.initByName("fileName", outfile, "logEvery", 10000, "mode", "tree", "log", substLoggables);
+					substTreeLogger.setID(substTreeLoggerID);
+					
+
+					doc.registerPlugin(typedTreeLogger);
+					doc.registerPlugin(substTreeLogger);
+					
+					
+				}
 				
 
-				doc.registerPlugin(typedTreeLogger);
-				doc.registerPlugin(substTreeLogger);
 				
 				Log.warning("Making new mapper " + substTreeLoggerID);
 				
@@ -356,23 +368,37 @@ public class BeastMapInputEditor extends ListInputEditor {
 				Log.warning("Making new species logger called " + substTreeLoggerID);
 			
 				
-				// Loggable
-				List<Loggable> substLoggables = new ArrayList<>();
-				SampledSubstTreeLogger typedTreeLogger = new SampledSubstTreeLogger();
-				typedTreeLogger.initByName("tree", speciesTree);
-				typedTreeLogger.setID("BeastMap.SampledSubstTreeLogger." + id);
-				substLoggables.add(typedTreeLogger);
-				
-				// Loggers
-				substTreeLogger = new Logger();
 				String outfile = "beastmap.species.trees";
-				substTreeLogger.initByName("fileName", outfile, "logEvery", 10000, "mode", "tree", "log", substLoggables);
-				substTreeLogger.setID(substTreeLoggerID);
+				substTreeLogger = getTreeLoggerForLikelihood(speciesTree);
 				
 				
-				doc.registerPlugin(typedTreeLogger);
-				doc.registerPlugin(substTreeLogger);
+				// This will always be true unless there are morphological traits
+				if (substTreeLogger == null) {
+				
+					// Loggable
+					List<Loggable> substLoggables = new ArrayList<>();
+					SampledSubstTreeLogger typedTreeLogger = new SampledSubstTreeLogger();
+					typedTreeLogger.initByName("tree", speciesTree);
+					typedTreeLogger.setID("BeastMap.SampledSubstTreeLogger." + id);
+					substLoggables.add(typedTreeLogger);
+					
+					// Loggers
+					substTreeLogger = new Logger();
+					
+					substTreeLogger.initByName("fileName", outfile, "logEvery", 10000, "mode", "tree", "log", substLoggables);
+					
+					
+					doc.registerPlugin(typedTreeLogger);
+					doc.registerPlugin(substTreeLogger);
 
+					
+				}
+				
+				
+				
+				// This logger should always be named after the species, not one of the morphological traits
+				substTreeLogger.fileNameInput.set(outfile);
+				substTreeLogger.setID(substTreeLoggerID);
 				
 				
 			}
@@ -403,6 +429,53 @@ public class BeastMapInputEditor extends ListInputEditor {
     
     
     
+    /**
+     * See if there is an an existing beastmap logger with the same tree, and if not return null
+     * @param likelihood
+     * @return
+     */
+    private Logger getTreeLoggerForLikelihood(Tree tree ) {
+    	
+    	
+    	
+		for (String id : doc.pluginmap.keySet()) {
+			
+			BEASTInterface o = doc.pluginmap.get(id);
+			
+			// Is this a Logger?
+			if (o instanceof Logger) {
+				
+				
+				Logger logger = (Logger) o;
+				
+				// Does it have a SampledSubstTreeLogger?
+				for (BEASTObject obj : logger.loggersInput.get()) {
+					if (obj instanceof SampledSubstTreeLogger) {
+						SampledSubstTreeLogger substLogger = (SampledSubstTreeLogger) obj;
+						
+						if (substLogger.likelihoodInput.get() == null) {
+							Log.warning("Cannot find likelihood for " + substLogger.getID());
+							continue;
+						}
+						
+						// Same tree?
+						if (substLogger.likelihoodInput.get().treeInput.get() == tree) {
+							Log.warning("Found a preexisting tree logger for " + tree.getID());
+							return logger;
+						}
+					}
+				}
+				
+			}
+			
+		}
+		
+		return null;
+    	
+    	
+    }
+    
+    
 
 	private List<BranchMutationSampler> getAllMappers() {
 		
@@ -427,77 +500,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 		return mappers;
 	}
 	
-//	
-//	private void getAllMappers(BEASTInterface obj, List<BranchMutationSampler> mappers) {
-//		
-//		
-//		
-//		Map<String, Input<?>>  map = obj.getInputs();
-//		
-//		for (String key : map.keySet()) {
-//			
-//			Log.warning("key=" + key + " for " + obj.getID() + " " + obj.getClass());
-//			
-//			Input<?> input = map.get(key);
-//			Object o = input.get();
-//			
-//			
-//			// List of objects
-//			if (o instanceof List<?>) {
-//				
-//				List<?> list = (List<?>) o;
-//				for (Object ele : list) {
-//					
-//					if (ele instanceof BEASTInterface) {
-//						
-//						BEASTInterface o2 = (BEASTInterface) ele;
-//						
-//						Log.warning("Looking at " + key + "=" + o2.getID() + " in " + obj.getID());
-//						
-//						// Is this a mapper?
-//						if (o instanceof BranchMutationSampler) {
-//							BranchMutationSampler b = (BranchMutationSampler)o;
-//							mappers.add(b);
-//							Log.warning("Found stochatstic mapper in mcmc " + b.getID());
-//						}
-//						
-//						// Recurse
-//						getAllMappers(o2, mappers);
-//						
-//					}
-//					
-//				}
-//				
-//			}
-//			
-//			
-//			// Object
-//			else if (o instanceof BEASTInterface) {
-//				
-//				BEASTInterface o2 = (BEASTInterface) o;
-//				
-//				Log.warning("Looking at " + key + "=" + o2.getID() + " in " + obj.getID());
-//				
-//				// Is this a mapper?
-//				if (o instanceof BranchMutationSampler) {
-//					BranchMutationSampler b = (BranchMutationSampler)o;
-//					mappers.add(b);
-//					Log.warning("Found stochatstic mapper in mcmc " + b.getID());
-//				}
-//				
-//				// Recurse
-//				getAllMappers(o2, mappers);
-//				
-//			}
-//			
-//		}
-//		
-//		
-//		
-//	}
-//	
-//	
-	
+
 	
 
 	// Check if there is a species tree that embeds all gene trees (ie StarBeast3)
@@ -620,11 +623,18 @@ public class BeastMapInputEditor extends ListInputEditor {
 				
 				// Which gene trees can count this term?
 				for (GenericTreeLikelihood likelihood : likelihoods) {
+					
+					
+					
 					Object instance = clazz.getDeclaredConstructor().newInstance();
 					BranchSubstLogger sumGeneTree = (BranchSubstLogger) instance;
 					
 		    		// Gene tree
 		    		Tree tree = (Tree) likelihood.treeInput.get();
+		    		
+		    		
+		    		// Morphology
+		    		if (tree == speciesTree) continue;
 		    		
 		    		// Valid data type?
 		    		DataType dt = likelihood.dataInput.get().getDataType();
@@ -822,21 +832,15 @@ public class BeastMapInputEditor extends ListInputEditor {
 	    	return cell;
 	    });
 	    selectedCol.setCellValueFactory( f -> f.getValue().selectedProperty());
-	    selectedCol.setOnEditCommit(e->{
-			Boolean newValue = e.getNewValue();
-			LoggerSelection item = (LoggerSelection) e.getSource();
-			item.setSelected(newValue);
-		});
-	    selectedCol.setEditable(true);
-	    table.getColumns().add(selectedCol);
-
+	    
+	    selectedCol.setCellFactory(CheckBoxTableCell.forTableColumn(selectedCol));
 
 	    
-	    // Logger settings column
-//	    TableColumn<LoggerSelection, SubstLoggerSelection> settingsCol = new TableColumn<>("Terms to count");
-//	    settingsCol.setPrefWidth(500);
-//	    settingsCol.setCellValueFactory(data -> data.getValue().substLoggerTable());
-//	    table.getColumns().add(settingsCol);
+	    selectedCol.setEditable(true);
+	    table.getColumns().add(selectedCol);
+	    
+	   
+
 	    
 	    TableColumn<LoggerSelection, List<String>> optionsColumn = new TableColumn<>("Terms to count");
 	    optionsColumn.setPrefWidth(500);
@@ -863,23 +867,19 @@ public class BeastMapInputEditor extends ListInputEditor {
 	                    CheckBox cb = new CheckBox(name);
 	                    
 	                    
-
-	                    // optional: bind check state to the row’s underlying data:
+	                    // Bind check state to the row’s underlying data:
 	                    LoggerSelection row = getTableView().getItems().get(getIndex());
-	    
-                    	// replace row.isChecked(name) / row.setChecked(name, value) with your getters/setters
+
+	                    
 	                    cb.setSelected(row.isChecked(name));
 	                    cb.selectedProperty().addListener((obs, oldV, newV) ->
 	                        row.setChecked(name, newV)
 	                    );
-//	                    cb.disabledProperty().addListener((obs, oldV, newV) ->
-//	                        row.isSelected()
-//	                    );
-//                    
 	                    
-	                 
+	                    
 
 	                    box.getChildren().add(cb);
+	                    
 	                }
 
 	                setGraphic(box);
@@ -956,19 +956,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 			
 		}
 		
-		
-//		for (T obj : list) {
-//			
-//			if (obj instanceof BEASTObject) {
-//				
-//				BEASTObject bobj = (BEASTObject) obj;
-//				if (bobj.getID().equals(id)) {
-//					list.remove(obj);
-//					//doc.unregisterPlugin(bobj);
-//				}
-//			}
-//			
-//		}
+
 		
 	}
 	
@@ -1038,9 +1026,8 @@ public class BeastMapInputEditor extends ListInputEditor {
 	    	this.substLogger = substLogger;
 	    	
 	    	
-	    	// Is the logger on?
-			setSelected(inputContainsID(this.mcmc.loggersInput.get(), logger.getID()));
-			selected.addListener((obs,  wasSelected,  isSelected) -> {
+	    	setSelected(inputContainsID(this.mcmc.loggersInput.get(), logger.getID()));
+	    	selected.addListener((obs,  wasSelected,  isSelected) -> {
 				setSelected(isSelected);
 			});	
 			
@@ -1056,33 +1043,55 @@ public class BeastMapInputEditor extends ListInputEditor {
 	    }
 	    
 	    
-	    
-	    // Is the logger on?
+
+
+		public Logger getLogger() {
+			return logger;
+		}
+
+
+
+		// Is the logger on?
 	    public Boolean isSelected() { return selected.get(); }
 	    public BooleanProperty selectedProperty() { return selected; }
+	    
+	    
+	    
+	    // Same as setSelected but without any recursion
+	    public void resetSelection() {
+	    	
+			boolean s = inputContainsID(this.mcmc.loggersInput.get(), logger.getID());
+			this.selected.set(s); 
+			
+			if (s) {
+	    		addWithID(this.mcmc.loggersInput.get(), logger);
+	    	}else {
+	    		removeWithID(this.mcmc.loggersInput.get(), logger.getID());
+	    	}
+			
+	    }
+	    
 	    public void setSelected(Boolean selected) { 
+	    	
+	    	
+	    	//Log.warning("SELECTED " + this.logger.getID());
 	    	
 	    	this.selected.set(selected); 
 			
 	    	if (selected) {
-	    		
 	    		addWithID(this.mcmc.loggersInput.get(), logger);
-	    		
-	    		//if (!this.mcmc.loggersInput.get().contains(logger)) {
-	    			//mcmc.loggersInput.get().add(logger);
-	    		//}
 	    	}else {
-	    		
-	    		
 	    		removeWithID(this.mcmc.loggersInput.get(), logger.getID());
-	    		
-//	    		if (this.mcmc.loggersInput.get().contains(logger)) {
-//	    			mcmc.loggersInput.get().remove(logger);
-//	    		}
+	    	}
+	    	
+	    	
+	    	for (LoggerSelection item : table.getItems()) {
+	    		item.resetSelection();
 	    	}
 	    	
 	    }
 	    
+
 	    
 	    // What terms are being logged by the subst logger?
 	    public List<String> getOptionNames() {
@@ -1206,7 +1215,7 @@ public class BeastMapInputEditor extends ListInputEditor {
     	Loggable loggable;
     	
     	public SubstLoggerSelection(String name, boolean active, Loggable logger) {
-    		this.name = name;
+    		this.name = name.replaceAll(" ", "");
     		this.active = active;
     		this.loggable = logger;
     	}

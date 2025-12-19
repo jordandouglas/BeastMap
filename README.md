@@ -1,39 +1,51 @@
 # BeastMap
 A BEAST 2 package for counting the number of synonymous, non-synonymous, and indel mutations on each branch. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a mutation pathway along each branch. This all happens during MCMC. This package is compatible with a wide range of existing BEAST 2 site, clock, and tree models; and discrete data types (including nucleotide, codon, amino acid, 3Di, morphological, cognate, phoneme, and geographical).
 
-This package is currently in pre-release. It has passed the simulation studies, and is fairly stable.
 
 
-## Install
+
+## Installation
+
+BeastMap is currently in pre-release. 
+
+1.  Launch BEAUti
+2.  Click on `File -> Manage Packages`
+3.  Install BeastMap. If BeastMap is not in the list of packages, you may need to add an extra package repository as follows:
+
+-   Click the packager repositories button. A dialog pops up.
+-   Click the Add URL button. A dialog is shown where you can enter  [https://raw.githubusercontent.com/CompEvol/CBAN/master/packages-extra-2.7.xml](https://raw.githubusercontent.com/CompEvol/CBAN/master/packages-extra-2.7.xml)
+-   click the OK button. There should be an extra entry in the list.
+-   click Done
+-   After a short delay, BeastMap should appear in the list of packages.
 
 
-Download the zip file directly from the releases section. 
 
-```
-mkdir ~/.beast/2.7/beastmap/
-cp build/dist/beastmap.package.v*.zip ~/.beast/2.7/beastmap/tmp.zip # Downloaded file
-cd ~/.beast/2.7/beastmap/
-unzip -o tmp.zip
-```
 
-Please make sure to install the `CodonSubstModels` package too, as that is a dependency.
+## Setting up stochastic mapping using BEAUti
 
-## BEAUti
 
-There is some very basic BEAUti support, with more on the way. Set up a BEAST 2 analysis as per usual. Then at the very end, configure the stochastic mapping with the `Beast Map` tab. It has been tested on nucleotide and discrete trait data. 
+Set up a BEAST 2 analysis as per usual. Then at the very end, configure the stochastic mapping with the `Beast Map` tab. This will work on a range of datatypes, including nucleotide, amino acids, 3Di characters, and discrete traits/locations.
 
-A segmented tree logger will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many mutations, as there will be a large number of states, and therefore the tree files may require a large amount of disk space.
+A **segmented tree logger** will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many mutations, as there will be a large number of states, and therefore the tree files may require a large amount of disk space.
 
-A substitution count logger (further detailed in the next section) will not report the timing of change events along each lineage, but it will summarise the events between each node and its parent (e.g. total number of changes along the branch). There is currently limited BEAUti support for this logger, which will only report the total number of changes and none of the other utilities below, which require XML file editing at this stage.
+A **substitution count logger** (further detailed in the next section) will not report the timing of change events along each lineage, but it will summarise the events between each node and its parent (e.g. total number of changes along the branch). There is currently limited BEAUti support for this logger, which will only report the total number of changes and none of the other utilities below, which require XML file editing at this stage.
 
 ![alt text](figs/beautiFig.png)
 
 
+The `Tree logger` column will add these terms to the trees (per branch), while the `Term to count` column will report the sum the terms up in the log file (summed across all branches).
 
 
-## Available counters
+These loggers can be further modified in the `MCMC` tab.
 
-Each counter requires a ```BranchMutationSampler```, which will stochastically sample the mutations at the time of logging. This ensures that the various mutation summarisers below will be in harmony.
+The first `burnin` steps of the MCMC chain will not have any stochastic mapping. This is because the initial states of the chain often present numerical issues due to very branches and high rates.
+
+There is also BEAUti support for BeastMap in [StarBeast3](https://github.com/rbouckaert/starbeast3).
+
+
+## Subsitution counters
+
+Each counter shares a common ```BranchMutationSampler``` for any given tree likelihood, which will stochastically sample the mutations at the time of logging. This ensures that the various mutation summarisers below will be in harmony.
 
 
 
@@ -85,6 +97,13 @@ Counts the total number of amino acid substitutions per branch such that the ami
 Takes one of the other per-branch counters and adds all the numbers together across the whole tree
 
 ``` <log spec="beastmap.logger.SubstitutionSummer" counter="@ID_OF_COUNTER"  />```
+
+
+## Filters
+
+Any of the counters can be filtered to a certain range of sites. In the exampkle below, we will only count the substitutions in sites 1-10. 
+
+```<sampler spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" filter="1-10" />```
 
 
 ## Setting up counters in XML
@@ -152,7 +171,7 @@ Jelley, L., Douglas, J., Allais, M., Wang, J., O'Neill, M., ... & Huang, Q. S., 
 ## Known BEAUti issues
 
 
-- If you remove a partition from the `Partitions` tab, make sure to disable any of its loggers in the `Beast Map` tab before removal.
+- Please finalise all partitions in the `Partitions` tab before configuring the `Beast Map` tab. For example, If a partition is removed after stochastic mapping has been enabled on it, there may be unexpected issues. 
 
 
 
