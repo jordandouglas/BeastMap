@@ -60,7 +60,6 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 	
 	
 
-	
 	@Override
 	public void initAndValidate() {
 		super.initAndValidate();
@@ -120,6 +119,17 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 //		
 	}
 
+	
+	public void addIndelSampler(BranchMutationSampler indels) {
+		indelInput.setValue(indels, this);
+		PatternlessAlignment data = (PatternlessAlignment)indelInput.get().getData();
+		if (! (data.alignmentInput.get() instanceof SimpleIndelCodingAlignment)) {
+			throw new IllegalArgumentException("Please ensure that the indel data is of type " + SimpleIndelCodingAlignment.class.getName() + ". Currently it is " + data.alignmentInput.get());
+		}
+		indelData = (SimpleIndelCodingAlignment)data.alignmentInput.get();
+		gapChar = indelData.getGapChar();
+	}
+	
 	
 	@Override
 	public StochasticMapper getUnconditionalData() {

@@ -191,7 +191,7 @@ Although time trees (e.g. birth-death, coalescent) may be preferrable over subst
 
 
 
-## Insertions and deletions using BEAUti
+## Ancestral sequence reconstruction and indels using BEAUti
 
 
 Insertions and deletions (indels) are usually overlooked in phylogenetics. In a standard BEAST 2 analysis, gaps (the - symbol) are treated as missing data and are effectively ignored from the likelihood calculation. Using BeastMap, you can treat gaps as a binary data type, as a partition alongside the main amino acid / nucleotide partition. 
@@ -199,7 +199,7 @@ Insertions and deletions (indels) are usually overlooked in phylogenetics. In a 
 
 1. Open BEAUti
 
-2. Drag and drop an alignment file onto BEAUti and select `Import alignment with simple indels` (or alternatively press `File` and then `Import alignment with simple indels`). Select an alignment file and its data type, as per usual. 
+2. Drag and drop an alignment file onto BEAUti and select `Import Alignment With Simple Indels` (or alternatively press `File` and then `Import Alignment With Simple Indels`). Select an alignment file and its data type, as per usual. 
 
 
 ![alt text](figs/openSimpleIndel.png)
@@ -219,7 +219,11 @@ Insertions and deletions (indels) are usually overlooked in phylogenetics. In a 
 5. Configure the clock models in the `Clock Model` tab. By default, the main partition will have its clock rate fixed to 1, while the indel alignment will have its relative clock rate estimated.
 
 
-6. Save the XML file and run BEAST 2, as per usual.
+6. Open the `Beast Map` tab. Enable the tree log for either the amino acid or indel tree (the other box will automatically be selected because they have the same tree). Check the `AncestralSequenceLogger` box on the amino acid partition. Observe that the indel partition has been correctly identified in the rightmost column of this table.  
+
+![alt text](figs/BeastMapIndels.png) 
+
+7. Save the XML file and run BEAST 2, as per usual. The beastmap trees file will contain ancestral sequences, and these sequences will have gaps reconstructed under the indel model. If you chose to record the number of substitutions in the previous step, these terms should be smaller because the gaps are now being accounted for. 
 
 
 

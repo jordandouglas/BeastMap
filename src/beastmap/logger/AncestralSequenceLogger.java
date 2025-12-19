@@ -32,8 +32,21 @@ public class AncestralSequenceLogger extends CalculationNode implements Stochast
 
 	@Override
 	public Object getPropertyOfNode(Node node) {
-		int[] seqInt = sampler.getStatesForNode(sampler.getTree(), node);
+		
 		DataType dt = sampler.getDataTypeOfMapper();
+		int[] seqInt = null;
+		try {
+			seqInt = sampler.getStatesForNode(sampler.getTree(), node);
+			
+		}catch (Exception e) {
+			seqInt = new int[sampler.getPatternCount()];
+			for (int i = 0; i < sampler.getPatternCount();  i++) {
+				seqInt[i] = 0;
+			}
+		}
+		
+		
+		
 		return dt.encodingToString(seqInt);
 	}
 

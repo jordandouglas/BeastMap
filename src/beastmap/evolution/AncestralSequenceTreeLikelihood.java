@@ -388,7 +388,7 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
         	
         	try {
         		return Randomizer.randomChoicePDF(probs);
-        	}catch(Exception e) {
+        	}catch(Error e) {
         		
         		// Use MAP state
         		Log.warning("Warning: ancestral state encountered error, suggesting numerical issues. Selecting a state uniformly at random.");

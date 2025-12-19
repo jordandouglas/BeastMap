@@ -26,6 +26,8 @@ import beastfx.app.util.FXUtils;
 import beastfx.app.inputeditor.ListInputEditor;
 import beastmap.evolution.BranchMutationSampler;
 import beastmap.evolution.PatternlessAlignment;
+import beastmap.indel.SimpleIndelCodingAlignment;
+import beastmap.logger.AncestralSequenceLogger;
 import beastmap.logger.BranchSubstLogger;
 import beastmap.logger.TypedTreeLogger;
 import beastmap.logger.mut.*;
@@ -66,7 +68,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 	
 	public static Class[] termsToLog = new Class[] { SubstitutionSum.class, SynonymousSubstSum.class, NonSynonymousSubstSum.class, 
 														NucleotideTransitionCounter.class, NucleotideTransversionCounter.class, 
-														AminoAcidClassChanges.class, AminoAcidClassRemains.class
+														AminoAcidClassChanges.class, AminoAcidClassRemains.class, AncestralSequenceLogger.class
 										  }; // TotalSize.class NetSize.class, FromToSubstSum.class,, NetSize.class
 	
 	
@@ -341,12 +343,17 @@ public class BeastMapInputEditor extends ListInputEditor {
 			
 			
 			// Add to table
-			table.getItems().add(new LoggerSelection(id, "Segmented tree logger", segmentedTreeLogger, mcmc, traceLog, new ArrayList<>(), null));
-			table.getItems().add(new LoggerSelection(id, "Substitution count logger", substTreeLogger, mcmc, traceLog, loggers, substLogger));
+			table.getItems().add(new LoggerSelection(id, "Segmented tree logger", sampler, segmentedTreeLogger, mcmc, traceLog, new ArrayList<>(), null));
+			table.getItems().add(new LoggerSelection(id, "Substitution count logger", sampler, substTreeLogger, mcmc, traceLog, loggers, substLogger));
 
 			
 		}
 		
+		
+		// Indels?
+		for (BranchMutationSampler sampler : mappersAll) {
+			addIndelSampler(sampler, mappersAll);
+		}
 		
 		
 		
@@ -417,7 +424,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 						
 			
 			// Add this to the top of the table
-			table.getItems().add(0, new LoggerSelection(id, "Substitution count logger", substTreeLogger, mcmc, traceLog, loggers, substLogger));
+			table.getItems().add(0, new LoggerSelection(id, "Substitution count logger", null, substTreeLogger, mcmc, traceLog, loggers, substLogger));
 			
 			
 		}
@@ -557,26 +564,45 @@ public class BeastMapInputEditor extends ListInputEditor {
     		
     		try {
 				Object instance = clazz.getDeclaredConstructor().newInstance();
-				BranchSubstLogger sum = (BranchSubstLogger) instance;
+				if (! (instance instanceof StochasticMapProperty)) {
+    				continue;
+    			}
 				
-				if (!sum.canHandleDataType(dt)) {
-					continue;
+				
+				StochasticMapProperty stochasticMapProperty = (StochasticMapProperty) instance;
+				String propertyID = ((BEASTObject) stochasticMapProperty).getID();
+				
+				if (stochasticMapProperty instanceof BranchSubstLogger) {
+					BranchSubstLogger bsl = (BranchSubstLogger) stochasticMapProperty;
+					if (!bsl.canHandleDataType(dt)) {
+						continue;
+					}
+					
+
+					bsl.initByName("sampler", sampler);
+					bsl.setID("beastmap." + stochasticMapProperty.getClass().getSimpleName() + "." + id);
+					
+					
+				}else if (stochasticMapProperty instanceof AncestralSequenceLogger) {
+					AncestralSequenceLogger bsl = (AncestralSequenceLogger) stochasticMapProperty;
+					
+					bsl.initByName("sampler", sampler);
+					bsl.setID("beastmap." + stochasticMapProperty.getClass().getSimpleName() + "." + id);
+					
 				}
 				
-				sum.initByName("sampler", sampler);
-				sum.setID("beastmap." + sum.getClass().getSimpleName() + "." + id);
-				SubstLoggerSelection obj = new SubstLoggerSelection(sum.getClass().getSimpleName(), true, sum);
+				
+				SubstLoggerSelection obj = new SubstLoggerSelection(stochasticMapProperty.getClass().getSimpleName(), true, stochasticMapProperty);
 				
 				
-
-	    		// See if the object already exists
+				// See if the object already exists
 	    		for (StochasticMapProperty term : logger.samplerInput.get()) {
 	    			
-	    			if (term instanceof BranchSubstLogger) {
+	    			if (term instanceof StochasticMapProperty && term instanceof BEASTObject) {
 	    				
-	    				BranchSubstLogger term2 = (BranchSubstLogger) term;
-	    				if (term2.getID().equals(sum.getID())) {
-	    					obj = new SubstLoggerSelection(term.getClass().getSimpleName(), true, term2);
+	    				BEASTObject term2 = (BEASTObject) term;
+	    				if (term2.getID().equals(propertyID)) {
+	    					obj = new SubstLoggerSelection(term2.getClass().getSimpleName(), true, (StochasticMapProperty)term2);
 	    					Log.warning("Found the mut " + term2.getID());
 	    					break;
 	    				}
@@ -584,6 +610,8 @@ public class BeastMapInputEditor extends ListInputEditor {
 	    			}
 	    			
 	    		}
+				
+				
 	    		
     			loggers.add(obj);
 	    		
@@ -612,7 +640,15 @@ public class BeastMapInputEditor extends ListInputEditor {
     	for (Class<?> clazz : termsToLog) {
     		
     		
+    		
+    		
+    		
     		try {
+    			
+    			Object inst = clazz.getDeclaredConstructor().newInstance();
+    			if (! (inst instanceof BranchSubstLogger)) {
+    				continue;
+    			}
     			
     			SubstitutionSummerPerBranch speciesSummer = new SubstitutionSummerPerBranch();
 				String className = clazz.getDeclaredConstructor().newInstance().getClass().getSimpleName();
@@ -784,6 +820,65 @@ public class BeastMapInputEditor extends ListInputEditor {
     }
     
     
+    
+    /**
+     * Look for an indel sampler that mirrors this alignment
+     * @param sampler
+     */
+    private void addIndelSampler(BranchMutationSampler sampler, List<BranchMutationSampler> mappersAll) {
+    	
+    	
+    	Log.warning("Looking for an indel sampler for " + sampler.getID());
+    	
+    	// First make sure this sampler is not itself an indel sampler
+    	Alignment a = sampler.dataInput.get();
+    	if (a instanceof PatternlessAlignment){
+    		PatternlessAlignment b = (PatternlessAlignment)a;
+    		Alignment c = b.alignmentInput.get();
+    		if (c instanceof SimpleIndelCodingAlignment) {
+    			Log.warning("\t This is an indel sampler, skipping " + sampler.getID());
+    			return;
+    		}
+    	}
+    	
+    	Tree tree1 = (Tree) sampler.likelihoodInput.get().treeInput.get();
+    	
+    	
+    	// Try to find an alignment of class SimpleIndelCodingAlignment that has the same tree
+    	for (BranchMutationSampler indelSampler : mappersAll) {
+    		
+    		if (indelSampler == sampler) continue;
+    		
+    		Alignment aln = indelSampler.dataInput.get();
+    		if (aln instanceof PatternlessAlignment) {
+    			
+    			PatternlessAlignment aln2 = (PatternlessAlignment)aln;
+    			Alignment aln3 = aln2.alignmentInput.get();
+    			
+    			if (aln3 instanceof SimpleIndelCodingAlignment) {
+    				
+    				// Found one
+    				Tree tree2 = (Tree) indelSampler.likelihoodInput.get().treeInput.get();
+    				
+    				if (tree1 == tree2) {
+    					Log.warning("\t Found an indel sampler " + indelSampler.getID());
+    					sampler.addIndelSampler(indelSampler);
+    				}
+    				
+    				
+    			}
+    			
+    			
+    		}
+    		
+    	}
+    	
+    	
+
+    	
+    }
+    
+    
 	// Prepare the outer table
     private TableView<LoggerSelection> prepareTable(){
     	
@@ -819,10 +914,10 @@ public class BeastMapInputEditor extends ListInputEditor {
 	    
 	    
 	    // Check boxes
-	    TableColumn<LoggerSelection, Boolean> selectedCol = new TableColumn<>("Tree logger");
+	    TableColumn<LoggerSelection, Boolean> selectedCol = new TableColumn<>("Log tree");
 	    selectedCol.setGraphic(selecteAllCheckBox);
 	    selectedCol.setSortable(false);
-	    selectedCol.setPrefWidth(130);
+	    selectedCol.setPrefWidth(100);
 	    
 
 	    selectedCol.setCellFactory( tc -> {
@@ -842,8 +937,8 @@ public class BeastMapInputEditor extends ListInputEditor {
 	   
 
 	    
-	    TableColumn<LoggerSelection, List<String>> optionsColumn = new TableColumn<>("Terms to count");
-	    optionsColumn.setPrefWidth(500);
+	    TableColumn<LoggerSelection, List<String>> optionsColumn = new TableColumn<>("Terms to log");
+	    optionsColumn.setPrefWidth(250);
 	    optionsColumn.setCellValueFactory(data ->
 		    new ReadOnlyObjectWrapper<>(data.getValue().getOptionNames())
 		);
@@ -888,6 +983,14 @@ public class BeastMapInputEditor extends ListInputEditor {
 	    });
 	    
 	    table.getColumns().add(optionsColumn);
+	    
+	    
+	    
+	    // Indels
+	    TableColumn<LoggerSelection, String> indelCol = new TableColumn<>("Indel model");
+	    indelCol.setPrefWidth(250);
+	    indelCol.setCellValueFactory(data -> data.getValue().loggerGetIndel());
+	    table.getColumns().add(indelCol );
 	    
 	    
 	    return table;
@@ -1005,6 +1108,7 @@ public class BeastMapInputEditor extends ListInputEditor {
     // Include a logger in MCMC?
     public class LoggerSelection {
     	
+    	
 		private StringProperty name = new SimpleStringProperty();
 		private StringProperty loggerType = new SimpleStringProperty();
 		private MCMC mcmc;
@@ -1013,9 +1117,10 @@ public class BeastMapInputEditor extends ListInputEditor {
 	    private BooleanProperty selected = new SimpleBooleanProperty();
 	    private List<SubstLoggerSelection> options;
 	    private SampledSubstTreeLogger substLogger;
+	    private BranchMutationSampler sampler;
 	    
-	    
-	    public LoggerSelection(String name, String loggerType, Logger logger, MCMC mcmc, Logger traceLog, List<SubstLoggerSelection> options, SampledSubstTreeLogger substLogger) {
+	    public LoggerSelection(String name, String loggerType, BranchMutationSampler sampler, Logger logger, MCMC mcmc, Logger traceLog, List<SubstLoggerSelection> options, SampledSubstTreeLogger substLogger) {
+	    	
 	    	
 	    	this.setName(name);
 	    	this.setLoggerType(loggerType);
@@ -1024,6 +1129,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 	    	this.traceLog = traceLog;
 	    	this.options = options;
 	    	this.substLogger = substLogger;
+	    	this.sampler = sampler;
 	    	
 	    	
 	    	setSelected(inputContainsID(this.mcmc.loggersInput.get(), logger.getID()));
@@ -1043,6 +1149,21 @@ public class BeastMapInputEditor extends ListInputEditor {
 	    }
 	    
 	    
+
+
+		public StringProperty loggerGetIndel() {
+			
+			StringProperty indel = new SimpleStringProperty();
+			if (sampler == null || sampler.indelInput.get() == null) {
+				indel.setValue("");
+			}else {
+				indel.setValue(sampler.indelInput.get().getID().replaceAll("BeastMap.StochasticMapper.", ""));
+			}
+			
+			return indel;
+		}
+
+
 
 
 		public Logger getLogger() {
@@ -1112,13 +1233,13 @@ public class BeastMapInputEditor extends ListInputEditor {
 					// Add/remove the term to the tree logger
 					if (value) {
 						
-						addWithID(substLogger.samplerInput.get(), (BEASTObject)option.loggable);
+						addWithID(substLogger.samplerInput.get(), (BEASTObject)option.getLogger());
 						
 //						if (!substLogger.samplerInput.get().contains(option.logger)) {
 //							substLogger.samplerInput.get().add(option.logger);
 //						}
 						
-						doc.registerPlugin((BEASTObject)option.loggable);
+						doc.registerPlugin((BEASTObject)option.getLogger());
 						
 					}else {
 						//substLogger.samplerInput.get().remove(option.logger);
@@ -1134,9 +1255,11 @@ public class BeastMapInputEditor extends ListInputEditor {
 					}
 					
 					
+					if (!option.isSummable()) continue;
+					
 					// Add/remove their sums to the trace logger (if appropriate)
 					SubstitutionSummer sum_summer = new SubstitutionSummer();
-					sum_summer.initByName("counter", option.loggable);
+					sum_summer.initByName("counter", option.getLogger());
 					String newID = "beastmap.sumof." + option.name + "." + this.getName();
 					sum_summer.setID(newID);
 					if (value) {
@@ -1210,16 +1333,25 @@ public class BeastMapInputEditor extends ListInputEditor {
     // Include a logger in MCMC?
     public class SubstLoggerSelection {
     	
-    	String name;
-    	boolean active;
-    	Loggable loggable;
+    	private String name;
+    	private boolean active;
+    	private StochasticMapProperty loggable;
     	
-    	public SubstLoggerSelection(String name, boolean active, Loggable logger) {
+    	public SubstLoggerSelection(String name, boolean active, StochasticMapProperty logger) {
     		this.name = name.replaceAll(" ", "");
     		this.active = active;
     		this.loggable = logger;
     	}
 
+    	
+    	public boolean isSummable() {
+    		if (!(loggable instanceof BranchSubstLogger) ){
+    			return false;
+    		}
+    		
+    		BranchSubstLogger bsl = (BranchSubstLogger) loggable;
+    		return bsl.isSummable();
+    	}
 
 
 		public String getName() {
@@ -1235,7 +1367,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 			return active;
 		}
 		
-		public Loggable getLogger() {
+		public StochasticMapProperty getLogger() {
 			return loggable;
 		}
 		

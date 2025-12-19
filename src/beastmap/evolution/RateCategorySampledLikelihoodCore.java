@@ -78,7 +78,26 @@ public class RateCategorySampledLikelihoodCore extends BeerLikelihoodCore {
         	
         	
         	// Sample a category
-        	int siteCategory = sum <= 0 ? 0 : Randomizer.randomChoicePDF(siteCategoryPosteriors);
+        	int siteCategory;
+        	try {
+        		siteCategory = sum <= 0 ? 0 : Randomizer.randomChoicePDF(siteCategoryPosteriors);
+        	}catch(Error e) {
+        		
+        		// Use MAP state
+        		double max = siteCategoryPosteriors[0];
+                int choice = 0;
+                for (int i = 1; i < siteCategoryPosteriors.length; i++) {
+                    if ((siteCategoryPosteriors[i] - max)/(siteCategoryPosteriors[i] + max) > 1e-10) {
+                        max = siteCategoryPosteriors[i];
+                        choice = i;
+                    }
+                }
+                siteCategory = choice;
+        		
+        	}
+        	
+        	
+        	
         	patternSiteCategories[k] = siteCategory;
         	
         	
