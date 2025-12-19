@@ -3,6 +3,7 @@ package beastmap.app.beauti;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import beast.base.inference.CompoundDistribution;
 import beast.base.inference.Distribution;
 import beast.base.inference.Logger;
 import beast.base.inference.MCMC;
+import beast.base.parser.PartitionContext;
 import beastfx.app.inputeditor.BeautiDoc;
 import beastfx.app.util.FXUtils;
 import beastfx.app.inputeditor.ListInputEditor;
@@ -68,8 +70,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 	
 	
 	
-	private final int burninDefault = 100000;
-	private final SimpleIntegerProperty burnin = new SimpleIntegerProperty(burninDefault);
+	private SimpleIntegerProperty burnin = new SimpleIntegerProperty(100000);
 	
 	public BeastMapInputEditor() {
 		
@@ -104,8 +105,12 @@ public class BeastMapInputEditor extends ListInputEditor {
     	super.init(input, beastObject, itemNr, isExpandOption, addButtons);
     	
     	
+    	
+    	
+    	
     	MCMC mcmc = (MCMC) doc.mcmc.get();
-    	List<BranchMutationSampler> mappersAll = getAllMappers(mcmc);
+    	List<BranchMutationSampler> mappersAll = getAllMappers();
+    	Log.warning("Found " + mappersAll.size() + " stochastic mappers in mcmc");
 		
 		pane = FXUtils.newVBox();
 		
@@ -159,23 +164,39 @@ public class BeastMapInputEditor extends ListInputEditor {
 		// Remove any unused likelihoods from the cache
 		for (BranchMutationSampler mapper : mappersAll) {
 			
-			String likelihoodID = mapper.getID();
-			likelihoodID = likelihoodID.replaceAll("BeastMap.StochasticMapper.", "");
+			String id = mapper.getID();
+			id = id.replaceAll("BeastMap.StochasticMapper.", "");
 			
-			Log.warning(likelihoodID);
+			Log.warning(id);
 			
 			boolean likelihoodActive = false;
-			for (GenericTreeLikelihood likelihood : likelihoods) {
-				if (likelihood.getID().equals(likelihoodID)) {
+			
+			List<PartitionContext> partitions = doc.partitionNames;
+			
+			for (PartitionContext partition : doc.partitionNames) {
+				
+				Log.warning(partition.partition);
+				
+				if (partition.partition.equals(id)) {
 					likelihoodActive = true;
 					break;
 				}
 			}
 
 			if (!likelihoodActive) {
-				Log.warning("Removing " + likelihoodID);
-				removeWithID(mcmc.loggersInput.get(), "BeastMap.SubstTreeLogger." + likelihoodID);
-				removeWithID(mcmc.loggersInput.get(), "SegmentedTreeLogger.SubstTreeLogger." + likelihoodID);
+				Log.warning("Removing " + id);
+				
+				String segmentedTreeLoggerID =  "BeastMap.SegmentedTreeLogger." + id;
+				String substTreeLoggerID =  "BeastMap.SubstTreeLogger." + id;
+				String mapperID =  "BeastMap.StochasticMapper." + id;
+				
+				removeWithID(mcmc.loggersInput.get(), substTreeLoggerID);
+				removeWithID(mcmc.loggersInput.get(), segmentedTreeLoggerID);
+				
+				doc.unregisterPlugin(doc.pluginmap.get(segmentedTreeLoggerID));
+				doc.unregisterPlugin(doc.pluginmap.get(substTreeLoggerID));
+				doc.unregisterPlugin(doc.pluginmap.get(mapperID));
+				
 			}
 			
 		}
@@ -200,8 +221,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 			BranchMutationSampler sampler;
 			if (inputContainsID(mappersAll, mapperID)) {
 				sampler = (BranchMutationSampler) getInputWithID(mappersAll, mapperID);
-				
-				Log.warning("Found mapper in mcmc!");
+				Log.warning("Found mapper in mcmc! " + mapperID);
 			}else {
 				
 				
@@ -216,12 +236,17 @@ public class BeastMapInputEditor extends ListInputEditor {
 				
 				// Sampler
 				sampler = new BranchMutationSampler();
-				sampler.initByName("likelihood", likelihood, "data", dataPatternless, "burnin", burninDefault);
+				sampler.initByName("likelihood", likelihood, "data", dataPatternless, "burnin", burnin.get());
 				sampler.setID(mapperID);
 				
 				
+				
+				//doc.registerPlugin(dataPatternless);
+				doc.registerPlugin(sampler);
+				
+				
 				mappersAll.add(sampler);
-				Log.warning("Making new mapper");
+				Log.warning("Making new mapper " + mapperID);
 				
 			}
 			
@@ -230,7 +255,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 			Logger segmentedTreeLogger, substTreeLogger;
 			if (inputContainsID(mcmc.loggersInput.get(), segmentedTreeLoggerID)) {
 				segmentedTreeLogger = (Logger) getInputWithID(mcmc.loggersInput.get(), segmentedTreeLoggerID);
-				Log.warning("Found logger in map!");
+				Log.warning("Found logger in map! " + segmentedTreeLoggerID);
 				
 			}else {
 			
@@ -249,6 +274,12 @@ public class BeastMapInputEditor extends ListInputEditor {
 				String outfile = "beastmap.segmented." + id + ".trees";
 				segmentedTreeLogger.initByName("fileName", outfile, "logEvery", 10000, "mode", "tree", "log", segmentedLoggables);
 				segmentedTreeLogger.setID(segmentedTreeLoggerID);
+				
+				
+				doc.registerPlugin(typedTreeLogger);
+				doc.registerPlugin(segmentedTreeLogger);
+				
+				Log.warning("Making new mapper " + segmentedTreeLoggerID);
 
 				
 			}
@@ -257,7 +288,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 			// Subst logger
 			if (inputContainsID(mcmc.loggersInput.get(), substTreeLoggerID)) {
 				substTreeLogger = (Logger) getInputWithID(mcmc.loggersInput.get(), substTreeLoggerID);
-				Log.warning("Found logger in map!");
+				Log.warning("Found logger in map! " + substTreeLoggerID);
 			} else {
 
 
@@ -276,8 +307,10 @@ public class BeastMapInputEditor extends ListInputEditor {
 				substTreeLogger.setID(substTreeLoggerID);
 				
 
+				doc.registerPlugin(typedTreeLogger);
+				doc.registerPlugin(substTreeLogger);
 				
-
+				Log.warning("Making new mapper " + substTreeLoggerID);
 				
 			}
 			
@@ -335,6 +368,10 @@ public class BeastMapInputEditor extends ListInputEditor {
 				String outfile = "beastmap.species.trees";
 				substTreeLogger.initByName("fileName", outfile, "logEvery", 10000, "mode", "tree", "log", substLoggables);
 				substTreeLogger.setID(substTreeLoggerID);
+				
+				
+				doc.registerPlugin(typedTreeLogger);
+				doc.registerPlugin(substTreeLogger);
 
 				
 				
@@ -367,41 +404,99 @@ public class BeastMapInputEditor extends ListInputEditor {
     
     
 
-	private List<BranchMutationSampler> getAllMappers(BEASTObject obj) {
+	private List<BranchMutationSampler> getAllMappers() {
+		
 		List<BranchMutationSampler> mappers = new ArrayList<>();
-		getAllMappers(obj, mappers);
-		return mappers;
-	}
-	
-	
-	private List<BranchMutationSampler> getAllMappers(BEASTObject obj, List<BranchMutationSampler> mappers) {
-		
-		Map<String, Input<?>>  map = obj.getInputs();
-		
-		for (String key : map.keySet()) {
+		Map<String, BEASTInterface> objects = doc.pluginmap;
+		for (String key : objects.keySet()) {
 			
-			Input<?> input = map.get(key);
-			Object o = input.get();
-			if (o instanceof BEASTObject) {
-				
-				// Is this a mapper?
-				if (o instanceof BranchMutationSampler) {
-					mappers.add((BranchMutationSampler)o);
-				}
-				
-				// Recurse
-				getAllMappers((BEASTObject)o, mappers);
-				
+			//Log.warning("Found " + key);
+			BEASTInterface o = objects.get(key);
+			
+			// Is this a mapper?
+			if (o instanceof BranchMutationSampler) {
+				BranchMutationSampler b = (BranchMutationSampler)o;
+				mappers.add(b);
+				Log.warning("Found stochatstic mapper in mcmc " + b.getID());
 			}
+			
 			
 		}
 		
 		
 		return mappers;
-		
 	}
 	
-	
+//	
+//	private void getAllMappers(BEASTInterface obj, List<BranchMutationSampler> mappers) {
+//		
+//		
+//		
+//		Map<String, Input<?>>  map = obj.getInputs();
+//		
+//		for (String key : map.keySet()) {
+//			
+//			Log.warning("key=" + key + " for " + obj.getID() + " " + obj.getClass());
+//			
+//			Input<?> input = map.get(key);
+//			Object o = input.get();
+//			
+//			
+//			// List of objects
+//			if (o instanceof List<?>) {
+//				
+//				List<?> list = (List<?>) o;
+//				for (Object ele : list) {
+//					
+//					if (ele instanceof BEASTInterface) {
+//						
+//						BEASTInterface o2 = (BEASTInterface) ele;
+//						
+//						Log.warning("Looking at " + key + "=" + o2.getID() + " in " + obj.getID());
+//						
+//						// Is this a mapper?
+//						if (o instanceof BranchMutationSampler) {
+//							BranchMutationSampler b = (BranchMutationSampler)o;
+//							mappers.add(b);
+//							Log.warning("Found stochatstic mapper in mcmc " + b.getID());
+//						}
+//						
+//						// Recurse
+//						getAllMappers(o2, mappers);
+//						
+//					}
+//					
+//				}
+//				
+//			}
+//			
+//			
+//			// Object
+//			else if (o instanceof BEASTInterface) {
+//				
+//				BEASTInterface o2 = (BEASTInterface) o;
+//				
+//				Log.warning("Looking at " + key + "=" + o2.getID() + " in " + obj.getID());
+//				
+//				// Is this a mapper?
+//				if (o instanceof BranchMutationSampler) {
+//					BranchMutationSampler b = (BranchMutationSampler)o;
+//					mappers.add(b);
+//					Log.warning("Found stochatstic mapper in mcmc " + b.getID());
+//				}
+//				
+//				// Recurse
+//				getAllMappers(o2, mappers);
+//				
+//			}
+//			
+//		}
+//		
+//		
+//		
+//	}
+//	
+//	
 	
 	
 
@@ -646,6 +741,7 @@ public class BeastMapInputEditor extends ListInputEditor {
     	int initialValue = burnin.get();
     	for (BranchMutationSampler sampler : mappersAll) {
     		initialValue = sampler.burninInput.get();
+    		Log.warning("Loading burnin from " + sampler.getID() + " " + initialValue);
     		break;
     	}
     	
@@ -840,25 +936,45 @@ public class BeastMapInputEditor extends ListInputEditor {
 	
 	
 	// Remove the input if it has the right id
-	public static <T> void removeWithID(List<T> list, String id) {
+	public <T> void removeWithID(List<T> list, String id) {
 		
-		for (T obj : list) {
+		
+		
+		Iterator<T> iter = list.iterator();
+		while (iter.hasNext()) {
+			
+			T obj = iter.next();
 			
 			if (obj instanceof BEASTObject) {
 				
 				BEASTObject bobj = (BEASTObject) obj;
 				if (bobj.getID().equals(id)) {
-					list.remove(obj);
+					iter.remove();
+					//doc.unregisterPlugin(bobj);
 				}
 			}
 			
 		}
 		
+		
+//		for (T obj : list) {
+//			
+//			if (obj instanceof BEASTObject) {
+//				
+//				BEASTObject bobj = (BEASTObject) obj;
+//				if (bobj.getID().equals(id)) {
+//					list.remove(obj);
+//					//doc.unregisterPlugin(bobj);
+//				}
+//			}
+//			
+//		}
+		
 	}
 	
 	
 	// Does the input contain something with this ID?
-	public static <T> boolean inputContainsID(List<T> list, String id) {
+	public <T> boolean inputContainsID(List<T> list, String id) {
 		
 		for (T obj : list) {
 			
@@ -878,7 +994,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 	
 	
 	// Does the input contain something with this ID?
-	public static <T> BEASTObject getInputWithID(List<T> list, String id) {
+	public <T> BEASTObject getInputWithID(List<T> list, String id) {
 		
 		for (T obj : list) {
 			
@@ -931,7 +1047,8 @@ public class BeastMapInputEditor extends ListInputEditor {
 			
 			// Which terms are being logged?
 			for (SubstLoggerSelection option : this.options) {
-				boolean active = inputContainsID(substLogger.samplerInput.get(), option.getLoggerID());
+				boolean active = inputContainsID(substLogger.samplerInput.get(), option.getLoggerID()) || doc.pluginmap.containsKey(option.getLoggerID());
+				Log.warning("Setting " + option.getName() + "to " + active);
 				this.setChecked(option.getName(), active);
 			}
 			
@@ -992,9 +1109,19 @@ public class BeastMapInputEditor extends ListInputEditor {
 //							substLogger.samplerInput.get().add(option.logger);
 //						}
 						
+						doc.registerPlugin((BEASTObject)option.loggable);
+						
 					}else {
 						//substLogger.samplerInput.get().remove(option.logger);
+						
+						BEASTObject o = getInputWithID(substLogger.samplerInput.get(), option.getLoggerID());
 						removeWithID(substLogger.samplerInput.get(), option.getLoggerID());
+						
+						if (o != null){
+							doc.unregisterPlugin((BEASTObject)o);
+						}
+						
+						
 					}
 					
 					
@@ -1016,6 +1143,8 @@ public class BeastMapInputEditor extends ListInputEditor {
 						if (!alreadyThere) {
 							traceLog.loggersInput.get().add(sum_summer);
 						}
+						
+						
 						
 					}else {
 						

@@ -145,3 +145,14 @@ Summarise a posterior distribution of segmented trees onto a summary tree using:
 In the `examples` folder, there is an analysis based on the haemagglutinin segment sequenced from 96 cases of influenza A(H3N2) in New Zealand. This dataset was downsampled from over 1000 complete genomes produced by Jelley at al. 2025.
 
 Jelley, L., Douglas, J., Allais, M., Wang, J., O'Neill, M., ... & Huang, Q. S., Geoghegan, J.,  (2025). A decade of genomic surveillance tracks the disappearance and reintroduction of seasonal influenza virus in Aotearoa New Zealand.  https://doi.org/10.21203/rs.3.rs-7503135/v1
+
+
+
+
+## Known BEAUti issues
+
+
+- If you remove a partition from the `Partitions` tab, make sure to disable any of its loggers in the `Beast Map` tab before removal.
+
+
+
