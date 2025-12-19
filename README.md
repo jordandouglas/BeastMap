@@ -1,5 +1,5 @@
 # BeastMap
-A BEAST 2 package for counting the number of synonymous, non-synonymous, and indel mutations on each branch. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a mutation pathway along each branch. This all happens during MCMC. This package is compatible with a wide range of existing BEAST 2 site, clock, and tree models; and discrete data types (including nucleotide, codon, amino acid, 3Di, morphological, cognate, phoneme, and geographical).
+A BEAST 2 package for counting the number of synonymous, non-synonymous, and indel mutations on each branch. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a substitution pathway along each branch. This all happens during MCMC. This package is compatible with a wide range of BEAST 2 site, clock, and tree models; and discrete data types (including nucleotide, codon, amino acid, 3Di, morphological, cognate, phoneme, and geographical).
 
 
 
@@ -26,14 +26,14 @@ BeastMap is currently in pre-release.
 
 Set up a BEAST 2 analysis as per usual. Then at the very end, configure the stochastic mapping with the `Beast Map` tab. This will work on a range of datatypes, including nucleotide, amino acids, 3Di characters, and discrete traits/locations.
 
-A **segmented tree logger** will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many mutations, as there will be a large number of states, and therefore the tree files may require a large amount of disk space.
+A **segmented tree logger** will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many substitutions, as there will be a large number of states, and therefore the tree files may require a large amount of disk space.
 
-A **substitution count logger** (further detailed in the next section) will not report the timing of change events along each lineage, but it will summarise the events between each node and its parent (e.g. total number of changes along the branch). There is currently limited BEAUti support for this logger, which will only report the total number of changes and none of the other utilities below, which require XML file editing at this stage.
+A **substitution count logger** (further detailed in [doc](doc/)) will not report the timing of change events along each lineage, but it will summarise the events between each node and its parent (e.g. total number of changes along the branch). There is currently limited BEAUti support for this logger, which will only report the total number of changes and none of the other utilities below, which require XML file editing at this stage.
 
 ![alt text](figs/beautiFig.png)
 
 
-The `Tree logger` column will add these terms to the trees (per branch), while the `Term to count` column will report the sum the terms up in the log file (summed across all branches).
+The `Tree logger` column will add these terms to the trees (per branch), while the `Term to count` column will report the terms to include in the logger file. Some of these terms will also be included in the trace log (summed across all branches).
 
 
 These loggers can be further modified in the `MCMC` tab.
@@ -43,150 +43,6 @@ The first `burnin` steps of the MCMC chain will not have any stochastic mapping.
 There is also BEAUti support for BeastMap in [StarBeast3](https://github.com/rbouckaert/starbeast3).
 
 
-
-
-
-## Subsitution counters
-
-Each counter shares a common ```BranchMutationSampler``` for any given tree likelihood, which will stochastically sample the mutations at the time of logging. This ensures that the various mutation summarisers below will be in harmony.
-
-
-
-### SubstitutionSum
-Counts the total number of substitutions per branch.
-
-```<sampler spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" />```
-
-### SynonymousSubstSum
-Counts the total number of synonymous substitutions per branch. Requirements: **nucleotide** or **codon** data. Options: code (default: universal); readingFrame (default: 1).
-
-```<sampler spec="beastmap.logger.mut.SynonymousSubstSum" sampler="@mutationsampler" code="universal" readingFrame="1"/>```
-
-### NonSynonymousSubstSum
-Counts the total number of non-synonymous substitutions per branch. Requirements: **nucleotide** or **codon** data. Options: code (default: universal); readingFrame (default: 1).
-
-```<sampler spec="beastmap.logger.mut.NonSynonymousSubstSum" sampler="@mutationsampler"  code="universal" readingFrame="1"/>```
-
-### FromToSubstSum
-Counts the total number of substitutions per branch from one of the characters in state X to one of the characters in state Y (user defined). Options: from (e.g. 'A' or 'AG'); from (e.g. 'C' or 'ACG').
-
-``` <sampler spec="beastmap.logger.mut.FromToSubstSum" sampler="@mutationsampler" from="A" to="CG" />```
-
-### NucleotideTransitionCounter
-Counts the total number of transitions per branch (purine to purine or pyrimidine to pyrimidine). Requirements: **nucleotide** data.
-
-``` <sampler spec="beastmap.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />```
-
-### NucleotideTransversionCounter
-Counts the total number of substitutions per branch (purine to pyrimidine or vice versa). Requirements: **nucleotide** data.
-
-``` <sampler spec="beastmap.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />```
-
-
-### AminoAcidClassChanges
-Counts the total number of amino acid substitutions per branch such that the amino acid chnages to a different functional class. Requirements: **amino acid** data. These classes are based on the BLOSUM62 matrix non-polar: {IVLM}, amide/amine: {DENQ}, basic: {HKR}, aromatic: {FWY}, small/polar: {AST}, cysteine: {C}, glycine: {G}, proline: {P}.
-
-``` <sampler spec="beastmap.logger.mut.AminoAcidClassChanges" sampler="@mutationsampler" />```
-
-
-### AminoAcidClassRemains
-Counts the total number of amino acid substitutions per branch such that the amino acid remains in the same functional class. Requirements: **amino acid** data.
-
-``` <sampler spec="beastmap.logger.mut.AminoAcidClassRemains" sampler="@mutationsampler" />```
-
-
-### SubstitutionSummer
-
-Takes one of the other per-branch counters and adds all the numbers together across the whole tree
-
-``` <log spec="beastmap.logger.SubstitutionSummer" counter="@ID_OF_COUNTER"  />```
-
-
-## Filters
-
-Any of the counters can be filtered to a certain range of sites. In the exampkle below, we will only count the substitutions in sites 1-10. 
-
-```<sampler spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" filter="1-10" />```
-
-
-## Setting up counters in XML
-
-At every log, the ancestral sequence of each internal node will be stochatsically sampled, and so will the mutations along each branch. These mutations are summarised by the following loggers.
-
-Append the following loggers to the bottom of the XML file to count the number of substitutions along each branch in the tree logger. In this example, the trees will be logged with length `SubstitutionSum` but you can leave in default units by removing the `lengths` input.
-```
-  <logger id="treelog" spec="Logger" fileName="substitution.trees" logEvery="10000" mode="tree">
-      <log id="SampledSubstTreeLogger" spec="beastmap.logger.SampledSubstTreeLogger" lengths="@SubstitutionSum" tree="@tree">
-          <sampler id="SubstitutionSum" spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" />
-          <sampler id="SynonymousSubstSum" spec="beastmap.logger.mut.SynonymousSubstSum" sampler="@mutationsampler" code="universal" readingFrame="1"/>
-          <sampler id="NonSynonymousSubstSum" spec="beastmap.logger.mut.NonSynonymousSubstSum" sampler="@mutationsampler"  code="universal" readingFrame="1"/>
-          <sampler id="FromToSubstSum" spec="beastmap.logger.mut.FromToSubstSum" sampler="@mutationsampler" from="A" to="G" />
-          <sampler id="NucleotideTransitionCounter" spec="beastmap.logger.mut.NucleotideTransitionCounter" sampler="@mutationsampler" />
-          <sampler id="NucleotideTransversionCounter" spec="beastmap.logger.mut.NucleotideTransversionCounter" sampler="@mutationsampler" />
-          <sampler id="SubstitutionSumFiltered" spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" filter="2,1-99\3" />
-
-          <!-- This will log the ancestral sequences onto the tree -- it will make the tree files quite large so turn it off if you dont want it -->
-          <sampler id="AncestralSequenceLogger" spec="beastmap.logger.AncestralSequenceLogger" sampler="@mutationsampler"/>
-
-          <sampler id="NucleotideTransversionCounter" spec="beastmap.logger.mut.NucleotideTransversionCounter">
-            <sampler id="mutationsampler" spec="beastmap.evolution.BranchMutationSampler" tag="seq" useAmbiguities="true" substModelIsNodeDependent="false" burnin="50000" >
-               <tree idref="tree" />
-               <siteModel idref="siteModelID" />
-               <branchRateModel idref="clockModelID" />
-               <data spec="beastmap.evolution.PatternlessAlignment" data="@data" />
-            </sampler>
-          </sampler>
-      </log>
-  </logger>
-```
-
-You can also place these loggers in the trace file as well as the tree file to estimate their ESS:
-
-```
-<logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
-   <sampler idref="NucleotideTransitionCounter" />
-</logger>
-```
-
-
-## Summarising a segmented tree
-
-Summarise a posterior distribution of segmented trees onto a summary tree using:
-
-```
-# Generate a summary tree first
-~/beast/bin/TreeAnnotator tree.trees summary.nexus
-
-# Then map the segments onto the summary tree
-~/beast/bin/applauncher SegmentedTreeAnnotator -tree summary.nexus -segments beastmap.segments.trees -out segments.nexus 
-```
-
-
-
-## Setting up a gamma-length midpoint tree prior using BEAUti
-
-
-Although time trees (e.g. birth-death, coalescent) may be preferrable over substitution trees in many biological datasets, if you are interested in using the unconstrained gamma-length midpoint (GM) tree prior, follow the steps below. This may serve as a useful null hypothesis to test whether time trees are indeed appropriate. In this tree prior, branch lengths are independently sampled from a gamma distribution. The tree is rooted using a Bayesian extension of the midpoint method. 
-
-
-
-1. Open BEAUti
-2. Load the data and set up partitions and site models, as per usual.
-3. It is recommended to use a strict clock in the `Clock Model` tab. A relaxed or local clock will not be identifiable with the tree.
-4. Open the `Priors` tab and select `Gamma Length Midpoint Prior` from the tree dropdown.
-
-![alt text](figs/gammaLengthMidpoint.png)
-
-
-5. The `Midpoint` constant will determine where the root should lie on the longest path between the furtherest pair of tips. path. Specifically, the root is assumed to lie 0 < F < 1 along this path, where F ~ beta(Midpoint, Midpoint). If this term is 50, then we expect the midpoint to lie between 40-60% of the way along this path (with 95% probability). If this term is 1, then the root is equally likely to lie anywhere on the path.
-
-6. The `GMprior_LengthMean` parameter is the average branch length (under a gamma distribution prior).
-
-7. The `GMprior_LengthShape` parameter is the shape of branch lengths (under a gamma distribution prior).
-
-8. Optionally, open the `Beast Map` tab to also do stochastic mapping on this tree.
-
-9. Save the XML file and run in BEAST 2, as per usual.
 
 
 
@@ -228,11 +84,61 @@ Insertions and deletions (indels) are usually overlooked in phylogenetics. In a 
 
 
 
+
+
+## Setting up a gamma-length midpoint tree prior using BEAUti
+
+
+Although time trees (e.g. birth-death, coalescent) may be preferrable over substitution trees in many biological datasets, if you are interested in using the unconstrained gamma-length midpoint (GM) tree prior, follow the steps below. This may serve as a useful null hypothesis to test whether time trees are indeed appropriate. In this tree prior, branch lengths are independently sampled from a gamma distribution. The tree is rooted using a Bayesian extension of the midpoint method. 
+
+
+
+1. Open BEAUti
+2. Load the data and set up partitions and site models, as per usual.
+3. It is recommended to use a strict clock in the `Clock Model` tab. A relaxed or local clock will not be identifiable with the tree.
+4. Open the `Priors` tab and select `Gamma Length Midpoint Prior` from the tree dropdown.
+
+![alt text](figs/gammaLengthMidpoint.png)
+
+
+5. The `Midpoint` constant will determine where the root should lie on the longest path between the furtherest pair of tips. path. Specifically, the root is assumed to lie 0 < F < 1 along this path, where F ~ beta(Midpoint, Midpoint). If this term is 50, then we expect the midpoint to lie between 40-60% of the way along this path (with 95% probability). If this term is 1, then the root is equally likely to lie anywhere on the path.
+
+6. The `GMprior_LengthMean` parameter is the average branch length (under a gamma distribution prior).
+
+7. The `GMprior_LengthShape` parameter is the shape of branch lengths (under a gamma distribution prior).
+
+8. Optionally, open the `Beast Map` tab to also do stochastic mapping on this tree.
+
+9. Save the XML file and run in BEAST 2, as per usual.
+
+
+
+
+## Summarising a segmented tree
+
+Summarise a posterior distribution of segmented trees onto a summary tree using:
+
+```
+# Generate a summary tree first
+~/beast/bin/TreeAnnotator tree.trees summary.nexus
+
+# Then map the segments onto the summary tree
+~/beast/bin/applauncher SegmentedTreeAnnotator -tree summary.nexus -segments beastmap.segments.trees -out segments.nexus 
+```
+
+
+
+
+
 ## Examples
 
-In the `examples` folder, there is an analysis based on the haemagglutinin segment sequenced from 96 cases of influenza A(H3N2) in New Zealand. This dataset was downsampled from over 1000 complete genomes produced by Jelley at al. 2025.
+There are some XML files in the [examples](examples) folder. Also see the [simulation](simulation) folder for some simulation studies and codon partion models (currently these cannot be configured using BEAUti).
 
 
+*Influenza*. `H3N2_NewZealand.xml` and its input file `H3N2_HA.fasta`  describe a discrete phylogeographical analysis based on the haemagglutinin segment sequenced from 96 cases of influenza A(H3N2) in New Zealand. This dataset was downsampled from over 1000 complete genomes produced by Jelley at al. 2025. **Package dependencies:**  BEAST CLASSIC
+
+
+*Anticodon binding domain*. `CRIMVLG.xml`  and its input files `crimvlg_aa_trimmed.fasta` and `crimvlg_3di_trimmed.fasta`. This analysis uses three data types on a single tree: both amino acids, 3Di characters, and indels. **Package dependencies:**  FoldBeast, OBAMA, ORC
 
 
 
