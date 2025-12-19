@@ -163,10 +163,10 @@ Summarise a posterior distribution of segmented trees onto a summary tree using:
 
 
 
-## Setting up the gamma-length midpoint tree prior using BEAUti
+## Setting up a gamma-length midpoint tree prior using BEAUti
 
 
-Although time trees (e.g. birth-death, coalescent) may be preferrable over substitution trees on most biological datasets, if you are interested in using the unconstrained gamma-length midpoint (GM) tree prior, follow the steps below. This may serve as a useful null hypothesis to test whether time trees are indeed appropriate. In this tree prior, branch lengths are independently sampled from a gamma distribution. The tree is rooted using a Bayesian extension of the midpoint method. 
+Although time trees (e.g. birth-death, coalescent) may be preferrable over substitution trees in many biological datasets, if you are interested in using the unconstrained gamma-length midpoint (GM) tree prior, follow the steps below. This may serve as a useful null hypothesis to test whether time trees are indeed appropriate. In this tree prior, branch lengths are independently sampled from a gamma distribution. The tree is rooted using a Bayesian extension of the midpoint method. 
 
 
 
@@ -189,11 +189,45 @@ Although time trees (e.g. birth-death, coalescent) may be preferrable over subst
 9. Save the XML file and run in BEAST 2, as per usual.
 
 
+
+
+## Insertions and deletions using BEAUti
+
+
+Insertions and deletions (indels) are usually overlooked in phylogenetics. In a standard BEAST 2 analysis, gaps (the - symbol) are treated as missing data and are effectively ignored from the likelihood calculation. Using BeastMap, you can treat gaps as a binary data type, as a partition alongside the main amino acid / nucleotide partition. 
+
+
+1. Open BEAUti
+
+2. Drag and drop an alignment file onto BEAUti and select `Import alignment with simple indels` (or alternatively press `File` and then `Import alignment with simple indels`). Select an alignment file and its data type, as per usual. 
+
+
+![alt text](figs/openSimpleIndel.png)
+
+
+3. If there are gaps in the alignment, we should have two partitions now, sharing the same tree. The `simpleindel` partition is a binary representation of gaps using the Simple Gap method described by Simmons and Ochoterena 2000. This representation does not treat each gap as an independent site, but rather it joins together contiguous gapped positions into the same indel event. Observe that the number of sites will be different in the indel alignment compared with the main one.
+
+![alt text](figs/simpleIndel.png)
+
+
+4. The substitution model will be restricted to binary data models, such as the Lewis MK model from the [MM package](https://github.com/CompEvol/morph-models).
+
+
+![alt text](figs/LewisMK.png)
+
+
+5. Configure the clock models in the `Clock Model` tab. By default, the main partition will have its clock rate fixed to 1, while the indel alignment will have its relative clock rate estimated.
+
+
+6. Save the XML file and run BEAST 2, as per usual.
+
+
+
+
 ## Examples
 
 In the `examples` folder, there is an analysis based on the haemagglutinin segment sequenced from 96 cases of influenza A(H3N2) in New Zealand. This dataset was downsampled from over 1000 complete genomes produced by Jelley at al. 2025.
 
-Jelley, L., Douglas, J., Allais, M., Wang, J., O'Neill, M., ... & Huang, Q. S., Geoghegan, J.,  (2025). A decade of genomic surveillance tracks the disappearance and reintroduction of seasonal influenza virus in Aotearoa New Zealand.  https://doi.org/10.21203/rs.3.rs-7503135/v1
 
 
 
@@ -207,3 +241,12 @@ Jelley, L., Douglas, J., Allais, M., Wang, J., O'Neill, M., ... & Huang, Q. S., 
 
 
 
+## References
+
+
+
+
+Jelley, L., Douglas, J., Allais, M., Wang, J., O'Neill, M., ... & Huang, Q. S., Geoghegan, J.,  (2025). A decade of genomic surveillance tracks the disappearance and reintroduction of seasonal influenza virus in Aotearoa New Zealand.  https://doi.org/10.21203/rs.3.rs-7503135/v1
+
+
+Simmons, M. P., & Ochoterena, H. (2000). Gaps as characters in sequence-based phylogenetic analyses. Systematic biology, 49(2), 369-381.

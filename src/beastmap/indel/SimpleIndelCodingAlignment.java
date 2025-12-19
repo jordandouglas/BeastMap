@@ -43,6 +43,9 @@ public class SimpleIndelCodingAlignment extends Alignment {
 			dataTypeInput.setValue("binary", this);
 		}
 		
+		
+		sequenceInput.get().clear();
+		
 		stateCountInput.setValue(2, this);
 		
 		gapChar = dataInput.get().getDataType().stringToEncoding(""+DataType.GAP_CHAR).get(0);

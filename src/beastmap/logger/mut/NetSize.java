@@ -3,6 +3,7 @@ package beastmap.logger.mut;
 import java.util.List;
 
 import beast.base.core.Description;
+import beast.base.evolution.datatype.Binary;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.tree.Node;
 import beastmap.logger.BranchSubstLogger;
@@ -59,7 +60,7 @@ public class NetSize extends BranchSubstLogger {
 
 	@Override
 	public boolean canHandleDataType(DataType dataType) {
-		return true;
+		return true; //dataType instanceof Binary;
 	}
 	
 	

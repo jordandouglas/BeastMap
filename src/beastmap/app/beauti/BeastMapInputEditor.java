@@ -67,7 +67,7 @@ public class BeastMapInputEditor extends ListInputEditor {
 	public static Class[] termsToLog = new Class[] { SubstitutionSum.class, SynonymousSubstSum.class, NonSynonymousSubstSum.class, 
 														NucleotideTransitionCounter.class, NucleotideTransversionCounter.class, 
 														AminoAcidClassChanges.class, AminoAcidClassRemains.class
-										  }; // TotalSize.class NetSize.class, FromToSubstSum.class,
+										  }; // TotalSize.class NetSize.class, FromToSubstSum.class,, NetSize.class
 	
 	
 	
