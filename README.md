@@ -28,7 +28,7 @@ Set up a BEAST 2 analysis as per usual. After the partitions have been finalised
 
 A **segmented tree logger** will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many substitutions, as there will be a large number of ancestral sequences or states, and therefore the tree files may require a large amount of disk space.
 
-A **substitution count logger** (further detailed in [doc](doc/)) will not report the timing of change events along each lineage, but it will summarise the events between each node and its parent (e.g. total number of changes along the branch). 
+A **substitution count logger** (further detailed in [doc](doc/)) will not report the timing of change events along each lineage, but it can report the ancestral sequence/state of each node, and the events between each node and its parent (e.g. total number of changes along the branch). 
 
 ![alt text](figs/nucleotide.png)
 
