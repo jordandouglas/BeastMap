@@ -29,7 +29,7 @@ BeastMap is currently in pre-release.
 Set up a BEAST 2 analysis as per usual. After the partitions have been finalised, configure the stochastic mapping with the `Beast Map` tab. Note that this will not change any of the results or the phylogenetic model, but it will add new information to the logged files. These loggers can be further modified in the `MCMC` tab. There is also BEAUti support for BeastMap in [StarBeast3](https://github.com/rbouckaert/starbeast3).
 
 
-The `Log tree` column will add these terms to the trees (per branch), while the `Term to count` column will report the terms to include in the logger file. Some of these terms will also be included in the trace log (summed across all branches).
+The `Log tree` column will add these terms to the trees (per branch), while the `Term to log` column will report the terms to include in the logger file. Some of these terms will also be included in the trace log (summed across all branches).
 
 
 The first `burnin` steps of the MCMC chain will not have any stochastic mapping. This is because the initial states of the chain often present numerical issues due to very branches and high rates.
