@@ -32,7 +32,7 @@ Set up a BEAST 2 analysis as per usual. After the partitions have been finalised
 The `Log tree` column will add these terms to the trees (per branch), while the `Term to log` column will report the terms to include in the logger file. Some of these terms will also be included in the trace log (summed across all branches).
 
 
-The first `burnin` steps of the MCMC chain will not have any stochastic mapping. This is because the initial states of the chain often present numerical issues due to very branches and high rates.
+The first `burnin` steps of the MCMC chain will not have any stochastic mapping. This is not only to minimise computational overhead during burnin, but also because the initial states of the chain often present numerical issues due to long branches and high rates.
 
 
 ![alt text](figs/nucleotide.png)
