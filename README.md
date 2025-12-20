@@ -4,6 +4,7 @@ A BEAST 2 package for reconstructing ancestral sequences and substitution histor
 
 
 
+
 ## Installation
 
 BeastMap is currently in pre-release. 
@@ -24,7 +25,8 @@ BeastMap is currently in pre-release.
 ## Setting up stochastic mapping using BEAUti
 
 
-Set up a BEAST 2 analysis as per usual. After the partitions have been finalised, configure the stochastic mapping with the `Beast Map` tab. 
+Set up a BEAST 2 analysis as per usual. After the partitions have been finalised, configure the stochastic mapping with the `Beast Map` tab. Note that this will not change any of the results or the phylogenetic model, but it will add new information to the logged files.
+
 
 A **segmented tree logger** will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many substitutions, as there will be a large number of ancestral sequences or states, and therefore the tree files may require a large amount of disk space.
 
