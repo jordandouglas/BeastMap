@@ -24,26 +24,32 @@ BeastMap is currently in pre-release.
 ## Setting up stochastic mapping using BEAUti
 
 
-Set up a BEAST 2 analysis as per usual. Then at the very end, configure the stochastic mapping with the `Beast Map` tab. This will work on a range of datatypes, including nucleotide, amino acids, 3Di characters, and discrete traits/locations.
+Set up a BEAST 2 analysis as per usual. Then at the very end, configure the stochastic mapping with the `Beast Map` tab. This will work on a range of datatypes, including nucleotide, amino acids, 3Di characters, and discrete traits/locations. These loggers can be further modified in the `MCMC` tab. There is also BEAUti support for BeastMap in [StarBeast3](https://github.com/rbouckaert/starbeast3).
 
-A **segmented tree logger** will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many substitutions, as there will be a large number of states, and therefore the tree files may require a large amount of disk space.
 
-A **substitution count logger** (further detailed in [doc](doc/)) will not report the timing of change events along each lineage, but it will summarise the events between each node and its parent (e.g. total number of changes along the branch). There is currently limited BEAUti support for this logger, which will only report the total number of changes and none of the other utilities below, which require XML file editing at this stage.
+The `Log tree` column will add these terms to the trees (per branch), while the `Term to count` column will report the terms to include in the logger file. Some of these terms will also be included in the trace log (summed across all branches).
+
+
+The first `burnin` steps of the MCMC chain will not have any stochastic mapping. This is because the initial states of the chain often present numerical issues due to very branches and high rates.
+
 
 ![alt text](figs/nucleotide.png)
 
 
-The `Tree logger` column will add these terms to the trees (per branch), while the `Term to count` column will report the terms to include in the logger file. Some of these terms will also be included in the trace log (summed across all branches).
 
+A **segmented tree logger** will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many substitutions, as there will be a large number of states, and therefore the tree files may require a large amount of disk space. 
 
-These loggers can be further modified in the `MCMC` tab.
+Shown below is a segmented tree, where branches/segments are coloured by geographical location. This tree is easily visualised using [IcyTree](https://www.icytree.org).
 
-The first `burnin` steps of the MCMC chain will not have any stochastic mapping. This is because the initial states of the chain often present numerical issues due to very branches and high rates.
-
-There is also BEAUti support for BeastMap in [StarBeast3](https://github.com/rbouckaert/starbeast3).
+![alt text](figs/segmentedTree.png)
 
 
 
+A **substitution count logger** (further detailed in [doc](doc/)) will not report the timing of change events along each lineage, but it will summarise the events between each node and its parent (e.g. total number of changes along the branch). There is currently limited BEAUti support for this logger, which will only report the total number of changes and none of the other utilities below, which require XML file editing at this stage. 
+
+Shown below is a tree with branches coloured by the number of substitutions (ranging from 0 to 2 here).
+
+![alt text](figs/substSum.png)
 
 
 
@@ -135,7 +141,7 @@ Summarise a posterior distribution of segmented trees onto a summary tree using:
 There are some XML files in the [examples](examples) folder. Also see the [simulation](simulation) folder for some simulation studies and codon partion models (currently these cannot be configured using BEAUti).
 
 
-*Influenza*. `H3N2_NewZealand.xml` and its input file `H3N2_HA.fasta`  describe a discrete phylogeographical analysis based on the haemagglutinin segment sequenced from 96 cases of influenza A(H3N2) in New Zealand. This dataset was downsampled from over 1000 complete genomes produced by Jelley at al. 2025. **Package dependencies:**  BEAST CLASSIC
+*Influenza*. `H3N2_NewZealand.xml` and its input file `H3N2_HA.fasta`  describe a discrete phylogeographical analysis based on the haemagglutinin segment sequenced from 96 cases of influenza A(H3N2) in New Zealand. This dataset was downsampled from over 1000 complete genomes produced by Jelley at al. 2025. **Package dependencies:**  BEAST CLASSIC, SSM
 
 
 *Anticodon binding domain*. `CRIMVLG.xml`  and its input files `crimvlg_aa_trimmed.fasta` and `crimvlg_3di_trimmed.fasta`. This analysis uses three data types on a single tree: both amino acids, 3Di characters, and indels. **Package dependencies:**  FoldBeast, OBAMA, ORC
