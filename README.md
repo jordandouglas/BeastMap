@@ -1,5 +1,6 @@
 # BeastMap
-A BEAST 2 package for counting the number of synonymous, non-synonymous, and indel mutations on each branch. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a substitution pathway along each branch. This all happens during MCMC. This package is compatible with a wide range of BEAST 2 site, clock, and tree models; and discrete data types (including nucleotide, codon, amino acid, 3Di, morphological, cognate, phoneme, and geographical).
+A BEAST 2 package for reconstructing ancestral sequences and substitution histories. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a substitution pathway along each branch. This all happens during MCMC. This package is compatible with a wide range of BEAST 2 site, clock, and tree models; and discrete data types (including nucleotide, codon, amino acid, 3Di, morphological, cognate, phoneme, and geographical). BeastMap will also take care of insertions and deletions.
+
 
 
 
@@ -24,7 +25,8 @@ BeastMap is currently in pre-release.
 ## Setting up stochastic mapping using BEAUti
 
 
-Set up a BEAST 2 analysis as per usual. Then at the very end, configure the stochastic mapping with the `Beast Map` tab. This will work on a range of datatypes, including nucleotide, amino acids, 3Di characters, and discrete traits/locations. These loggers can be further modified in the `MCMC` tab. There is also BEAUti support for BeastMap in [StarBeast3](https://github.com/rbouckaert/starbeast3).
+
+Set up a BEAST 2 analysis as per usual. After the partitions have been finalised, configure the stochastic mapping with the `Beast Map` tab. Note that this will not change any of the results or the phylogenetic model, but it will add new information to the logged files. These loggers can be further modified in the `MCMC` tab. There is also BEAUti support for BeastMap in [StarBeast3](https://github.com/rbouckaert/starbeast3).
 
 
 The `Log tree` column will add these terms to the trees (per branch), while the `Term to count` column will report the terms to include in the logger file. Some of these terms will also be included in the trace log (summed across all branches).
@@ -36,16 +38,15 @@ The first `burnin` steps of the MCMC chain will not have any stochastic mapping.
 ![alt text](figs/nucleotide.png)
 
 
+A **segmented tree logger** will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many substitutions, as there will be a large number of ancestral sequences or states, and therefore the tree files may require a large amount of disk space.
 
-A **segmented tree logger** will produce a tree containing one branch segment every time the sequence/state changes. This is useful for geographical analyses, but is not recommended for long sequences with many substitutions, as there will be a large number of states, and therefore the tree files may require a large amount of disk space. 
 
 Shown below is a segmented tree, where branches/segments are coloured by geographical location. This tree is easily visualised using [IcyTree](https://www.icytree.org).
 
 ![alt text](figs/segmentedTree.png)
 
 
-
-A **substitution count logger** (further detailed in [doc](doc/)) will not report the timing of change events along each lineage, but it will summarise the events between each node and its parent (e.g. total number of changes along the branch). There is currently limited BEAUti support for this logger, which will only report the total number of changes and none of the other utilities below, which require XML file editing at this stage. 
+A **substitution count logger** (further detailed in [doc](doc/)) will not report the timing of change events along each lineage, but it can report the ancestral sequence/state of each node, and the events between each node and its parent (e.g. total number of changes along the branch). 
 
 Shown below is a tree with branches coloured by the number of substitutions (ranging from 0 to 2 here).
 
@@ -56,7 +57,7 @@ Shown below is a tree with branches coloured by the number of substitutions (ran
 ## Ancestral sequence reconstruction and indels using BEAUti
 
 
-Insertions and deletions (indels) are usually overlooked in phylogenetics. In a standard BEAST 2 analysis, gaps (the - symbol) are treated as missing data and are effectively ignored from the likelihood calculation. Using BeastMap, you can treat gaps as a binary data type, as a partition alongside the main amino acid / nucleotide partition. 
+Insertions and deletions (indels) are usually overlooked in phylogenetics. In a standard BEAST 2 analysis, gaps (the - symbol) are treated as missing data and are effectively ignored from the likelihood calculation. However, this can present problems when reconstructing ancestral sequences and substitution pathways, and will lead to a biased estimate. Using BeastMap, you can treat gaps as a binary data type, as a partition alongside the main amino acid / nucleotide partition. 
 
 
 1. Open BEAUti
@@ -72,7 +73,7 @@ Insertions and deletions (indels) are usually overlooked in phylogenetics. In a 
 ![alt text](figs/simpleIndel.png)
 
 
-4. The substitution model will be restricted to binary data models, such as the Lewis MK model from the [MM package](https://github.com/CompEvol/morph-models).
+4. In the `Site Model` tab, the indel substitution model will be restricted to binary data models, such as the Lewis MK model from the [MM package](https://github.com/CompEvol/morph-models). Whereas, the main character alignment (e.g. amino acids or nucleotides) will have its usual choice of substitution models.
 
 
 ![alt text](figs/LewisMK.png)
@@ -153,7 +154,7 @@ There are some XML files in the [examples](examples) folder. Also see the [simul
 
 - Please finalise all partitions in the `Partitions` tab before configuring the `Beast Map` tab. For example, If a partition is removed after stochastic mapping has been enabled on it, there may be unexpected issues. 
 
-- When using the segmented tree logger, please ensure that the taxon names are primarily alphanumeric, with no non-ascii characters and none of the following symbols, or it can interfere with newick parsing: []():;!@#$%^&*
+- When using the segmented tree logger, please ensure that the taxon names are primarily alphanumeric, with no non-ascii characters and none of the following symbols, or it can interfere with newick parsing: ][)(:;!@#$%^&*
 
 
 
