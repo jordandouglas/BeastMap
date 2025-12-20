@@ -66,7 +66,7 @@ Insertions and deletions (indels) are usually overlooked in phylogenetics. In a 
 ![alt text](figs/simpleIndel.png)
 
 
-4. The substitution model will be restricted to binary data models, such as the Lewis MK model from the [MM package](https://github.com/CompEvol/morph-models).
+4. In the `Site Model` tab, the indel substitution model will be restricted to binary data models, such as the Lewis MK model from the [MM package](https://github.com/CompEvol/morph-models). Whereas, the main character alignment (e.g. amino acids or nucleotides) will have its usual choice of substitution models.
 
 
 ![alt text](figs/LewisMK.png)
