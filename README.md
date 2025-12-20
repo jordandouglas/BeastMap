@@ -68,7 +68,7 @@ Insertions and deletions (indels) are usually overlooked in phylogenetics. In a 
 ![alt text](figs/openSimpleIndel.png)
 
 
-3. If there are gaps in the alignment, we should have two partitions now, sharing the same tree. The `simpleindel` partition is a binary representation of gaps using the Simple Gap method described by Simmons and Ochoterena 2000. This representation does not treat each gap as an independent site, but rather it joins together contiguous gapped positions into the same indel event. Observe that the number of sites will be different in the indel alignment compared with the main one.
+3. If there are gaps in the alignment, we should have two partitions now, sharing the same tree. The `simpleindel` partition is a binary representation of gaps using the Simple Indel Coding method described by Simmons and Ochoterena 2000. This representation does not treat each gap as an independent site, but rather it joins together contiguous gapped positions into the same indel event. Observe that the number of sites will be different in the indel alignment compared with the main one.
 
 ![alt text](figs/simpleIndel.png)
 
