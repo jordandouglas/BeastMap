@@ -30,7 +30,7 @@ A **segmented tree logger** will produce a tree containing one branch segment ev
 
 A **substitution count logger** (further detailed in [doc](doc/)) will not report the timing of change events along each lineage, but it will summarise the events between each node and its parent (e.g. total number of changes along the branch). There is currently limited BEAUti support for this logger, which will only report the total number of changes and none of the other utilities below, which require XML file editing at this stage.
 
-![alt text](figs/beautiFig.png)
+![alt text](figs/nucleotide.png)
 
 
 The `Tree logger` column will add these terms to the trees (per branch), while the `Term to count` column will report the terms to include in the logger file. Some of these terms will also be included in the trace log (summed across all branches).
