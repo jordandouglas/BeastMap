@@ -2,7 +2,7 @@
 A BEAST 2 package for reconstructing ancestral sequences and substitution histories. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a substitution pathway along each branch. This all happens during MCMC. This package is compatible with a wide range of BEAST 2 site, clock, and tree models; and discrete data types (including nucleotide, codon, amino acid, 3Di, morphological, cognate, phoneme, and geographical). BeastMap will also take care of insertions and deletions.
 
 
-
+If you find this package helpful for your research, please cite our preprint (Douglas & Bromham 2025).
 
 
 ## Installation
@@ -161,7 +161,7 @@ There are some XML files in the [examples](examples) folder. Also see the [simul
 ## References
 
 
-
+Douglas, J., & Bromham, L. (2025). Reconstructing substitution histories on phylogenies, with accuracy, precision, and coverage. bioRxiv, 2025-12.
 
 Jelley, L., Douglas, J., Allais, M., Wang, J., O'Neill, M., ... & Huang, Q. S., Geoghegan, J.,  (2025). A decade of genomic surveillance tracks the disappearance and reintroduction of seasonal influenza virus in Aotearoa New Zealand.  https://doi.org/10.21203/rs.3.rs-7503135/v1
 
