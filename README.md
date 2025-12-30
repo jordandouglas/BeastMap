@@ -57,7 +57,7 @@ Shown below is a tree with branches coloured by the number of substitutions (ran
 ## Ancestral sequence reconstruction and indels using BEAUti
 
 
-Insertions and deletions (indels) are usually overlooked in phylogenetics. In a standard BEAST 2 analysis, gaps (the - symbol) are treated as missing data and are effectively ignored from the likelihood calculation. However, this can present problems when reconstructing ancestral sequences and substitution pathways, and will lead to a biased estimate. Using BeastMap, you can treat gaps as a binary data type, as a partition alongside the main amino acid / nucleotide partition. 
+Insertions and deletions (indels) are usually overlooked in phylogenetics. In a standard BEAST 2 analysis, gaps (the - symbol) are treated as missing data and are effectively ignored from the likelihood calculation. This can present problems when reconstructing ancestral sequences and substitution pathways, and will lead to a biased estimate. Using BeastMap, you can treat gaps as a binary data type, as a partition alongside the main amino acid / nucleotide partition. 
 
 
 1. Open BEAUti
@@ -110,9 +110,9 @@ Although time trees (e.g. birth-death, coalescent) may be preferrable over subst
 
 5. The `Midpoint` constant will determine where the root should lie on the longest path between the furtherest pair of tips. path. Specifically, the root is assumed to lie 0 < F < 1 along this path, where F ~ beta(Midpoint, Midpoint). If this term is 50, then we expect the midpoint to lie between 40-60% of the way along this path (with 95% probability). If this term is 1, then the root is equally likely to lie anywhere on the path.
 
-6. The `GMprior_LengthMean` parameter is the average branch length (under a gamma distribution prior).
+6. The `GMprior_LengthMean` parameter is the average branch length (under a gamma distribution prior). A larger value gives longer branches. By default, its prior is centered around 0.05 substitutions per site.
 
-7. The `GMprior_LengthShape` parameter is the shape of branch lengths (under a gamma distribution prior).
+7. The `GMprior_LengthShape` parameter is the shape of branch lengths (under a gamma distribution prior). A smaller value gives a greater variability in branch length. By default, its prior is centered around a shape of 2, where the upper branch length in the 95% interquartile range is 23x the lower value. If the shape is 1, then the upper is 146x the lower.
 
 8. Optionally, open the `Beast Map` tab to also do stochastic mapping on this tree.
 
