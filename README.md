@@ -96,7 +96,7 @@ Insertions and deletions (indels) are usually overlooked in phylogenetics. In a 
 ## Setting up a gamma-length midpoint tree prior using BEAUti
 
 
-Although time trees (e.g. birth-death, coalescent) may be preferrable over substitution trees in many biological datasets, if you are interested in using the unconstrained gamma-length midpoint (GM) tree prior, follow the steps below. This may serve as a useful null hypothesis to test whether time trees are indeed appropriate. In this tree prior, branch lengths are independently sampled from a gamma distribution. The tree is rooted using a Bayesian extension of the midpoint method. 
+Although time trees (e.g. birth-death, coalescent) may be preferrable over substitution trees in many biological datasets, if you are interested in using the unconstrained gamma-length midpoint (GM) tree prior, follow the steps below. This may serve as a useful null hypothesis to test whether time trees are indeed appropriate. In this tree prior, branch lengths are independently sampled from a gamma distribution. This tree is not ultrametric, meaning that the leaf heights are variable. The tree is rooted using a Bayesian extension of the midpoint method. 
 
 
 
