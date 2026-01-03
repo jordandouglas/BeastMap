@@ -46,7 +46,7 @@ Shown below is a segmented tree, where branches/segments are coloured by geograp
 ![alt text](figs/segmentedTree.png)
 
 
-A **substitution count logger** (further detailed in [doc](doc/)) will not report the timing of change events along each lineage, but it can report the ancestral sequence/state of each node, and the events between each node and its parent (e.g. total number of changes along the branch). 
+A **substitution count logger** (further detailed in [doc](doc/)) will not report the timing of change events along each lineage, but it can report the ancestral sequence/state of each node, and the events between each node and its parent (e.g. total number of changes along the branch). Warning: logging ancestral sequences may generate very large tree files that are slow and memory intensive to process, so do not log unless important (whereas logging the number of changes is much more tractable).
 
 Shown below is a tree with branches coloured by the number of substitutions (ranging from 0 to 2 here).
 
