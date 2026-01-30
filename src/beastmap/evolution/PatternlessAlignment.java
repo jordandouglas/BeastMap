@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import beast.base.core.Citation;
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Log;
@@ -15,6 +16,7 @@ import beast.base.evolution.alignment.Alignment.SiteComparator;
 import beast.base.evolution.datatype.DataType;
 
 @Description("An alignment for which each site is its own pattern (useful for ancestral stae reconstruction with site categories)")
+@Citation(value="Douglas, J., & Bromham, L. (2025). Reconstructing substitution histories on phylogenies, with accuracy, precision, and coverage. bioRxiv, 2025-12.", DOI="10.64898/2025.12.21.695861")
 public class PatternlessAlignment extends FilteredAlignment {
 	
 	

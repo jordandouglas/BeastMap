@@ -415,7 +415,52 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 	
 	
 	
-
+	/**
+	 * Return the weight of this count. Equal to the total branch length of all genes in the species if multispecies coalescent, otherwise 1
+	 * @return
+	 */
+	public double getWeight(int speciesNodeNr) {
+		
+		if (geneTreePrior == null) {
+			return 1;
+		}
+		
+		
+		
+		double weight = 0;
+		int numberOfSites = this.getSiteAndPatternCount();
+		Node speciesNode = geneTreePrior.speciesTreeInput.get().getNode(speciesNodeNr);
+		Node[] geneNodes = geneTreePrior.getGeneTree().getNodesAsArray();
+		
+		
+		
+		double t0 = speciesNode.isRoot() ? Double.POSITIVE_INFINITY : speciesNode.getParent().getHeight();
+		double t1 = speciesNode.getHeight();
+		
+		for (Node geneNode : geneNodes) {
+			
+			if (geneNode.isRoot()) continue;
+			if (this.geneTreePrior.mapGeneBranchToSpeciesNodes(geneNode.getNr()).contains(speciesNode)) {
+				
+				double start = Math.min(geneNode.getParent().getHeight(), t0);
+				double end = Math.max(geneNode.getHeight(), t1);
+				weight += (start - end); // Add lineage length
+				
+				//Log.warning(start + " - " + end + " (" + t0 + ", " + t1 + ")");
+				
+			}
+		}
+		
+		
+	
+		// Normalise by alignment length
+		weight *= numberOfSites;
+		
+		
+		return weight;
+		
+		
+	}
 	
 
 

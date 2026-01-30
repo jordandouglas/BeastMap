@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
+import beast.base.core.Citation;
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
@@ -18,7 +19,12 @@ import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.TwoStateCovarion;
 
 
+
+
+
+
 @Description("Represents an alignment using its gaps https://www.jstor.org/stable/pdf/2585224.pdf")
+@Citation(value="Douglas, J., & Bromham, L. (2025). Reconstructing substitution histories on phylogenies, with accuracy, precision, and coverage. bioRxiv, 2025-12.", DOI="10.64898/2025.12.21.695861")
 public class SimpleIndelCodingAlignment extends Alignment {
 	
     final public Input<Alignment> dataInput = new Input<>("data", "the original alignment", Validate.REQUIRED);

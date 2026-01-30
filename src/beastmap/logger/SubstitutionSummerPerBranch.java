@@ -7,6 +7,7 @@ import java.util.List;
 import beast.base.core.Description;
 import beast.base.core.Function;
 import beast.base.core.Input;
+import beast.base.core.Log;
 import beast.base.core.Loggable;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
@@ -16,7 +17,7 @@ import beast.base.inference.CalculationNode;
 public class SubstitutionSummerPerBranch extends CalculationNode implements StochasticMapProperty, Loggable, Function {
 
 	
-	final public Input<Boolean> weightInput = new Input<>("weight", "weight sums by alignment length?", false);
+	final public Input<Boolean> weightInput = new Input<>("weight", "weight sums by branch length?", false);
 	final public Input<List<BranchSubstLogger>> counterInput = new Input<>("counter", "counter to sum", new ArrayList<>());
 	
 	Tree tree;
@@ -91,20 +92,23 @@ public class SubstitutionSummerPerBranch extends CalculationNode implements Stoc
 	@Override
 	public double getArrayValue(int dim) {
 		
-		//double wsum = 0;
+		double wtotal = 0;
 		double total = 0;
 		for (BranchSubstLogger logger : counterInput.get()) {
-			
-			//double w = 1;
-//			if (weightInput.get()) {
-//				w = logger.getSiteAndPatternCount();
-//			}
-			total += logger.getArrayValue(dim);
-			//wsum += w;
+			double val = logger.getArrayValue(dim);
+			if (weightInput.get()) {
+				double w = logger.getWeight(dim);
+				wtotal += w;
+			}
+			total += val;
+		}
+		
+		if (weightInput.get()) {
+			//Log.warning("Weighting by " + wtotal);
+			total = total / wtotal;
 		}
 		
 		
-		//if (weightInput.get()) total = total / wsum;
 		return total;
 		
 	}

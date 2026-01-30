@@ -23,6 +23,8 @@
         <provider classname="beastmap.operator.BranchLengthScaler"/>
         <provider classname="beastmap.operator.AVMNTimelessTree"/>
 
+        <provider classname="beastmap.operator.LeafOperatorTest"/>
+
 
         <provider classname="beastmap.evolution.AncestralSequenceTreeLikelihood"/>
         <provider classname="beastmap.evolution.PatternlessAlignment"/>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='noAutoSetClockRate' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.8:SSM v1.2.2:BEAST_CLASSIC v1.6.4:BICEPS v1.1.2:beastmap v0.0.1" version="2.7">
+
+    <data
+id="test_data"
+spec="Alignment"
+name="alignment">
+        <sequence id="seq1" spec="Sequence" taxon="seq1" totalcount="4"     value="AAACNRY"/>
+        <sequence id="seq2" spec="Sequence" taxon="seq2" totalcount="4"     value="AAACNNY"/>
+        <sequence id="seq3" spec="Sequence" taxon="seq3" totalcount="4"     value="AAACNNN"/>
+        <sequence id="seq4" spec="Sequence" taxon="seq4" totalcount="4"     value="AAACNRG"/>
+        <sequence id="seq5" spec="Sequence" taxon="seq5" totalcount="4"     value="AAACNRG"/>
+    </data>
+
+    <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+
+    <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+
+    <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+
+    <map name="Normal" >beast.base.inference.distribution.Normal</map>
+
+    <map name="Beta" >beast.base.inference.distribution.Beta</map>
+
+    <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+
+    <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+
+    <map name="prior" >beast.base.inference.distribution.Prior</map>
+
+    <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+
+    <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
+
+    <run id="mcmc" spec="MCMC" chainLength="10000000">
+        <state id="state" spec="State" storeEvery="5000">
+            <tree id="Tree.t:test_data" spec="beast.base.evolution.tree.Tree" name="stateNode">
+                <taxonset id="TaxonSet.test_data" spec="TaxonSet">
+                    <alignment idref="test_data"/>
+                </taxonset>
+            </tree>
+            <stateNode id="testParameter" spec="parameter.IntegerParameter" dimension="1">1</stateNode>
+        </state>
+        <init id="RandomTree.t:test_data" spec="RandomTree" estimate="false" initial="@Tree.t:test_data" taxa="@test_data">
+            <populationModel id="ConstantPopulation0.t:test_data" spec="ConstantPopulation">
+                <parameter id="randomPopSize.t:test_data" spec="parameter.RealParameter" name="popSize">1.0</parameter>
+            </populationModel>
+        </init>
+        <distribution id="posterior" spec="CompoundDistribution">
+           
+            <distribution id="likelihood" spec="CompoundDistribution" useThreads="true">
+                <distribution id="treeLikelihood.test_data" spec="ThreadedTreeLikelihood" data="@test_data" tree="@Tree.t:test_data">
+                    <siteModel id="SiteModel.s:test_data" spec="SiteModel">
+                        <parameter id="mutationRate.s:test_data" spec="parameter.RealParameter" estimate="false" lower="0.0" name="mutationRate">1.0</parameter>
+                        <parameter id="gammaShape.s:test_data" spec="parameter.RealParameter" estimate="false" lower="0.1" name="shape">1.0</parameter>
+                        <parameter id="proportionInvariant.s:test_data" spec="parameter.RealParameter" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+                        <substModel id="Standard_JC.s:test_data" spec="substmodels.nucleotide.JC">
+                            <parameter id="JCrates.s:test_data" spec="parameter.RealParameter" estimate="false" lower="0.0" name="rates">1.0</parameter>
+                        </substModel>
+                    </siteModel>
+                    <branchRateModel id="StrictClock.c:test_data" spec="beast.base.evolution.branchratemodel.StrictClockModel" clock.rate="1"/>
+                </distribution>
+
+            </distribution>
+        </distribution>
+
+
+        <operator id="LeafOperatorTest" spec="beastmap.operator.LeafOperatorTest" x="@testParameter" weight="30.0">
+            <likelihood id="AncestralSequenceTreeLikelihood" spec="beastmap.evolution.AncestralSequenceTreeLikelihood" branchRateModel="@StrictClock.c:test_data" siteModel="@SiteModel.s:test_data" tree="@Tree.t:test_data">
+                        <data
+                            id="PatternlessAlignment1"
+                            spec="beastmap.evolution.PatternlessAlignment"
+                            data="@test_data"/>
+            </likelihood>
+        </operator>
+
+   
+        <operator id="BICEPSEpochTop.t:test_data" spec="EpochFlexOperator" scaleFactor="0.1" tree="@Tree.t:test_data" weight="2.0"/>
+        <operator id="BICEPSEpochAll.t:test_data" spec="EpochFlexOperator" fromOldestTipOnly="false" scaleFactor="0.1" tree="@Tree.t:test_data" weight="2.0"/>
+        <operator id="BICEPSTreeFlex.t:test_data" spec="TreeStretchOperator" scaleFactor="0.01" tree="@Tree.t:test_data" weight="2.0"/>
+        <operator id="BICEPSTreeRootScaler.t:test_data" spec="kernel.BactrianScaleOperator" rootOnly="true" scaleFactor="0.1" tree="@Tree.t:test_data" upper="10.0" weight="3.0"/>
+        <operator id="BICEPSUniformOperator.t:test_data" spec="kernel.BactrianNodeOperator" tree="@Tree.t:test_data" weight="30.0"/>
+        <operator id="BICEPSSubtreeSlide.t:test_data" spec="kernel.BactrianSubtreeSlide" tree="@Tree.t:test_data" weight="15.0"/>
+        <operator id="BICEPSNarrow.t:test_data" spec="Exchange" tree="@Tree.t:test_data" weight="15.0"/>
+        <operator id="BICEPSWide.t:test_data" spec="Exchange" isNarrow="false" tree="@Tree.t:test_data" weight="3.0"/>
+        <operator id="BICEPSWilsonBalding.t:test_data" spec="WilsonBalding" tree="@Tree.t:test_data" weight="3.0"/>
+
+        <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+        </logger>
+        <logger id="screenlog" spec="Logger" logEvery="1000">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+        </logger>
+
+        <operatorschedule id="OperatorSchedule" spec="OperatorSchedule"/>
+    </run>
+
+</beast>

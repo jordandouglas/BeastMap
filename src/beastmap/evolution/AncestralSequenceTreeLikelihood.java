@@ -287,14 +287,37 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
         return reconstructedStates[node.getNr()];
     }
 
+    
 
-    public void redrawAncestralStates() {
+
+    /** 
+     * Redraw ancestral states
+     * 
+     * 
+     * Returns a 3d array
+     * The first dimension is one for each leaf
+     * The second dimension is one per site (aka pattern)
+     * The third dimension is a probability for each state
+     * Note that all probabilities are in log space
+     * @return
+     */
+    public double[][][] redrawAncestralStates() {
     	
         jointLogLikelihood = 0;
         TreeInterface tree = treeInput.get();
-        traverseSample(tree, tree.getRoot(), null);
+        
+        
+    	int nleaves = tree.getLeafNodeCount(); 
+    	int nsites = dataInput.get().getPatternCount();
+    	double[][][] leafProbs = new double[nleaves][nsites][stateCount];
+        
+        
+        traverseSample(tree, tree.getRoot(), null, leafProbs);
         
         areStatesRedrawn = true;
+        
+        
+        return leafProbs;
         
 
     }
@@ -411,6 +434,10 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
         System.arraycopy(tipStates[tipNum], 0, states, 0, states.length);
     }
 
+    
+    
+   
+    
 
     
     /**
@@ -420,7 +447,7 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
      * @param node        - current node
      * @param parentState - character state of the parent node to 'node'
      */
-    public void traverseSample(TreeInterface tree, Node node, int[] parentState) {
+    public void traverseSample(TreeInterface tree, Node node, int[] parentState, double[][][] leafProbs) {
 
         int nodeNum = node.getNr();
 
@@ -507,17 +534,41 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
 
             // Traverse down the two child nodes
             Node child1 = node.getChild(0);
-            traverseSample(tree, child1, state);
+            traverseSample(tree, child1, state, leafProbs);
 
             Node child2 = node.getChild(1);
-            traverseSample(tree, child2, state);
+            traverseSample(tree, child2, state, leafProbs);
         } else {
 
             // This is an external leaf
         	getStates(nodeNum, reconstructedStates[nodeNum]);
 
+        	
+        	
+        	// Calculate tip probabilities
+        	for (int j = 0; j < patternCount; j++) {
+        		
+                final int thisState = reconstructedStates[nodeNum][j];
+                final int parentIndex = parentState[j] * stateCount;
+                likelihoodCore.getNodeMatrix(nodeNum, 0, probabilities);
+	                    
+                boolean [] stateSet = dataType.getStateSet(thisState);
+                for (int i = 0; i < stateCount; i++) {
+                    conditionalProbabilities[i] = stateSet[i] ? Math.log(probabilities[parentIndex + i]) : Double.NEGATIVE_INFINITY;
+                }
+                
+                //Log.warning("nodeNum=" + nodeNum +  ", j=" + j + ", " + conditionalProbabilities[0] + " " + conditionalProbabilities[1]);
+                
+                System.arraycopy(conditionalProbabilities, 0, leafProbs[nodeNum][j], 0, stateCount);
+
+                
+            }
+        	
+        	
+        	
 
         	if (sampleTipsInput.get()) {
+        		
 	            // Check for ambiguity codes and sample them
 	            for (int j = 0; j < patternCount; j++) {
 	
@@ -529,7 +580,7 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
 	                    boolean [] stateSet = dataType.getStateSet(thisState);
 	                    for (int i = 0; i < stateCount; i++) {
 	                        //conditionalProbabilities[i] =  stateSet[i] ? probabilities[parentIndex + i] : 0;
-	                        conditionalProbabilities[i] =  stateSet[i] ? Math.log(probabilities[parentIndex + i]) : 0;
+	                        conditionalProbabilities[i] =  stateSet[i] ? Math.log(probabilities[parentIndex + i]) : Double.NEGATIVE_INFINITY;
 	                    }
 	                    
 	                    
@@ -550,6 +601,9 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
 	                jointLogLikelihood += Math.log(contrib);
 	            }
         	}
+        	
+        	
+        	
         	
         }
     }
