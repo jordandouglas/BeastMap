@@ -127,7 +127,7 @@ Summarise a posterior distribution of segmented trees onto a summary tree using:
 
 ```
 # Generate a summary tree first
-~/beast/bin/TreeAnnotator tree.trees summary.nexus
+~/beast/bin/treeannotator tree.trees summary.nexus
 
 # Then map the segments onto the summary tree
 ~/beast/bin/applauncher SegmentedTreeAnnotator -tree summary.nexus -segments beastmap.segments.trees -out segments.nexus 
