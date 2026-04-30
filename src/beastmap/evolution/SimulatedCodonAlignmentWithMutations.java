@@ -8,13 +8,13 @@ import java.util.List;
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
-import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.alignment.Sequence;
 import beast.base.evolution.branchratemodel.BranchRateModel;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.sitemodel.SiteModel;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
+import beast.base.inference.parameter.IntegerParameter;
 import beast.base.parser.XMLProducer;
 import beast.base.util.Randomizer;
 import beastmap.util.Mutation;
@@ -32,13 +32,22 @@ import codonmodels.evolution.datatype.GeneticCode;
         + "given site model down a given tree.")
 public class SimulatedCodonAlignmentWithMutations extends CodonAlignment implements StochasticMapper {
     final public Input<Tree> m_treeInput = new Input<>("tree", "phylogenetic beast.tree with sequence data in the leafs", Validate.REQUIRED);
-    final public Input<SiteModel.Base> m_pSiteModelInput = new Input<>("siteModel", "site model for leafs in the beast.tree", Validate.REQUIRED);
+    
+    final public Input<List<SiteModel.Base>> m_pSiteModelInput = new Input<>("siteModel", "site model for leafs in the beast.tree", new ArrayList<>());
+    final public Input<IntegerParameter> siteModelNumberInput = new Input<>("siteModelNumber", "the site model number of each site will be saved to this list", Validate.OPTIONAL);
+    
+    
+    final public Input<IntegerParameter> siteModelChangesInput = new Input<>("changes", "a list of internal node numbers where the site model changes, same length as the siteModel list", Validate.OPTIONAL);
+    
     final public Input<BranchRateModel.Base> m_pBranchRateModelInput = new Input<>("branchRateModel",
             "A model describing the rates on the branches of the beast.tree.");
     final public Input<Integer> m_sequenceLengthInput = new Input<>("sequencelength", "nr of samples to generate (default 1000).", 1000);
     final public Input<String> m_outputFileNameInput = new Input<>(
             "outputFileName",
             "If provided, simulated alignment is additionally written to this file.");    
+    
+    final public Input<Boolean> oneSiteModelPerSiteInput = new Input<>("oneSiteModelPerSite", "if there are multiple site models, do we sample one per site?", false);
+    
 
     /**
      * nr of samples to generate *
@@ -51,7 +60,7 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
     /**
      * site model used for generating samples *
      */
-    protected SiteModel.Base m_siteModel;
+    //protected SiteModel.Base m_siteModel;
     /**
      * branch rate model used for generating samples *
      */
@@ -76,7 +85,7 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
     protected double[][] m_probabilities;
     
     long lastSampleNr;
-    
+    boolean oneSiteModelPerSite;
     
     int[][] sequencesAll;
     List<List<Mutation>> mutationsAlongEachBranch;
@@ -86,21 +95,57 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
         // Override the sequence input requirement.
         sequenceInput.setRule(Validate.OPTIONAL);
     }
+    
+    
 
     @Override
     public void initAndValidate() {
     	
     	mutationsAlongEachBranch = new ArrayList<>();
         m_tree = m_treeInput.get();
-        m_siteModel = m_pSiteModelInput.get();
+        
         m_branchRateModel = m_pBranchRateModelInput.get();
         m_sequenceLength = m_sequenceLengthInput.get();
+        
+        if (m_pSiteModelInput.get().isEmpty()) {
+        	throw new IllegalArgumentException("Please provide a site model");
+        }
+        
+        oneSiteModelPerSite = oneSiteModelPerSiteInput.get();
+        if (!oneSiteModelPerSite) {
+        	
+	        if (m_pSiteModelInput.get().size() > 1 && (siteModelChangesInput.get() == null || m_pSiteModelInput.get().size() != siteModelChangesInput.get().getDimension())) {
+	        	throw new IllegalArgumentException("The number of site models must be at the same as the number of changes");
+	        }
+        
+	        if (m_pSiteModelInput.get().size() > 1) {
+	        	int rootNr = m_tree.getRoot().getNr();
+	        	
+	        	boolean rootIncluded = false;
+	        	for (int i = 0; i < siteModelChangesInput.get().getDimension(); i ++) {
+	        		int nr = siteModelChangesInput.get().getNativeValue(i);
+	        		if (nr == rootNr) {
+	        			rootIncluded = true;
+	        			break;
+	        		}
+	        	}
+	        	if (!rootIncluded) {
+	        		throw new IllegalArgumentException("One of the changes must be the root number " + rootNr);
+	        	}
+	        	
+	    	}
+        
+    	}else {
+    		if (siteModelNumberInput.get() != null) {
+    			siteModelNumberInput.get().setDimension(m_sequenceLengthInput.get());
+    		}
+    	}
 
         GeneticCode geneticCode = GeneticCode.findByName(geneticCodeInput.get());
         setGeneticCode(geneticCode);
 
         m_stateCount = geneticCode.getStateCount();
-        m_categoryCount = m_siteModel.getCategoryCount();
+        m_categoryCount = this.getSiteModel(m_tree.getRoot().getNr(), 0).getCategoryCount();
         m_probabilities = new double[m_categoryCount][m_stateCount * m_stateCount];
         m_outputFileName = m_outputFileNameInput.get();
         
@@ -169,20 +214,29 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
      */
     public void simulate() {
         Node root = m_tree.getRoot();
-
-
-        double[] categoryProbs = m_siteModel.getCategoryProportions(root);
+        
+        int[] siteModelCategory = new int[m_sequenceLength];
         int[] category = new int[m_sequenceLength];
-        for (int i = 0; i < m_sequenceLength; i++) {
-            category[i] = Randomizer.randomChoicePDF(categoryProbs);
-        }
-
-        double[] frequencies = m_siteModel.getSubstitutionModel().getFrequencies();
         int[] seq = new int[m_sequenceLength];
-        for (int i = 0; i < m_sequenceLength; i++) {
-            seq[i] = Randomizer.randomChoicePDF(frequencies);
+        for (int siteNr = 0; siteNr < m_sequenceLength; siteNr ++) {
+        	
+        	if (this.oneSiteModelPerSite) {
+        		siteModelCategory[siteNr] = Randomizer.nextInt(this.m_pSiteModelInput.get().size());
+        		//siteModelCategory[siteNr] = 1; // test
+        	}else {
+        		siteModelCategory[siteNr] = 0;
+        	}
+        	
+        	if (siteModelNumberInput.get() != null) {
+        		siteModelNumberInput.get().setValue(siteNr, siteModelCategory[siteNr]);
+        	}
+        	
+			SiteModel.Base rootSiteModel = this.getSiteModel(root.getNr(), siteModelCategory[siteNr]);
+			double[] categoryProbs = rootSiteModel.getCategoryProportions(root);
+			category[siteNr] = Randomizer.randomChoicePDF(categoryProbs);
+			double[] frequencies = rootSiteModel.getSubstitutionModel().getFrequencies();
+			seq[siteNr] = Randomizer.randomChoicePDF(frequencies);
         }
-
         
         this.sequencesAll[root.getNr()] = seq;
         
@@ -190,7 +244,7 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
         for (int i = 0; i < m_tree.getNodeCount(); i++) {
         	this.mutationsAlongEachBranch.add(null);
         }
-        traverse(root, seq, category);
+        traverse(root, seq, category, siteModelCategory);
 
     } 
 
@@ -203,7 +257,11 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
      * @param category       array of categories for each of the sites
      * @param alignment
      */
-    void traverse(Node node, int[] parentSequence, int[] category) {
+    void traverse(Node node, int[] parentSequence, int[] category, int[] siteModelCategory) {
+    	
+    	
+    	
+    	
         for (int childIndex = 0; childIndex < 2; childIndex++) {
         	
         	
@@ -211,9 +269,10 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
             Node child = (childIndex == 0 ? node.getLeft() : node.getRight());
             int[] seq = new int[m_sequenceLength];
             for (int i = 0; i < m_sequenceLength; i++) {
+            	SiteModel.Base nodeSiteModel = this.getSiteModel(node.getNr(), siteModelCategory[i]);
                 double clockRate = (m_branchRateModel == null ? 1.0 : m_branchRateModel.getRateForBranch(child));
-                double siteRate = m_siteModel.getRateForCategory(category[i], child);
-                seq[i] = MutationUtils.simulateMutationsDownBranch(parentSequence[i], child, clockRate*siteRate, m_siteModel.getSubstitutionModel(), mutationsBranch, i, this.getDataTypeOfMapper().getStateCount());
+                double siteRate = nodeSiteModel.getRateForCategory(category[i], child);
+                seq[i] = MutationUtils.simulateMutationsDownBranch(parentSequence[i], child, clockRate*siteRate, nodeSiteModel.getSubstitutionModel(), mutationsBranch, i, this.getDataTypeOfMapper().getStateCount());
             }
             
             this.mutationsAlongEachBranch.set(child.getNr(), mutationsBranch);
@@ -222,7 +281,7 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
             if (child.isLeaf()) {
                 sequenceInput.setValue(intArray2Sequence(seq, child), this);
             } else {
-                traverse(child, seq, category);
+                traverse(child, seq, category, siteModelCategory);
             }
         }
     }
@@ -303,6 +362,47 @@ public class SimulatedCodonAlignmentWithMutations extends CodonAlignment impleme
 	@Override
 	public int getPatternCount() {
         return super.getPatternCount();
+    }
+	
+	@Override
+	public int getSequenceLength() {
+        return this.m_sequenceLength;
+    }
+	
+
+	
+    private SiteModel.Base getSiteModel(int nodeNr, int siteModelNr){
+    	
+    	if (m_pSiteModelInput.get().size() == 1) {
+    		return m_pSiteModelInput.get().get(0);
+    	}
+    	
+    	Tree tree = m_treeInput.get();
+    	
+    	if (oneSiteModelPerSite) {
+    		return m_pSiteModelInput.get().get(siteModelNr);
+    	}
+    	
+    	
+    	
+    	List<Integer> changes = new ArrayList<>();
+    	for (int i = 0; i < siteModelChangesInput.get().getDimension(); i++) {
+    		changes.add(siteModelChangesInput.get().getNativeValue(i));
+    	}
+    	
+    	// Find the most recent site model above this one
+    	Node node = tree.getNode(nodeNr);
+    	
+    	while (!changes.contains(node.getNr())) {
+    		node = node.getParent();
+    		if (node == null) return null;
+    	}
+    	
+		int index = changes.indexOf(node.getNr());
+		
+		//System.out.println(nodeNr + " has site model " + index + " and " + m_pSiteModelInput.get().get(index).getSubstitutionModel().getFrequencies()[0]);
+		return m_pSiteModelInput.get().get(index);
+    	
     }
 
     

@@ -25,6 +25,10 @@ public interface StochasticMapper {
 	public DataType getDataTypeOfMapper();
 	
 	public int getPatternCount();
+	
+	public default int getSequenceLength() {
+		return getPatternCount();
+	}
 
 	public StochasticMapper getUnconditionalData();
 

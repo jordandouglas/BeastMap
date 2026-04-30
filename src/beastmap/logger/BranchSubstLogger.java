@@ -173,16 +173,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     	
     	for (Node node : nodes) {
     		
-    		List<Mutation> mutations;
-    		if (samplerInput.get() != null) {
-        		
-        		// Make sure to call sampleMutations before calling this method so that it depends on the current stochastic sample
-        		mutations = getSpeciesTreeMutationSummary(dim, node);
-        		
-        	}else {
-        		mutations = truthInput.get().getMutationsOnBranch(dim); // TODO implement on MSC for simulation
-        	}
-        	
+    		List<Mutation> mutations = getSpeciesTreeMutationSummary(dim, node);
     		
     		Collections.sort(mutations);
     		
@@ -194,6 +185,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     		total += x;
     	}
     	
+
     	return total;
     	
     	
@@ -204,13 +196,16 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     // Get all nodes within this species branch (or just return the branch itself if there aren't any)
     private List<Node> getAllNodesOnBranch(Node speciesNode){
     	
+    	
     	List<Node> nodes = new ArrayList<>();
     	if (this.geneTreePrior == null) {
     		nodes.add(speciesNode);
     	}else {
     		
     		Tree geneTree = (Tree) this.geneTreePrior.getGeneTree();
+    		
 			for (Node geneNode : geneTree.getRoot().getAllChildNodesAndSelf()) {
+				
 				
 				if (geneNode.isRoot()) continue;
 				
@@ -218,6 +213,8 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 				if (!this.geneTreePrior.mapGeneBranchToSpeciesNodes(geneNode.getNr()).contains(speciesNode)) {
 					continue;
 				}
+				
+				
 				nodes.add(geneNode);
 			}
     		
@@ -231,14 +228,20 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
     // If we are counting a species tree, then consider all gene tree branch segments within this species branch
     protected List<Mutation> getSpeciesTreeMutationSummary(int speciesNodeNr, Node geneNode){
     	
+    	
+    	
 
+    	StochasticMapper mapper = samplerInput.get() != null ? samplerInput.get() : truthInput.get();
     	if (this.geneTreePrior == null) {
-    		return samplerInput.get().getMutationsOnBranch(speciesNodeNr);
+    		return mapper.getMutationsOnBranch(speciesNodeNr);
     	}else {
+    		
+    		
     		
     		List<Mutation> mutationsSpeciesBranch = new ArrayList<Mutation>();
     		
     		if (geneNode.isRoot()) return mutationsSpeciesBranch;
+    		
     		
     		Tree speciesTree = this.getTree();
     		Node speciesNode = speciesTree.getNode(speciesNodeNr);
@@ -255,10 +258,14 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 			}
 			
 			
-			List<Mutation> mutationsGeneBranch = samplerInput.get().getMutationsOnBranch(geneNode.getNr());
+			
+			//List<Mutation> mutationsGeneBranch = samplerInput.get().getMutationsOnBranch(geneNode.getNr());
+			List<Mutation> mutationsGeneBranch = mapper.getMutationsOnBranch(geneNode.getNr());
 			
 			// Renumber the mutations on the branch
 			for (Mutation mut : mutationsGeneBranch) {
+				
+				//Log.warning("mutation " + mut);
 				
 				// Count all mutations that occur within this species branch
 				double mutHeight = geneNode.getParent().getHeight() - mut.getTime();
@@ -269,6 +276,7 @@ public abstract class BranchSubstLogger extends CalculationNode implements Logga
 			}
 				
         	
+			
         	return mutationsSpeciesBranch;
     		
     	}

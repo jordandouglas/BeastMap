@@ -381,9 +381,9 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 			 loopNr++;
 			 if (loopNr > MAX_N_LOOPS) {
 				 arr = new ArrayList<>();
-				 Log.warning(this.getID() + ": Taking too long to get mutations on branch. Setting to parsimonious estimate. If this warning happens to often, it is because the rejection sampler is too slow. This is because there are too many mutations along the branches. Maybe one of the clock/substitution rates is too low?");
+				 Log.warning(this.getID() + ": Taking too long to get mutations on branch at site " + siteNr + ". Setting to parsimonious estimate. If this warning happens to often, it is because the rejection sampler is too slow. This is because there are too many mutations along the branches. Maybe one of the clock/substitution rates is too low?");
 				 if (parent != child) {
-					 Mutation mut = new Mutation(parent, child, -1, siteNr, parent, child, node);
+					 Mutation mut = new Mutation(parent, child, time/2, siteNr, parent, child, node);
 					 arr.add(mut);
 					 break;
 				 }

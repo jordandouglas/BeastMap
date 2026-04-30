@@ -100,6 +100,7 @@ public class SubstitutionSummerPerBranch extends CalculationNode implements Stoc
 				double w = logger.getWeight(dim);
 				wtotal += w;
 			}
+			
 			total += val;
 		}
 		
