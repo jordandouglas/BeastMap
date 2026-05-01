@@ -513,7 +513,7 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 			if (arr.size() > MAX_MUT_BRANCH) {
 				 Log.warning(this.getID() + ": rs2 -- too many mutations on each branch! Perhaps branches are too long or clock rate too slow. Using parsimonious estimate.");
 				 arr = new ArrayList<>();
-				 mut = new Mutation(parent, child, -1, siteNr, parent, child, node);
+				 mut = new Mutation(parent, child, time/2, siteNr, parent, child, node);
 				 arr.add(mut);
 				 return arr;
 			}

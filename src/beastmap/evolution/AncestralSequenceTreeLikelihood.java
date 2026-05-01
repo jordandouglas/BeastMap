@@ -78,6 +78,8 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     int stateCount;
 
     int[][] tipStates; // used to store tip states when using beagle
+    protected double[] probabilitiesTipSamples;
+    
     
     @Override
     public void initAndValidate() {
@@ -118,17 +120,19 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
         this.useMAP = useMAPInput.get();
         this.returnMarginalLogLikelihood = returnMLInput.get();
       
-        
+        int nStateCount = dataInput.get().getMaxStateCount();
         if (beagle != null) {
             if (!(siteModelInput.get() instanceof SiteModel.Base)) {
             	throw new IllegalArgumentException ("siteModel input should be of type SiteModel.Base");
             }
             m_siteModel = (SiteModel.Base) siteModelInput.get();
         	substitutionModel = (SubstitutionModel.Base) m_siteModel.substModelInput.get();
-            int nStateCount = dataInput.get().getMaxStateCount();
             probabilities = new double[(nStateCount + 1) * (nStateCount + 1)];
         }
 
+        
+        probabilitiesTipSamples = new double[(nStateCount + 1) * (nStateCount + 1)];
+        
         int tipCount = treeModel.getLeafNodeCount();
         tipStates = new int[tipCount][];
 
@@ -350,38 +354,76 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
         return logP;
     }
 
-
     
-    // More stable
-    private int drawChoiceLog(double[] logProbs) {
+    // Return true if everything is okay with these log probs, and false if something will present difficulties in the sampling process
+    private boolean checkLogProbs(double[] logProbs) {
     	
-    	// Max prob
+    	
     	double max = logProbs[0];
-        for (int i = 1; i < logProbs.length; i++) {
-            if (logProbs[i] > max) {
+    	for (int i = 1; i < logProbs.length; i ++) {
+    		if (logProbs[i] > max) {
                 max = logProbs[i];
             }
-        }
-        
-        
-        // Return a u.a.r character
-        if (Double.isInfinite(max) || Double.isNaN(max)) {
-        	int rand = Randomizer.nextInt(logProbs.length);
-    		return rand;
-        }
-		
+    	}
     	
-        // Convert to relative probabilities in a stable fashion
-    	double[] probs = new double[logProbs.length];
-    	for (int i = 0; i < logProbs.length; i++) {
-    		probs[i] = Math.exp(logProbs[i] - max);
-    		if (Double.isNaN(probs[i])) probs[i] = 0;
-    		//Log.warning(logProbs[i] + " max = " + max + " " + probs[i]);
+    	if (Double.isInfinite(max) || Double.isNaN(max))  {
+    		return false;
+    	}
+    	
+    	return true;
+    	
+    	
+    }
+
+    
+    // More stable than in real space
+    private int drawChoiceLog(double[] logProbs) {
+    	
+    	
+    	// Gulmbel-max trick
+    	double[] g = new double[logProbs.length];
+    	for (int i = 0; i < g.length; i ++) {
+    		double u = Randomizer.nextDouble();
+    		double gi = -Math.log(-Math.log(u));
+    		g[i] = gi + logProbs[i];
+    		
     	}
     	
     	
+    	// Take argmax. If there is a tie, we will pick one randomly
+    	int argmax = 0;
+    	double max = g[argmax];
+        for (int i = 1; i < g.length; i++) {
+            if (g[i] > max) {
+            	argmax = i;
+                max = g[i];
+            }
+        }
+        
+        // Check for a tie
+        int nmax = 0;
+        double[] measure = new double[g.length];
+        for (int i = 0; i < g.length; i++) {
+        	
+        	if (g[i] == max) {
+        		measure[i] = 1;
+        		nmax ++;
+        	}else {
+        		measure[i] = 0;
+        	}
+        	
+        }
+        
+        if (nmax > 1) {
+        	if (Double.isInfinite(max) || Double.isNaN(max)) {
+        		Log.warning("Warning: found multiple states with Inf or NaN log-probabilities, suggesting numerical issues. Selecting a state uniformly at random.");
+        	}
+        	return Randomizer.randomChoicePDF(measure);
+        }
+        
+        return argmax;
     	
-    	return drawChoice(probs);
+
         	
     }
 
@@ -404,7 +446,8 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
         		Log.warning("Warning: ancestral state reconstruction probabilities sum to 0, suggesting numerical issues. Selecting a state uniformly at random.");
         		
         		// Return a u.a.r character
-        		int rand = Randomizer.nextInt(probs.length);
+        		//int rand = Randomizer.nextInt(probs.length);
+        		int rand = probs.length-1;
         		return rand;
         		
         	}
@@ -482,7 +525,6 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
                         conditionalProbabilities[i] = Math.log(conditionalProbabilities[i]) + Math.log(rootFrequencies[i]);
                     }
                     try {
-                        //state[j] = drawChoice(conditionalProbabilities);
                         state[j] = drawChoiceLog(conditionalProbabilities);
                         
                     } catch (Error e) {
@@ -514,13 +556,24 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
                         //conditionalProbabilities[i] = partialLikelihood[childIndex + i] * probabilities[parentIndex + i];
                         conditionalProbabilities[i] = Math.log(partialLikelihood[childIndex + i]) + Math.log(probabilities[parentIndex + i]);
                     }
-
                     
-                    // Sampled ancestor?
+                    double branchDist = getExpectedBranchLength(node);
+                    boolean probsAreOkay = checkLogProbs(conditionalProbabilities);
+                    
+                    // Sampled ancestor, or a very short branch
                     if (node.getLength() <= 0) {
                     	 state[j] = parentState[j];
-                    }else {
-                    	 state[j] = drawChoiceLog(conditionalProbabilities);
+                    }
+                    
+                    // Numerical issues will arise, and the cause is likely the short branch. So just use the same as the parent
+                    else if (!probsAreOkay && branchDist < 1e-4) {
+                    	//Log.warning("Warning: short branch " + branchDist);
+                    	state[j] = parentState[j];
+                    }
+                    
+                    // Sample
+                    else {
+                    	state[j] = drawChoiceLog(conditionalProbabilities);
                     }
                     
                    
@@ -550,11 +603,11 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
         		
                 final int thisState = reconstructedStates[nodeNum][j];
                 final int parentIndex = parentState[j] * stateCount;
-                likelihoodCore.getNodeMatrix(nodeNum, 0, probabilities);
+                likelihoodCore.getNodeMatrix(nodeNum, 0, probabilitiesTipSamples);
 	                    
                 boolean [] stateSet = dataType.getStateSet(thisState);
                 for (int i = 0; i < stateCount; i++) {
-                    conditionalProbabilities[i] = stateSet[i] ? Math.log(probabilities[parentIndex + i]) : Double.NEGATIVE_INFINITY;
+                    conditionalProbabilities[i] = stateSet[i] ? Math.log(probabilitiesTipSamples[parentIndex + i]) : Double.NEGATIVE_INFINITY;
                 }
                 
                 //Log.warning("nodeNum=" + nodeNum +  ", j=" + j + ", " + conditionalProbabilities[0] + " " + conditionalProbabilities[1]);
@@ -606,6 +659,12 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
         	
         	
         }
+    }
+    
+    private double getExpectedBranchLength(Node node) {
+    	 final double branchRate = branchRateModel.getRateForBranch(node);
+         final double branchDist = node.getLength() * branchRate;
+         return branchDist;
     }
     
     

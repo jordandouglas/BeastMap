@@ -27,7 +27,7 @@ public class LeafOperatorTest extends Operator {
 		likelihood.calculateLogP();
 		
 		
-		double[][][] logProbs = likelihood.redrawAncestralStates();
+		double[][][] logProbs = null; // likelihood.redrawAncestralStates();
 		
 		// Print the probs
 		for (int leafNr = 0; leafNr < logProbs.length; leafNr ++) {
