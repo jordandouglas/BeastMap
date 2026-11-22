@@ -1032,9 +1032,11 @@ public class MutationUtils {
 	}
 
 	public static boolean isStopCodon(int[] threeNucleotides, Codon codon) {
-		if (threeNucleotides[0] < 0 || threeNucleotides[1] < 0 || threeNucleotides[2] < 0) return false; // Gaps or ambig
+		if (threeNucleotides.length != 3 || threeNucleotides[0] < 0 || threeNucleotides[1] < 0 || threeNucleotides[2] < 0) return false; // Gaps or ambig
+		if (threeNucleotides[0] > 3 || threeNucleotides[1] > 3 || threeNucleotides[2] > 3) return false; 
 		Nucleotide nt = new Nucleotide();
 		String triplet = nt.encodingToString(threeNucleotides);
+		if (triplet.length() != 3) return false;
 		return codon.isTripletStopCodon(triplet);
 	}
     

@@ -31,7 +31,7 @@ import beastmap.evolution.TimelessTree;
 
 
 @Description("A tree prior for a non-time tree")
-@Citation(value="Douglas, J., & Bromham, L. (2025). Reconstructing substitution histories on phylogenies, with accuracy, precision, and coverage. bioRxiv, 2025-12.", DOI="10.64898/2025.12.21.695861")
+@Citation(value="Douglas J. & Bromham L., Reconstructing substitution histories on phylogenies, with accuracy, precision, and coverage, Systematic Biology, 2026;, syag081", DOI="10.1093/sysbio/syag081")
 public class UnconstrainedTreePrior extends SpeciesTreeDistribution {
 
 	final public Input<RealParameter> meanInput = new Input<>("mean", "mean branch length under a gamma distribution prior", Input.Validate.REQUIRED);

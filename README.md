@@ -2,23 +2,15 @@
 A BEAST 2 package for reconstructing ancestral sequences and substitution histories. The method first performs ancestral sequence reconstruction on the internal nodes, and then uses stochastic mapping to sample a substitution pathway along each branch. This all happens during MCMC. This package is compatible with a wide range of BEAST 2 site, clock, and tree models; and discrete data types (including nucleotide, codon, amino acid, 3Di, morphological, cognate, phoneme, and geographical). BeastMap will also take care of insertions and deletions.
 
 
-If you find this package helpful for your research, please cite our preprint (Douglas & Bromham 2025).
+If you find this package helpful for your research, please cite our article (Douglas & Bromham 2026).
 
 
 ## Installation
 
-BeastMap is currently in pre-release. 
 
 1.  Launch BEAUti
 2.  Click on `File -> Manage Packages`
-3.  Install BeastMap. If BeastMap is not in the list of packages, you may need to add an extra package repository as follows:
-
--   Click the packager repositories button. A dialog pops up.
--   Click the Add URL button. A dialog is shown where you can enter  [https://raw.githubusercontent.com/CompEvol/CBAN/master/packages-extra-2.7.xml](https://raw.githubusercontent.com/CompEvol/CBAN/master/packages-extra-2.7.xml)
--   click the OK button. There should be an extra entry in the list.
--   click Done
--   After a short delay, BeastMap should appear in the list of packages.
-
+3.  Install BeastMap
 
 
 
@@ -148,6 +140,9 @@ There are some XML files in the [examples](examples) folder. Also see the [simul
 *Anticodon binding domain*. `CRIMVLG.xml`  and its input files `crimvlg_aa_trimmed.fasta` and `crimvlg_3di_trimmed.fasta`. This analysis uses three data types on a single tree: both amino acids, 3Di characters, and indels. **Package dependencies:**  FoldBeast, OBAMA, ORC
 
 
+*Flourescent protein*. `FP.xml`  is based on the flourescent protein experimental phylogeny by Randall et al. 2016. This xml file uses the strict clock and HIVb substitution model. **Package dependencies:**  OBAMA
+
+
 
 ## Known BEAUti issues
 
@@ -161,9 +156,11 @@ There are some XML files in the [examples](examples) folder. Also see the [simul
 ## References
 
 
-Douglas, J., & Bromham, L. (2025). Reconstructing substitution histories on phylogenies, with accuracy, precision, and coverage. bioRxiv, 2025-12. https://doi.org/10.64898/2025.12.21.695861
+Douglas, J., & Bromham, L. (2026). Reconstructing substitution histories on phylogenies, with accuracy, precision, and coverage, Systematic Biology, 2026;, syag081. https://doi.org/10.1093/sysbio/syag081
 
 Jelley, L., Douglas, J., Allais, M., Wang, J., O'Neill, M., ... & Huang, Q. S., Geoghegan, J.,  (2025). A decade of genomic surveillance tracks the disappearance and reintroduction of seasonal influenza virus in Aotearoa New Zealand.  https://doi.org/10.21203/rs.3.rs-7503135/v1
 
+
+Randall, R. N., Radford, C. E., Roof, K. A., Natarajan, D. K., & Gaucher, E. A. (2016). An experimental phylogeny to benchmark ancestral sequence reconstruction. Nature communications, 7(1), 12847.
 
 Simmons, M. P., & Ochoterena, H. (2000). Gaps as characters in sequence-based phylogenetic analyses. Systematic biology, 49(2), 369-381.

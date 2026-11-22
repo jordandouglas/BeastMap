@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate="Standard" beautistatus="" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.5:BICEPS v1.1.2:bModelTest v1.3.3:OBAMA v1.1.1:ORC v1.1.2:BEASTLabs v2.0.2" version="2.7">
+
+
+    <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+
+    <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+
+    <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+
+    <map name="Normal" >beast.base.inference.distribution.Normal</map>
+
+    <map name="Beta" >beast.base.inference.distribution.Beta</map>
+
+    <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+
+    <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+
+    <map name="prior" >beast.base.inference.distribution.Prior</map>
+
+    <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+
+    <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
+
+    <map name="Poisson" >beast.base.inference.distribution.Poisson</map>
+
+    <map name="Dirichlet" >beast.base.inference.distribution.Dirichlet</map>
+
+
+    <log id="mutationsampler" spec="beastmap.evolution.BranchMutationSampler" tag="seq" useAmbiguities="false" >
+         <tree idref="tree" />
+         <siteModel idref="siteModel" />
+         <branchRateModel idref="clockModel" />
+         <data spec="beastmap.evolution.PatternlessAlignment" data="@data" />
+    </log>
+
+
+
+    <data id="data" spec="beast.base.evolution.alignment.Alignment" dataType="aminoacid">
+        <sequence id="seq_taxon01" spec="Sequence" taxon="taxon01" totalcount="20" value="MASSEDVIKEFMRFRVSMEGSINGHEFEIEGEGEGRPYEGTQTAKLRVTKGGPLPFAWDILSPQFQYGSKAYVKHPADIPDYLKLSFPKGFKWERVMNFEDGGVVTVTQDSTLQDGVLIYKVKLHGINFPSDGPVMQKKTRGWEASTERMYPEDGVLKGEIKMRLKLKDGSHYEAVVKTSYMAKKPVQLPGAYITDIKLDITSHNEDYTIVEQYERAVGRHSTGA"/>
+        <sequence id="seq_taxon02" spec="Sequence" taxon="taxon02" totalcount="20" value="MASSEDVIKEFMRFKVSMEGSVNGHEFEIEGDGEGRPYEGTQSAKLKVTKGGPLPFAWDILSPQFQYGSKAYVKHPADIPDYLKLSFPEGFKWERVMNFEDGGVVTVTQDSTLRDGILIYKVKLHGTNFPSDGPVMQKKTRGWEASTERMYPEDGVLKGEIKMRLKLINGSHYKAEVKTTYIAKKPVQLPGAYKTDIKLDITSHNEDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon03" spec="Sequence" taxon="taxon03" totalcount="20" value="MASSEDVIKEFMRFKVYLEGSVNGHEFEIEGEGEGLPYEGTQVAKLRVTKGGPLPFAWDILSPQFQYGSKAYVKHPADIPDYMKLSFPEGFRWDRIMNFEDGGVVTVIQDTSLRDGEFICKVKLRGTDFPSEGPVMQKQTMGWEASTERMYPDGGMLRGEDNMRLRLKDGGHYYAYVRTTYMAKKPVQLPDAYTIDIKLDVTSHNEDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon04" spec="Sequence" taxon="taxon04" totalcount="20" value="MASSEDVIKEFMRFKVYLEGSVNGHEFEIEGEGEGRPYEGTQVAKLRVTKGGPLPFAWDILSPQFQYGSKAYVKHPADIPDYMKLSFPEGFKWDRVMKFEDGGVVTVTQDTSLQNGEFICKVKLRGTGFPSEGPVMQKQTMGWEASTERMYPEDGALKGEDTMCLRLKDGGHYDAYIKTTYMAKKPVQLPGAYIVDIKLDVTSHNEDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon05" spec="Sequence" taxon="taxon05" totalcount="20" value="MASSEDVIKEFMRFKVYLEGSVNGHEFEIEGEGEGRPYEGTQVAKLKVTKGGPLPFAWDILSPQFQYGSKAYVKHPADIPDYMKLSFPEGFRWERVMKFEDGGVVTVTQDTSLQDGEFIYKVKLHGTDFPSEGPVVQKQTMGWEASTERMYPEDGALKGEIKMRLRLKGGGQYEADVKTTYMAKKPVQLPGAYITDIKLDITYHNEDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon06" spec="Sequence" taxon="taxon06" totalcount="20" value="MASSEDVIKEFMRFKVYLEGSVNGHEFEIEGVGEGRPYEGTQVAKLKVTKGGPLPFSWDILSPQFQYGSKAYVKHPADIPDYMKLSFPEGFKWDRVMNFEDDGVVIVSQDTSLQNGEFIYKVKLRGIDFPSEGPVMQKQTMGWEASAERMYPEDGALKGEVKMRLRLKDGGHYEADVKTTYMAKKPVLLPGAYITDIKLDIISHNEDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon07" spec="Sequence" taxon="taxon07" totalcount="20" value="MASSEDVIKEFMRFKVYMEGSVNGHEFEIEGEGEGRPYEGTQAAKLKVTKGCPLPFAWDILSPQFQYGSKAYVKHPADIPDYMKLSFPEGLKWDRVMKFEDGGIVTVTQDSSLQDGVFIHKVKVRGTDFPSDGPVMRKQTMGWEASIDRMYPEDGLLKGEAKMRLKLKNGGHYDAEVKTTYMAKKQVQLPGAYIIDIKLDTTSHNDDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon08" spec="Sequence" taxon="taxon08" totalcount="20" value="MASSEDVIKEFMRFKVYMEGSVNGHEFEIEGEGEGRPYEGTQAAKLKVTKGGPLPFAWDILSPQFQYGSKAYVKHPSDIPDYMKLSFPEGFKWGRVMKFEDGGVVTVTQDSSLQDGVFIYKVKLHGMNFPSDGPVMQKQTMGWEASIERMYPEDGSLKGEAKMRLKLKNGGNYDAEVKTTYMAKKSVQLPGAYIIDTKLDITSHNEDYTNVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon09" spec="Sequence" taxon="taxon09" totalcount="20" value="MASSEDVIKEFMRFKVCMKGSVNGHVFEIEGEGEGRPYEGTQSVKLKVTKGGPLPFAWDILSPQFQYGSKAYVKHPANIPDYVKLSFPEGLKWVRIMNFEDGGVVTVTHDSSLQDGEFIYKVRLVGIDFPSDGPVMQKRTMGWEASTERMYPEDGALKGSVKMRLKLKDGGHYNAEVNTTYMAKKPVQLPGAYITDIKLDITSHNDDYTVVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon10" spec="Sequence" taxon="taxon10" totalcount="20" value="MASSEDVIKEFMRFKVSMEGSVNGHEFEIEGVGEGRPYEGTQSAKLKVTKGGPLPFAWDILSPQFQYGSKVYVKHPADIPDYLKLSFPEGFKWIRIMNFEDGGVVTVTQDSSLQDGVFIYKVKLHGIDFPSDGPVMQKQTMGWEASTERMYPEDGALQGAVKMRLKLKDGGRYGAEVKTTYMAKKHVQLPGAYLTDIKLDITSHNDDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon11" spec="Sequence" taxon="taxon11" totalcount="20" value="MASSEDVIKDFMRFRVRMEGSVNGHEFEIEGEGEGHPYEGTQSAKLKVTKGGPLPFAWDILSPQFMWGSKAYVKHPVDIPDYMKLSFPEGFKWERVMNFEDGGVVIVTQDSSLQDGEFVYEVRLCGTNFPSDGPVMQKKTMGCAAFSERIYSEDGALKGEVKMRLRLKDGDHYEAEVNTTYKAKKAVQLPDAYIIYGKLDIISHNEDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon12" spec="Sequence" taxon="taxon12" totalcount="20" value="MASSEDVIKEFMRFKVRMEGSVNGHEFEIEGEGAGRPYEGTQAAKLKVIKGGPLPFAWDILSPQLMWGSKAYVKHPADIPDYMKLSFPEGFKWERVMIFEDGGVLTVTQDSSLQDGEFIYKVRLCGTNFPSDGPVMQKRTMGCAAISERTYPEDGALKGEVKMRLRLKDGGHYEAEVKTTYMAKKTVQLPDAYIIDGKLDIISHNEDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon13" spec="Sequence" taxon="taxon13" totalcount="20" value="MASSEDVIKEFMRFKVRMVGSVNGHEFEIEGEGEGRPYEGTQAAKLKVTKGGPLPFAWDILSPQFMWGSKAYVKHPADIPDYMKLSFPEGFRWERVMIFEDGGVVTVTQDSSLLDGEFIYEVKLCGTNFPSDGPVMQKKTMGCAAISERIYPKDGALKGEVVMRLRLKDGDHYVAEVKTTYTAKQAVPLPDAYIIDGKLDIISYNEDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon14" spec="Sequence" taxon="taxon14" totalcount="20" value="MASSEDVIKEFMRFKVRMEGSVNGHEFEIEGEGEGRPYEGTQTAKLKVTKGGPLPFSWDILSPQFMWGSKAYVKHPADIPDYMKLSFPEGFKWDRVMIFEDGGVVTVTQDSSLQDGVLIYKVKVRGTNFPSDGPVMQKKTMGCAAISERVYPEDGALKGRVKMRLRLKGDDYYDAEVSTTYMAKKLVQLPDAYNIDGKLDIISHNKDYTIVEQYERAEARHSTGV"/>
+        <sequence id="seq_taxon15" spec="Sequence" taxon="taxon15" totalcount="20" value="MASSEDVIKEFMRFKVRMEGSVNGHEFEIEGEGEGRPYEGTQTAKLKVTKGGPLPFSWDILSPQFMWGSKAYVKHPADIPDYMKLSFPEGFKWDRVMNFEDGGVVIVTHDSSLQDGVFIYKVKLCGTNFPSVGPVMQKRTMGCAAISERIYPEDGALKGEVKMRLRLKDGGHYGAEVNTTYMAKKTVQLPGAYEIDGKLDIISHNEDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon16" spec="Sequence" taxon="taxon16" totalcount="20" value="MASSEDVIKEFMRYKVRMVGSVNGHEFEIKGEGEGRPYEGTQTAILKVTKGGPLPFSWDILSPQFMWGSKAYVKHSADIPDYMKLSFPEGFKWYRVMNFEDGGVITVTHDSSLHDGEFINEVKLRGTNFPSDGPVMQKKTKGCAAFSEHIYPEDGALKGDVIMRLRLEDGDHYVAEVSTAYIAKKRVQLPDAYKIDGKLDIISHNEDYTIVEQYERAEGRHSIGA"/>
+        <sequence id="seq_taxon17" spec="Sequence" taxon="taxon17" totalcount="20" value="MASSEDVIKEFMRYKVRMEGSVNGHEFEIEGEGKGRPYEGTQTAKLKVTKGGPLPFSWDILSPQFMWGSKAYVKHPADIPDYMKLSFPEGFKWYRVMNFEDGGVVTVTQDSSLQDGKFIYEVKLRGINFPSDGPVMQKKTMGCAAFSELTYPEDGALKGDVIMRLRLKDGRHYNAEVSTTYMAKKSVQLPDAYIIDGKLDIISHNEDYTIVEQYERAEGRHFTGA"/>
+        <sequence id="seq_taxon18" spec="Sequence" taxon="taxon18" totalcount="20" value="MASSEDVIKEFMRYKVRMEGSVNGHEFEIEGVGEGRPYEGTQTAKLSVTKGGPLPFSWDILSPQFMWGSKTYVKHPPDIPDYMKQSFPEGFRWYRVMNFEDGGVITVTQDSSLQDGKFTYEVKLHGTNFPSHGPVMQKKTNGYAAFSERIYPVDGALKGDVIMRLRLKDGNHYDAQVSTIYMAKKTVQLPDEYKINGKLDITSHNEDYTIVEQYERAEGRHSTGA"/>
+        <sequence id="seq_taxon19" spec="Sequence" taxon="taxon19" totalcount="20" value="MASSEDVIKEFMRYKVRMEGSINGHEFEIEGVGEGRPYEGTQTAKLRVTRGGPLPFSWDILSPQFMWGSKTYVKHPSDIPDYMKLSFPEGFRWYRVMNFEDGGVITVTQDSSLKDGEFIYEVKLHGTNFPSYGPVMQKKTIGYAAFSERMYPVDGALKGDVIMRLRLKDGSHYDAEVRTTYMAKKTVQLPEEYKIDGKLDITSHNEDYTIVEQYERAEGRHSTGA"/>
+    </data>
+
+
+
+    <!-- <run id="mcmc" spec="coupledMCMC.CoupledMCMC" chains="4" resampleEvery="10000" chainLength="5000000"> -->
+    <run id="mcmc" spec="MCMC" chainLength="3000000">
+        <state id="state" spec="State" storeEvery="100000">
+
+
+
+            <!-- Start on a random tree  -->
+            <tree id="tree" name="stateNode">
+                <taxonset id="taxonset" spec="TaxonSet">
+                    <alignment idref="data"/>
+                </taxonset>
+            </tree>
+
+
+
+            <parameter id="lambda" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+            <parameter id="r0" spec="parameter.RealParameter" name="stateNode" lower="0" >2</parameter>
+
+            <parameter id="gammaShape" spec="parameter.RealParameter" name="stateNode" lower="0">1</parameter>
+           
+
+
+        </state>
+
+
+        <!-- Fix tree -->
+         <!-- <init estimate="false" id="RandomTree" initial="@tree" spec="beast.base.evolution.tree.coalescent.RandomTree" /> -->
+
+        <distribution id="posterior" spec="CompoundDistribution">
+            <distribution id="prior" spec="CompoundDistribution">
+               
+
+
+                      
+
+                  <!-- <distribution id="treePrior" spec="beastmap.distribution.UnconstrainedTreePrior" tree="@tree" mean="@lengthMean" shape="@lengthShape" midpoint="@midpointAlpha" />  -->
+                <!-- <distribution id="treePrior" spec="beast.base.evolution.speciation.BirthDeathGernhard08Model" tree="@tree" birthDiffRate="@lambda" relativeDeathRate="@extinctionFraction" />  -->
+                <distribution id="treePrior" spec="gammaspike.distribution.StumpedTreePrior" r0="@r0" lambda="@lambda" ignoreTreePrior="false" ignoreStubPrior="false" tree="@tree"> 
+                 </distribution>
+
+
+
+                 <prior name="distribution" x="@lambda">
+                    <LogNormal name="distr" meanInRealSpace="true" M="1" S="2"/>
+                 </prior>
+
+                <prior name="distribution" x="@r0">
+                    <LogNormal name="distr" meanInRealSpace="true" M="3" S="0.5"/>
+                 </prior>
+             
+                <prior name="distribution" x="@gammaShape">
+                    <Exponential name="distr" mean="1"/>
+                 </prior> 
+
+      
+
+            </distribution>
+
+             <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution">
+
+                <distribution data="@data" id="treeLikelihood" spec="TreeLikelihood" tree="@tree">
+                    <siteModel id="siteModel" spec="beast.base.evolution.sitemodel.SiteModel" shape="@gammaShape" gammaCategoryCount="4">
+                       <substModel id="substModel" spec="obama.substitutionmodel.OBAMA_HIVb" />
+                   </siteModel>
+                      <branchRateModel id="clockModel" spec="beast.base.evolution.branchratemodel.StrictClockModel" clock.rate="1.0" />
+
+                    
+                </distribution>
+
+            </distribution>
+
+        </distribution>
+
+
+
+        <!-- Unconstrained tree operators -->
+     <!--    <operator id="TipDatesRandomWalker" spec="beastmap.operator.UnconstrainedTipRandomWalker" tree="@tree"  windowSize="0.1" weight="10.0"/>
+        <operator id="BranchLengthScaler" spec="beastmap.operator.BranchLengthScaler" tree="@tree" scaleFactor="0.1" weight="10.0"/> -->
+
+
+        <!-- Regular tree operators -->
+        <operator id="NarrowExchange.tree" spec="beast.base.evolution.operator.Exchange"  tree="@tree" weight="10.0"/>
+        <operator id="WideExchange.tree" spec="beast.base.evolution.operator.Exchange"  tree="@tree" isNarrow="false" weight="5.0"/>
+        <operator id="SubtreeSlide" spec="kernel.BactrianSubtreeSlide" tree="@tree" weight="5.0"/>
+        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="5.0"/>
+        <operator id="UniformOperator.t" spec="kernel.BactrianNodeOperator" tree="@tree" weight="10.0"/>
+        <operator id="TreeScale" spec="kernel.BactrianScaleOperator" tree="@tree" scaleFactor="0.1" weight="10.0"/>
+        <operator id="YuleModelBICEPSEpochTop." spec="EpochFlexOperator" scaleFactor="0.1" tree="@tree" weight="5.0"/>
+        <operator id="YuleModelBICEPSEpochAll." spec="EpochFlexOperator" fromOldestTipOnly="false" scaleFactor="0.1" tree="@tree" weight="5.0"/>
+        <operator id="YuleModelBICEPSTreeFlex." spec="TreeStretchOperator" scaleFactor="0.01" tree="@tree" weight="5.0"/>
+
+
+
+         <operator id="AVMN.tree.prior" spec="beastmap.operator.AVMNTimelessTree" beta="0.05" burnin="2000" initial="2000" weight="5">
+            <transformations spec="operator.kernel.Transform$LogTransform">
+                 <f idref="lambda"/>
+                 <f idref="r0" />
+                 <f idref="tree"/>
+            </transformations>
+        </operator> 
+
+       
+
+        <operator id="_gammaShapeScaler.s:dna" spec="ScaleOperator" parameter="@gammaShape" scaleFactor="0.5" weight="0.5"/>
+
+
+
+
+        <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log idref="lambda"/>
+            <log idref="r0"/>
+            <log idref="gammaShape"/>
+            <log id="treeHeight" spec="beast.base.evolution.tree.TreeStatLogger" tree="@tree"/>
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@SubstitutionSum"  />
+
+            <log idref="SubstitutionSum"  />
+
+
+
+
+        </logger>
+        <logger id="screenlog" spec="Logger" logEvery="10000">
+            <log spec="beastmap.logger.SubstitutionSummer" counter="@SubstitutionSum"  />
+        </logger>
+
+
+        <logger id="treelog" spec="Logger" fileName="$(filebase).trees" logEvery="10000" mode="tree">
+            <log id="SampledSubstTreeLogger" spec="beastmap.logger.SampledSubstTreeLogger" tree="@tree">
+                <sampler id="SubstitutionSum" spec="beastmap.logger.mut.SubstitutionSum" sampler="@mutationsampler" />
+                <sampler id="AncestralSequenceLogger" spec="beastmap.logger.AncestralSequenceLogger" sampler="@mutationsampler" />
+            </log>
+        </logger>
+
+
+
+        <operatorschedule id="OperatorSchedule" spec="OperatorSchedule" autoOptimizeDelay="5000"/>
+    </run>
+
+</beast>

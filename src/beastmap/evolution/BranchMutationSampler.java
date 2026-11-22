@@ -2,10 +2,11 @@ package beastmap.evolution;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-
-
+import beast.base.core.Citation;
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Log;
@@ -25,9 +26,13 @@ import beast.base.util.Randomizer;
 import beastmap.indel.SimpleIndelCodingAlignment;
 import beastmap.util.Mutation;
 import beastmap.util.MutationUtils;
+import starbeast3.evolution.branchratemodel.BranchRateModelSB3;
+import starbeast3.evolution.branchratemodel.StarBeast3Clock;
+import starbeast3.evolution.speciation.GeneTreeForSpeciesTreeDistribution;
 
 
 @Description("Stochastically samples a mutation trajectory along each branch for a given state")
+@Citation(value="Douglas J. & Bromham L., Reconstructing substitution histories on phylogenies, with accuracy, precision, and coverage, Systematic Biology, 2026;, syag081", DOI="10.1093/sysbio/syag081")
 public class BranchMutationSampler extends AncestralSequenceTreeLikelihood implements StochasticMapper{
 	
 	
@@ -201,35 +206,21 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     		
     		
     		
-    		// Mask any sites that correspond to deletions
+    		// In the case of multispecies coalescent, we may have a gene tree branch that has multiple rates, corresponding to species nodes
+    		// So we will consider the branch time to be rate*time, and then adjust the positions of the mutations later
+    		int nepochs = getNumberOfBranchRates(node);
+    		double[] branchRates = new double[nepochs];
+    		double[] branchRateDurations = new double[nepochs];
+    		getBranchRates(node, branchRates, branchRateDurations);
+    		double branchRateTotal = this.branchRateModel.getRateForBranch(node);
+    		double timeTotal = 0;
+    		for (int i = 0; i < nepochs; i ++) {
+    			timeTotal += branchRateDurations[i];
+    		}
+    		double branchDistance = timeTotal*branchRateTotal;
+    		
+    		
     		maskWithGaps(indels, siteStates, node, nsites);
-    		
-    		
-//        	if (indelInput.get() != null) {
-//        		
-//        		int[] gapsChildCompact = indels.getStatesForNode(tree, node);
-//        		//int[] gapsParentCompact = indels.getStatesForNode(tree, node.getParent());
-//        		boolean[] gapsChild = indelData.expandIndelCoding(gapsChildCompact);
-//        		//boolean[] gapsParent = indelData.expandIndelCoding(gapsParentCompact);
-//        		
-//        		
-//        		if (gapsChild.length != siteStates.length) {
-//        			throw new IllegalArgumentException("Please ensure that the original dataset in 'indel' is the same as this one. The lengths are not matching: " + gapsChild.length  + "!=" + siteStates.length);
-//        		}
-//        		
-//        		for (int siteNr = 0; siteNr < nsites; siteNr ++) {
-//        			if (!gapsChild[siteNr]) {
-//        				siteStates[siteNr] = gapChar;
-//        			}
-////        			if (!gapsParent[siteNr]) {
-////        				parentStates[siteNr] = gapChar;
-////        			}
-//        		}
-//        		
-//        	}
-    		
-    		
-    		double branchRate = this.branchRateModel.getRateForBranch(node);
     		
     		for (int siteNr = 0; siteNr < nsites; siteNr ++) {
     			
@@ -237,18 +228,44 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     			int siteCategory = ((RateCategorySampledLikelihoodCore)this.likelihoodCore).getSampledSiteCategory(siteNr);
     			double siteRate = siteModel.getRateForCategory(siteCategory, node);
     			
-    			List<Mutation> mutationsSite = sampleMutationsConditionalEndPoints(parentStates[siteNr], siteStates[siteNr], node.getLength(), siteNr, this.substitutionModel, branchRate*siteRate, node);
+    			List<Mutation> mutationsSite = sampleMutationsConditionalEndPoints(parentStates[siteNr], siteStates[siteNr], branchDistance, siteNr, this.substitutionModel, siteRate, node);
     			mutationsBranch.addAll(mutationsSite);
-    			
-//    			if (parentStates[siteNr] != siteStates[siteNr]) {
-//        			Log.warning(parentStates[siteNr] + " -> " + siteStates[siteNr] + " nmut = " + mutationsSite.size());
-//    			}
-//    			
     			
     		}
     		
     		
-    		//Log.warning("BranchMutationSampler :" +  nodeNr + " there are " + mutationsBranch.size());
+    		// Adjust the times of these mutations looking at where the branch rates change. If there is just one epoch then we are simply rescaling the branch back from distance to time
+    		for (Mutation mutation : mutationsBranch) {
+    			
+    			// Which epoch did this occur in
+    			double mutationTime = mutation.getTime();
+    			double dcumulative = 0;
+    			double tcumulative = 0;
+    			for (int i = 0; i < nepochs; i ++) {
+    				
+    				
+        			double d = branchRateDurations[i] * branchRates[i];
+        			
+        			//Log.warning(mutationTime + " " + d + " / " + dcumulative);
+        			if (mutationTime <= dcumulative + d) {
+        				double relativeTimeThroughEpoch = (mutationTime - dcumulative) / d;
+        				double mutationTimeNew = relativeTimeThroughEpoch*branchRateDurations[i] + tcumulative;
+        				mutation.setTime(mutationTimeNew);
+        				
+        				//Log.warning("adjusting time from " + mutationTime + " to " + mutationTimeNew + " with " + nepochs + " epochs ");
+        				break;
+        			}
+        			
+        			tcumulative += branchRateDurations[i];
+        			dcumulative += d;
+        			
+        			
+        		}
+    			
+    		}
+    		
+    		
+    		
         	this.mutationsAlongEachBranch.add(mutationsBranch);
     		
         	
@@ -259,10 +276,6 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
     	}
     
     	
-    	if (maxOnInternal == 0) {
-    		// Sometimes we have a state where all mutations appear on the leaves and none on the internal nodes. A bug or feature in the ASR
-    		//Log.warning("Warning: there are no mutations on the internal branches for some reason");
-    	}
     	
     	
     	// Sample unconditional
@@ -317,6 +330,79 @@ public class BranchMutationSampler extends AncestralSequenceTreeLikelihood imple
 		
 		
 	}
+	
+	
+	private int getNumberOfBranchRates(Node node) {
+		
+
+		if (this.branchRateModel instanceof StarBeast3Clock) {
+			
+			StarBeast3Clock clockModel = (StarBeast3Clock)this.branchRateModel;
+			GeneTreeForSpeciesTreeDistribution geneTree = clockModel.getGeneTreePrior();
+			List<Node> speciesNodes = geneTree.mapGeneBranchToSpeciesNodes(node.getNr());
+			return speciesNodes.size();
+			
+		}else {
+			return 1;
+		}
+		
+	}
+	
+	
+	/**
+	 * Fill in array with all of the branch rates and time durations of this branch (e.g., starbeast3 gene trees)
+	 * These rates are sorted in order from old to young
+	 * @param node
+	 * @param rates
+	 * @param times
+	 */
+	private void getBranchRates(Node node, double[] rates, double[] times) {
+		
+		
+		int nspecies = times.length;
+		if (nspecies > 1 && this.branchRateModel instanceof StarBeast3Clock) {
+			
+			
+			int i = node.getNr();
+			StarBeast3Clock clockModel = (StarBeast3Clock)this.branchRateModel;
+			GeneTreeForSpeciesTreeDistribution geneTree = clockModel.getGeneTreePrior();
+			BranchRateModelSB3 speciesTreeRatesX = clockModel.sharedRateModelInput.get().getClockModel();	
+			double[] speciesTreeRates = speciesTreeRatesX.getRatesArray();
+			double[] speciesOccupancy = geneTree.getSpeciesOccupancy();
+			int speciesNodeCount = speciesTreeRates.length;
+			double geneTreeRate = clockModel.meanRateInput.get().getArrayValue();
+			
+			
+			List<Node> speciesNodes = geneTree.mapGeneBranchToSpeciesNodes(node.getNr());
+			
+			
+			// Sort the list so that older nodes are first
+			speciesNodes.sort(Comparator.comparingDouble(Node::getHeight).reversed());
+			
+			
+			
+			// Get the rate and time durations
+			for (int s = 0; s < speciesNodes.size(); s++) {
+				int j = speciesNodes.get(s).getNr();
+				rates[s] = speciesTreeRates[j] * geneTreeRate;
+				times[s] = speciesOccupancy[i * speciesNodeCount + j];
+			}
+			
+			
+		}else {
+			
+			
+			double branchRate = this.branchRateModel.getRateForBranch(node);
+			
+			rates[0] = branchRate;
+			times[0] = node.getLength();
+			
+		}
+		
+		
+		
+	}
+	
 	 
 	@Override
 	public List<Mutation> getMutationsOnBranch(int nodeNr){

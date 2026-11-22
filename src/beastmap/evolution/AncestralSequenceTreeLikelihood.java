@@ -76,6 +76,13 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
      */
     int patternCount;
     int stateCount;
+    
+    
+    boolean scaledThisTime = false;
+    double scalingFactor = 1.0;
+    final double maxScalingFactor = 1000;
+    boolean scalingPrinted = false;
+    
 
     int[][] tipStates; // used to store tip states when using beagle
     protected double[] probabilitiesTipSamples;
@@ -316,6 +323,7 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
     	double[][][] leafProbs = new double[nleaves][nsites][stateCount];
         
         
+    	scaledThisTime = false;
         traverseSample(tree, tree.getRoot(), null, leafProbs);
         
         areStatesRedrawn = true;
@@ -427,50 +435,50 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
         	
     }
 
-    private int drawChoice(double[] probs) {
-    	
-        if (useMAP) {
-            double max = probs[0];
-            int choice = 0;
-            for (int i = 1; i < probs.length; i++) {
-                if ((probs[i] - max)/(probs[i] + max) > 1e-10) {
-                    max = probs[i];
-                    choice = i;
-                }
-            }
-            return choice;
-            
-        } else {
-        	
-        	if (Randomizer.getTotal(probs) <= 1e-100) {
-        		Log.warning("Warning: ancestral state reconstruction probabilities sum to 0, suggesting numerical issues. Selecting a state uniformly at random.");
-        		
-        		// Return a u.a.r character
-        		//int rand = Randomizer.nextInt(probs.length);
-        		int rand = probs.length-1;
-        		return rand;
-        		
-        	}
-        	
-        	try {
-        		return Randomizer.randomChoicePDF(probs);
-        	}catch(Error e) {
-        		
-        		// Use MAP state
-        		Log.warning("Warning: ancestral state encountered error, suggesting numerical issues. Selecting a state uniformly at random.");
-        		double max = probs[0];
-                int choice = 0;
-                for (int i = 1; i < probs.length; i++) {
-                    if ((probs[i] - max)/(probs[i] + max) > 1e-10) {
-                        max = probs[i];
-                        choice = i;
-                    }
-                }
-                return choice;
-        		
-        	}
-        }
-    }
+//    private int drawChoice(double[] probs) {
+//    	
+//        if (useMAP) {
+//            double max = probs[0];
+//            int choice = 0;
+//            for (int i = 1; i < probs.length; i++) {
+//                if ((probs[i] - max)/(probs[i] + max) > 1e-10) {
+//                    max = probs[i];
+//                    choice = i;
+//                }
+//            }
+//            return choice;
+//            
+//        } else {
+//        	
+//        	if (Randomizer.getTotal(probs) <= 1e-100) {
+//        		Log.warning("Warning: ancestral state reconstruction probabilities sum to 0, suggesting numerical issues. Selecting a state uniformly at random.");
+//        		
+//        		// Return a u.a.r character
+//        		//int rand = Randomizer.nextInt(probs.length);
+//        		int rand = probs.length-1;
+//        		return rand;
+//        		
+//        	}
+//        	
+//        	try {
+//        		return Randomizer.randomChoicePDF(probs);
+//        	}catch(Error e) {
+//        		
+//        		// Use MAP state
+//        		Log.warning("Warning: ancestral state encountered error, suggesting numerical issues. Selecting a state uniformly at random.");
+//        		double max = probs[0];
+//                int choice = 0;
+//                for (int i = 1; i < probs.length; i++) {
+//                    if ((probs[i] - max)/(probs[i] + max) > 1e-10) {
+//                        max = probs[i];
+//                        choice = i;
+//                    }
+//                }
+//                return choice;
+//        		
+//        	}
+//        }
+//    }
 
     public void getStates(int tipNum, int[] states)  {
         // Saved locally to reduce BEAGLE library access
@@ -490,7 +498,7 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
      * @param node        - current node
      * @param parentState - character state of the parent node to 'node'
      */
-    public void traverseSample(TreeInterface tree, Node node, int[] parentState, double[][][] leafProbs) {
+    private void traverseSample(TreeInterface tree, Node node, int[] parentState, double[][][] leafProbs) {
 
         int nodeNum = node.getNr();
 
@@ -560,13 +568,37 @@ public class AncestralSequenceTreeLikelihood extends TreeLikelihood  {
                     double branchDist = getExpectedBranchLength(node);
                     boolean probsAreOkay = checkLogProbs(conditionalProbabilities);
                     
+//                    if (!probsAreOkay) {
+//                    	Log.warning("Numerical issue " + branchDist );
+//                    	for (int i = 0; i < stateCount; i++) {
+//                    		System.out.println("\t" + conditionalProbabilities[i]);
+//                    	}
+//                    }
+                    
+                    
                     // Sampled ancestor, or a very short branch
                     if (node.getLength() <= 0) {
                     	 state[j] = parentState[j];
                     }
                     
-                    // Numerical issues will arise, and the cause is likely the short branch. So just use the same as the parent
-                    else if (!probsAreOkay && branchDist < 1e-4) {
+                    // Numerical issues will arise, and the cause is often a short branch. In this case we will just use the same as the parent, or we will overestimate the number of changes
+                    // Scaling prevents these spurious long-tailed (and often bimodal) distributions arising in subst count
+                    // But we don't want to print this every time as the scaling factor can grow quite large
+                    else if (!probsAreOkay) {
+                    	
+                    	if (!scaledThisTime) {
+                    		scalingFactor = Math.min(scalingFactor*1.01, maxScalingFactor);
+                    		
+                    		if (!scalingPrinted) {
+                    			Log.warning.println("Turning on ASR scaling to prevent numeric instability");
+                    			scalingPrinted = true;
+                    		}
+                            likelihoodCore.setUseScaling(scalingFactor);
+                            scaledThisTime = true;
+                    	}
+                        
+                        //likelihoodCore.unstore();
+                    	
                     	//Log.warning("Warning: short branch " + branchDist);
                     	state[j] = parentState[j];
                     }

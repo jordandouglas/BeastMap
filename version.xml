@@ -1,4 +1,4 @@
-<package name='beastmap' version='0.0.3'>
+<package name='beastmap' version='1.0.0'>
 
 	<depends on='BEAST.base' atleast='2.7.8'/>
   <depends on='BEAST.app' atleast='2.7.8'/>
@@ -34,6 +34,9 @@
         <provider classname="beastmap.evolution.SimulatedAlignmentWithMutations"/>
         <provider classname="beastmap.evolution.SimulatedCodonAlignmentWithMutations"/>
         <provider classname="beastmap.evolution.TimelessTree"/>
+        <provider classname="beastmap.evolution.AAToCodonFrequencies"/>
+
+        
 
 
         <provider classname="beastmap.logger.TypedTreeLogger"/>
@@ -48,6 +51,7 @@
         <provider classname="beastmap.logger.mut.SubstitutionSum"/>
         <provider classname="beastmap.logger.mut.SynonymousSubstSum"/>
         <provider classname="beastmap.logger.mut.NonSynonymousSubstSum"/>
+        <provider classname="beastmap.logger.mut.StopCodonCounter"/>
         <provider classname="beastmap.logger.mut.FromToSubstSum"/>
         <provider classname="beastmap.logger.mut.NucleotideTransversionCounter"/>
         <provider classname="beastmap.logger.mut.NucleotideTransitionCounter"/>
@@ -56,20 +60,23 @@
         <provider classname="beastmap.logger.mut.NetSize"/>
         <provider classname="beastmap.logger.mut.TotalSize"/>
         <provider classname="beastmap.logger.mut.Estimate_dNdS"/>
+        <provider classname="beastmap.logger.mut.ThymineDimerBreakCounter"/>
         
 
 
         <provider classname="beastmap.indel.SimpleIndelCodingAlignment"/>
 
 
-        <packageapp description="SegmentedTreeAnnotator"
-            class="beastmap.tools.SegmentedTreeAnnotator"
-            args=""
-          />
+       
 
 
    </service>
 
+
+    <packageapp description="SegmentedTreeAnnotator"
+            class="beastmap.tools.SegmentedTreeAnnotator"
+            args=""
+          />
 
 
 </package>

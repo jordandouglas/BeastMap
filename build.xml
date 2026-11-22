@@ -242,7 +242,7 @@
 
 
 	<!-- Release -->
-	<property name="version" value="1.1.0" />
+	<property name="version" value="1.0.0" />
 	<property name="version_number" value="${beastmapversion}" />
 	<property name="release_dirbeastmap" value="release" />
 	<property name="copyright" value="CladeAge development team 2013" />

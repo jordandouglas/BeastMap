@@ -76,6 +76,10 @@ public class Mutation implements Comparable<Mutation> {
 		 return time;
 	 }
 	 
+	 public void setTime(double time) {
+		  this.time = time;
+	 }
+	 
 	 public void setSiteNr(int siteNr) {
 		 this.siteNr = siteNr;
 	 }
